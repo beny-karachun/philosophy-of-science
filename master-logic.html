@@ -410,11 +410,22 @@
         const If = (left, right) => ({ type: 'if', left, right });
         const eq = (a, b) => JSON.stringify(a) === JSON.stringify(b);
         const key = value => JSON.stringify(value);
-        const format = value => {
-            if (value.type === 'atom') return value.name;
-            if (value.type === 'not') return '¬' + (value.value.type === 'atom' ? format(value.value) : '(' + format(value.value) + ')');
-            const signs = { and: '∧', or: '∨', if: '→' };
-            return `${format(value.left)} ${signs[value.type]} ${format(value.right)}`;
+        const precedence = { if:1, or:2, and:3, not:4, atom:5 };
+        const format = (value, parentPrecedence=0, position='') => {
+            const currentPrecedence=precedence[value.type];
+            let text;
+            if(value.type==='atom') text=value.name;
+            else if(value.type==='not') text='¬'+format(value.value,currentPrecedence,'right');
+            else {
+                const signs={and:'∧',or:'∨',if:'→'};
+                const left=format(value.left,currentPrecedence,'left');
+                const right=format(value.right,currentPrecedence,'right');
+                text=`${left} ${signs[value.type]} ${right}`;
+            }
+            const isNestedBinary=parentPrecedence>0 && ['and','or','if'].includes(value.type);
+            const needsParentheses=isNestedBinary || currentPrecedence<parentPrecedence ||
+                (value.type==='if' && currentPrecedence===parentPrecedence && position==='left');
+            return needsParentheses?`(${text})`:text;
         };
 
         const rules = ['MP', 'MT', 'HS', 'Trans', 'Impl', 'DS', 'Add', 'Simp'];
