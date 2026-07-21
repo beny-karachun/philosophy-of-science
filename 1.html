@@ -1,0 +1,1180 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Scientific Method and Logical Positivism</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+
+    <script>
+        window.MathJax = {
+            tex: {
+                inlineMath: [['$', '$'], ['\\(', '\\)']],
+                displayMath: [['$$', '$$'], ['\\[', '\\]']]
+            },
+            startup: {
+                typeset: false // We will trigger this manually via JS
+            }
+        };
+    </script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+    <style>
+        /* --- Root Variables for Theme --- */
+        :root {
+            --primary-bg: #0a0a0f;
+            --panel-bg: rgba(255, 255, 255, 0.03);
+            --panel-border: rgba(255, 255, 255, 0.1);
+
+            --accent-start: #6C63FF;
+            --accent-end: #A855F7;
+            --accent-gradient: linear-gradient(135deg, var(--accent-start), var(--accent-end));
+            --accent-color: #8B5CF6; /* Midpoint fallback */
+
+            --text-color: #E0E0E0;
+            --text-muted: #9ca3af;
+
+            --correct-color: rgba(16, 185, 129, 0.2);
+            --correct-border: #10b981;
+            --incorrect-color: rgba(239, 68, 68, 0.2);
+            --incorrect-border: #ef4444;
+
+            --insight-bg: rgba(168, 85, 247, 0.08);
+            --insight-border: #A855F7;
+        }
+
+        /* --- Global Styles & Glow Effects --- */
+        body {
+            background-color: var(--primary-bg);
+            background-image:
+                radial-gradient(circle at 15% 50%, rgba(108, 99, 255, 0.06), transparent 25vw),
+                radial-gradient(circle at 85% 30%, rgba(168, 85, 247, 0.06), transparent 25vw);
+            background-attachment: fixed;
+            color: var(--text-color);
+            font-family: 'Inter', sans-serif;
+            line-height: 1.6;
+            margin: 0;
+            padding: 20px;
+        }
+
+        /* --- Panel Containers (Optimized: No blur for performance) --- */
+        .container, .section, #flashcard-content, .question-container-single, .question-container-all, .explanation {
+            background: var(--panel-bg);
+            border: 1px solid var(--panel-border);
+            border-radius: 12px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+        }
+
+        .container {
+            width: 90%;
+            max-width: 1000px;
+            margin: 20px auto;
+            padding: 30px;
+        }
+
+        h1, h2 {
+            text-align: center;
+            border-bottom: 1px solid var(--panel-border);
+            padding-bottom: 15px;
+            font-weight: 700;
+            color: #fff;
+        }
+
+        .section {
+            padding: 25px;
+            margin-bottom: 30px;
+            animation: slideIn 0.5s ease-out forwards;
+        }
+
+        /* --- Theory & Key Insight Styling --- */
+        .theory-text {
+            font-size: 1.1em;
+            line-height: 1.8;
+            color: var(--text-muted);
+        }
+
+        .theory-text p, .theory-text li {
+            color: var(--text-color);
+        }
+
+        .theory-text h3 {
+            color: #fff;
+            margin-top: 25px;
+            border-bottom: none;
+            text-align: left;
+            font-size: 1.3em;
+        }
+
+        .insight-box {
+            background-color: var(--insight-bg);
+            border-left: 4px solid var(--insight-border);
+            padding: 18px;
+            margin: 25px 0;
+            border-radius: 8px;
+        }
+
+        .insight-box strong {
+            color: #fff;
+            display: block;
+            margin-bottom: 8px;
+            font-size: 1.1em;
+            text-shadow: 0 0 10px rgba(168, 85, 247, 0.4);
+        }
+
+        /* --- Study Cards Styling --- */
+        .flashcard-container {
+            height: 250px;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            perspective: 1000px;
+        }
+
+        #flashcard-content {
+            width: 100%;
+            height: 100%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            padding: 30px;
+            box-sizing: border-box;
+            transition: opacity 0.3s ease-in-out, transform 0.2s;
+        }
+
+        #flashcard-content:hover {
+            transform: translateY(-2px);
+            border-color: rgba(168, 85, 247, 0.4);
+            box-shadow: 0 10px 40px rgba(108, 99, 255, 0.15);
+        }
+
+        .flashcard-front-style {
+             font-size: 1.6em;
+             font-weight: 600;
+             font-family: 'JetBrains Mono', monospace;
+             color: var(--accent-end);
+        }
+
+        .flashcard-back-style {
+             font-size: 1.2em;
+             color: var(--text-color);
+        }
+
+        /* --- Questions Styling (MCQ & T/F) --- */
+         .question-container-single, .question-container-all {
+            margin-bottom: 20px;
+            padding: 20px;
+         }
+
+        .question-text {
+            font-weight: 600;
+            margin-bottom: 20px;
+            font-size: 1.1em;
+        }
+
+        /* Buttons & Glass Inputs */
+        .options button, .tf-options button, .nav-button, .view-all-button {
+            display: block;
+            width: 100%;
+            padding: 12px 15px;
+            margin: 8px 0;
+            background: rgba(255, 255, 255, 0.02);
+            color: var(--text-color);
+            border: 1px solid var(--panel-border);
+            border-radius: 8px;
+            cursor: pointer;
+            text-align: left;
+            font-family: 'Inter', sans-serif;
+            font-size: 1em;
+            transition: all 0.3s ease;
+        }
+
+        .nav-button, .view-all-button {
+            width: auto;
+            text-align: center;
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        .options button:hover:not(:disabled), .tf-options button:hover:not(:disabled), .nav-button:hover:not(:disabled), .view-all-button:hover {
+            background: var(--accent-gradient);
+            border-color: transparent;
+            color: #fff;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 15px rgba(108, 99, 255, 0.25);
+        }
+
+        .options button:disabled, .tf-options button:disabled, .nav-button:disabled {
+            cursor: not-allowed;
+            opacity: 0.5;
+            transform: none;
+        }
+
+        /* Correct/Incorrect States */
+        .options button.correct, .tf-options button.correct {
+            background: var(--correct-color);
+            border-color: var(--correct-border);
+            color: #fff;
+            opacity: 1;
+        }
+        .options button.incorrect, .tf-options button.incorrect {
+            background: var(--incorrect-color);
+            border-color: var(--incorrect-border);
+            color: #fff;
+            opacity: 1;
+        }
+
+        .feedback {
+            margin-top: 15px;
+            padding: 12px;
+            border-radius: 8px;
+            font-weight: 600;
+            text-align: center;
+            animation: fadeIn 0.3s ease-in;
+        }
+
+        .feedback.correct {
+            color: var(--correct-border);
+            background: var(--correct-color);
+            border: 1px solid var(--correct-border);
+        }
+
+        .feedback.incorrect {
+            color: var(--incorrect-border);
+            background: var(--incorrect-color);
+            border: 1px solid var(--incorrect-border);
+        }
+
+        .explanation {
+            margin-top: 15px;
+            font-style: italic;
+            font-size: 0.95em;
+            padding: 15px;
+            color: var(--text-muted);
+            border-left: 3px solid var(--accent-start);
+            animation: fadeIn 0.5s ease-in;
+        }
+
+        /* --- Navigation & Utility --- */
+        .navigation {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 20px;
+        }
+
+        .counter {
+            font-size: 0.9em;
+            color: var(--text-muted);
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        .view-all-container {
+            text-align: center;
+            margin-top: 25px;
+        }
+
+        .hidden { display: none !important; }
+
+        /* --- Animations --- */
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Scientific Method and Logical Positivism</h1>
+
+        <div class="section">
+            <h2>Theory Summary and Key Insights</h2>
+            <div id="theory-content" class="theory-text">
+                <h3>What Is Being Criticized?</h3>
+                <p>Criticism of science can concern its authority, but a more specific target is the <strong>scientific method</strong>: the way an ideal science ought to be conducted. Critiques may arise from within the scientific community or from external religious and cultural perspectives. Internal critiques are especially rigorous because they identify problems in the methodological framework used by science itself.</p>
+                <p>The scientific method is normative rather than merely descriptive. It is intended to state how scientists <em>ought</em> to work, not simply report how they actually work. In its ideal form, it would resemble a foolproof instruction manual: exact directions that guarantee appropriate results without depending on the user's intuition, experience, or exceptional skill.</p>
+
+                <div class="insight-box">
+                    <strong>Key Insight:</strong>
+                    A defect in an ideal method is more serious than a mistake in applying that method. An application error may be avoided by a more careful practitioner, whereas an intrinsic flaw remains even when the instructions are followed exactly.
+                </div>
+
+                <h3>The Aims of Science and the Role of Theory</h3>
+                <p>A scientific method should be judged by whether it enables science to achieve its aims. The primary aims are:</p>
+                <ul>
+                    <li>Providing reliable explanations of natural phenomena.</li>
+                    <li>Producing accurate predictions of natural phenomena.</li>
+                    <li>Supporting the development of successful technologies.</li>
+                </ul>
+                <p>Technology depends on successful explanation and prediction, so those two tasks are foundational. Science pursues them by constructing scientific theories. A good method must therefore guide scientists both in generating reliable theories and in using those theories to explain and predict phenomena.</p>
+                <p>Ideally, this guidance would constitute an algorithm that could, in principle, be programmed into a computer. Despite centuries of scientific progress, no flawless algorithm of this kind has been devised.</p>
+
+                <h3>The Tasks a Comprehensive Method Must Address</h3>
+                <ol>
+                    <li><strong>Theory generation:</strong> How should scientific theories be produced?</li>
+                    <li><strong>Theory evaluation:</strong> How should theories be confirmed or falsified?</li>
+                    <li><strong>Theory application:</strong> How should theories explain observed phenomena and predict phenomena?</li>
+                    <li><strong>Inter-theoretic relations:</strong> How should competing theories be compared, and how should theories relate across time and disciplines?</li>
+                    <li><strong>Science and values:</strong> Whether values play a role in science and, if so, what that role should be.</li>
+                </ol>
+                <p>Relations between new and older theories in the same discipline are <strong>diachronic</strong>. Relations between theories belonging to different scientific disciplines are <strong>synchronic</strong>.</p>
+
+                <h3>Two Categories of Methodological Failure</h3>
+                <p>Proposed scientific methods have exhibited two opposite kinds of defect. First, a method may permit results that it should exclude, such as absurd hypotheses, unsupported predictions, irrelevant confirmations, or backwards explanations. Examples include predicting that the next raven will be yellow, treating a white shoe as confirmation that all ravens are black, or using today's constellation to explain yesterday's constellation.</p>
+                <p>Second, a method may fail to permit operations that science requires, such as refuting a theory through a conflicting observation, choosing between competing theories, or explaining sciences such as chemistry, biology, and psychology in terms of physics.</p>
+
+                <div class="insight-box">
+                    <strong>Key Insight:</strong>
+                    Scientific success does not prove that the formal guidebook is flawless. Scientists avoid many outcomes permitted by the guidebook because they supplement it with intuition and common sense, resources that have not yet been successfully converted into an exact algorithm.
+                </div>
+
+                <h3>The Vienna Circle and the Need for Explicit Formulation</h3>
+                <p>The Vienna Circle, active from 1924 to 1936, included natural scientists, social scientists, mathematicians, and philosophers. Its members sought to formulate explicitly the method practiced since the seventeenth-century Scientific Revolution and exemplified by Isaac Newton. Explicit formulation was necessary because even successful practitioners could misunderstand or misdescribe their own methods.</p>
+                <p>Newton described hypothesis formation as <strong>inductive generalization</strong>, in which general laws are derived from particular observations. Repeated observations of black ravens can suggest the general hypothesis that all ravens are black. However, merely looking at observations does not plausibly generate a sophisticated law such as Newton's universal law of gravitation, $F = GMM'/R^2$. Formulating such a law requires more than mechanically generalizing the vocabulary already present in observations.</p>
+
+                <div class="insight-box">
+                    <strong>Key Insight:</strong>
+                    A procedure that can generalize a visible pattern need not be capable of creating a theoretically novel law. Newton's own description therefore illustrates the difference between successfully practicing science and accurately specifying the method responsible for that success.
+                </div>
+
+                <h3>Rationalism and Empiricism</h3>
+                <p>Newtonian science is distinguished from much pre-Scientific Revolution science by its reliance on empirical observation. Rationalism and empiricism differ over the ultimate criterion for evaluating scientific propositions and theories.</p>
+                <ul>
+                    <li><strong>Rationalism</strong> gives priority to pure reason. A theory consistent with the principles of reason is treated as true, and reason should prevail when it conflicts with sensory observation because the senses are regarded as fallible.</li>
+                    <li><strong>Empiricism</strong> gives priority to sensory observation. Observation should prevail in a conflict because reasoning can mislead us and empirical evidence is treated as the more trustworthy foundation.</li>
+                </ul>
+
+                <h3>Logical Empiricism or Logical Positivism</h3>
+                <p>Logical empiricism adds a crucial analysis to classical empiricism. A scientific theory is a set of propositions, while observed facts are expressed as empirical propositions. The relation between theory and world can therefore be treated as a relation between theoretical and empirical propositions, and relations among propositions are governed by logic.</p>
+                <p>Knowledge about the world may consequently arise through direct observation and through applying logical rules to empirical propositions. Logical empiricism, also called <strong>logical positivism</strong>, requires scientific operations to rely only on empirical observations and logic. Its method seeks to explain how theories are generated from observations, evaluated by observation and logic, applied to explanation and prediction, and related to other theories.</p>
+
+                <div class="insight-box">
+                    <strong>Key Insight:</strong>
+                    Logical positivism does not replace observation with logic. It combines empirical propositions with trusted logical relations, thereby attempting to turn the connection between evidence, theory, explanation, and prediction into a systematic method.
+                </div>
+
+                <h3>Achievement and Foundational Difficulty</h3>
+                <p>The Vienna Circle produced systematic guidance for theory generation, confirmation, refutation, explanation, prediction, relations between theories, and the relationship between science and values. The resulting framework was appealing, intuitive, and influential.</p>
+                <p>Beginning in the 1960s, however, fundamental problems accumulated. If the positivist guidebook were executed mechanically, it could produce absurd and unjustifiable theories, predictions, and explanations as well as reasonable ones. Radical revision or replacement therefore appears necessary, yet no satisfactory alternative has been found. Scientists continue to work largely within the positivist framework while relying on judgment to compensate for its documented weaknesses.</p>
+            </div>
+        </div>
+
+        <div class="section">
+            <h2>Study Cards</h2>
+            <div class="flashcard-container">
+                <div id="flashcard-content"></div>
+            </div>
+            <div class="navigation">
+                <button class="nav-button" id="prev-card">Previous</button>
+                <span class="counter" id="card-counter"></span>
+                <button class="nav-button" id="next-card">Next</button>
+            </div>
+        </div>
+
+        <div class="section">
+            <h2>Multiple-Choice Questions</h2>
+            <div id="mcq-single-view">
+                <div class="question-container-single" id="mcq-container">
+                    <div class="question-text" id="mcq-question"></div>
+                    <div class="options" id="mcq-options"></div>
+                    <div class="feedback hidden" id="mcq-feedback"></div>
+                    <div class="explanation hidden" id="mcq-explanation"></div>
+                </div>
+                <div class="navigation">
+                    <button class="nav-button" id="prev-mcq">Previous</button>
+                    <span class="counter" id="mcq-counter"></span>
+                    <button class="nav-button" id="next-mcq">Next</button>
+                </div>
+                 <div class="view-all-container">
+                     <button class="view-all-button" id="view-all-mcq">View All Questions</button>
+                 </div>
+            </div>
+            <div id="mcq-all-questions" class="hidden">
+                </div>
+        </div>
+
+        <div class="section">
+            <h2>True or False Questions</h2>
+             <div id="tf-single-view">
+                <div class="question-container-single" id="tf-container">
+                    <div class="question-text" id="tf-question"></div>
+                    <div class="tf-options" id="tf-options">
+                        <button data-answer="true">True</button>
+                        <button data-answer="false">False</button>
+                    </div>
+                    <div class="feedback hidden" id="tf-feedback"></div>
+                    <div class="explanation hidden" id="tf-explanation"></div>
+                </div>
+                <div class="navigation">
+                    <button class="nav-button" id="prev-tf">Previous</button>
+                    <span class="counter" id="tf-counter"></span>
+                    <button class="nav-button" id="next-tf">Next</button>
+                </div>
+                 <div class="view-all-container">
+                     <button class="view-all-button" id="view-all-tf">View All Questions</button>
+                 </div>
+            </div>
+             <div id="tf-all-questions" class="hidden">
+                 </div>
+        </div>
+    </div>
+
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+
+        const flashcardData = [
+            {
+                term: "Scientific method",
+                definition: "Normative instructions describing how an ideal science ought to generate, evaluate, and apply theories."
+            },
+            {
+                term: "Ideal method",
+                definition: "A foolproof procedure whose exact instructions guarantee an appropriate result without relying on skill, intuition, or experience."
+            },
+            {
+                term: "Foundational aims of science",
+                definition: "Reliable explanations and accurate predictions of natural phenomena; successful technologies depend on these achievements."
+            },
+            {
+                term: "Scientific theory",
+                definition: "A set of propositions through which science seeks to explain and predict natural phenomena."
+            },
+            {
+                term: "Theory generation",
+                definition: "The stage concerned with the method by which scientific theories are produced."
+            },
+            {
+                term: "Theory evaluation",
+                definition: "The stage concerned with confirming and falsifying scientific theories."
+            },
+            {
+                term: "Theory application",
+                definition: "The use of a scientific theory to explain observed phenomena and make predictions."
+            },
+            {
+                term: "Inter-theoretic relations",
+                definition: "Relations among theories, including competition, historical succession within disciplines, and connections across disciplines."
+            },
+            {
+                term: "Diachronic relation",
+                definition: "The relationship between newer and older theories within the same scientific discipline."
+            },
+            {
+                term: "Synchronic relation",
+                definition: "The relationship between theories from different scientific disciplines."
+            },
+            {
+                term: "Inductive generalization",
+                definition: "The formation of a general hypothesis from particular observations, such as generalizing from observed black ravens."
+            },
+            {
+                term: "Rationalism",
+                definition: "The view that pure reason is the highest criterion for evaluating theories and should prevail over conflicting observation."
+            },
+            {
+                term: "Empiricism",
+                definition: "The view that sensory observation is the highest criterion and should prevail over conflicting reasoning."
+            },
+            {
+                term: "Empirical proposition",
+                definition: "A proposition that describes an observed fact."
+            },
+            {
+                term: "Theoretical proposition",
+                definition: "A proposition belonging to a scientific theory."
+            },
+            {
+                term: "Logical empiricism",
+                definition: "The view that knowledge is gained through empirical propositions and the application of logical rules to them."
+            },
+            {
+                term: "Logical positivism",
+                definition: "Another name for logical empiricism and its observation-and-logic-based scientific framework."
+            },
+            {
+                term: "Vienna Circle",
+                definition: "The 1924–1936 group that explicitly formulated a systematic scientific method based on observation and logic."
+            }
+        ];
+
+        const mcqData = [
+            {
+                question: "Which description best captures the scientific method as an ideal?",
+                options: ["A record of everything scientists have historically done", "A set of instructions for how ideal science ought to be conducted", "A list of successful scientific technologies", "A defense of scientific authority against every criticism"],
+                correctIndex: 1,
+                explanation: "The method is normative: it specifies how science ought to proceed. A historical record of actual practice is descriptive and therefore does not serve the same role."
+            },
+            {
+                question: "Why is an intrinsic flaw in a scientific method more serious than a failure to execute it properly?",
+                options: ["It remains a problem even when practitioners follow the instructions correctly", "It affects technology but not explanation or prediction", "It can arise only from external cultural criticism", "It proves that scientists never use intuition"],
+                correctIndex: 0,
+                explanation: "An intrinsic flaw belongs to the instructions themselves and survives perfect execution. An application error, by contrast, may be corrected by following sound instructions more carefully."
+            },
+            {
+                question: "Which pair represents the foundational aims emphasized in evaluating a scientific method?",
+                options: ["Authority and cultural acceptance", "Intuition and common sense", "Explanation and prediction", "Confirmation and technological profit"],
+                correctIndex: 2,
+                explanation: "Reliable explanations and accurate predictions are the foundational aims. Technology is also an aim, but its success depends on successful explanation and prediction."
+            },
+            {
+                question: "Why is technology not the primary focus when the foundational aims of science are analyzed?",
+                options: ["Technology is unrelated to scientific theories", "Technology belongs exclusively to rationalism", "Technology cannot be evaluated empirically", "Technological success relies on successful explanations and predictions"],
+                correctIndex: 3,
+                explanation: "Technology is treated as dependent on the more foundational achievements of explanation and prediction. It is not regarded as unrelated to theory or empirical evaluation."
+            },
+            {
+                question: "A proposed method gives clear instructions for testing theories but says nothing about how theories should explain observed phenomena. Which required area is missing?",
+                options: ["Theory generation", "Theory application", "Science and values", "Diachronic relations"],
+                correctIndex: 1,
+                explanation: "Using a theory to explain or predict phenomena belongs to theory application. Testing a theory belongs to evaluation, so evaluation alone is not comprehensive."
+            },
+            {
+                question: "Which question belongs specifically to theory evaluation?",
+                options: ["How can a theory be confirmed or falsified?", "How should values influence science?", "How are theories generated?", "How can one discipline relate to another?"],
+                correctIndex: 0,
+                explanation: "Confirmation and falsification are the central tasks of theory evaluation. Generation, values, and inter-theoretic relations are separate methodological areas."
+            },
+            {
+                question: "A philosopher studies how a new theory should relate to the older theory it replaces within the same discipline. What kind of relation is being studied?",
+                options: ["Synchronic", "Empirical", "Diachronic", "Technological"],
+                correctIndex: 2,
+                explanation: "Diachronic relations connect newer and older theories within one discipline. Synchronic relations concern theories from different disciplines."
+            },
+            {
+                question: "A method examines the logical relationship between a biological theory and a physical theory. Which category does this illustrate?",
+                options: ["Theory generation", "Theory confirmation", "Diachronic relations", "Synchronic relations"],
+                correctIndex: 3,
+                explanation: "The theories come from different disciplines, making their relationship synchronic. A diachronic relation would instead compare theories across time within the same discipline."
+            },
+            {
+                question: "What would make an ideal scientific method algorithm-like?",
+                options: ["It would reproduce the personal style of a gifted scientist", "It could in principle be programmed to execute its specified tasks", "It would replace observation with pure reason", "It would describe only past scientific successes"],
+                correctIndex: 1,
+                explanation: "An algorithm-like method would provide sufficiently exact procedures to be programmed and executed. Dependence on an exceptional scientist's personal style would undermine that ideal."
+            },
+            {
+                question: "Which result exemplifies a method allowing something it should exclude?",
+                options: ["Treating one white shoe as confirmation that all ravens are black", "Recognizing that a theory conflicts with an observation", "Comparing two competing theories", "Studying relations between scientific disciplines"],
+                correctIndex: 0,
+                explanation: "A white shoe is an irrelevant basis for confirming a claim about the color of ravens, yet the criticized method permits this result. The other activities are legitimate tasks a comprehensive method should address."
+            },
+            {
+                question: "Which example belongs to the category of something a scientific method should permit but may fail to permit?",
+                options: ["Generating the hypothesis that tap liquid will become beer", "Predicting that the next raven will be yellow", "Refuting a theory by an observation that contradicts it", "Explaining yesterday's constellation from today's constellation"],
+                correctIndex: 2,
+                explanation: "A scientific method should provide a way to handle an observation that conflicts with a theory. The other examples are outcomes the method should exclude rather than required operations it fails to support."
+            },
+            {
+                question: "Why does science succeed even though its formal methodological guidebook has serious flaws?",
+                options: ["Its formal rules guarantee only reasonable results", "Its theories never conflict with observation", "Its methods have already incorporated every form of common sense", "Scientists supplement formal guidance with intuition and common sense"],
+                correctIndex: 3,
+                explanation: "Scientists are not merely computers executing rules; they use judgment to avoid absurd or unproductive directions. The formal guidebook itself does not guarantee that these directions will be excluded."
+            },
+            {
+                question: "Why has intuition not simply been added to the scientific method as a formal solution?",
+                options: ["Intuition is prohibited by every form of science", "No one has succeeded in converting it into the required exact method", "Intuition applies only to technological development", "The existing guidebook is already flawless"],
+                correctIndex: 1,
+                explanation: "Incorporating successful judgment would be ideal, but no satisfactory exact formulation has been achieved. The problem is not that scientists never use intuition; they already rely on it in practice."
+            },
+            {
+                question: "What was the Vienna Circle's central methodological project?",
+                options: ["To formulate explicitly the scientific method practiced since the Scientific Revolution", "To restore rationalism as the sole basis of science", "To eliminate logic from empirical inquiry", "To replace theories with technological inventions"],
+                correctIndex: 0,
+                explanation: "The Vienna Circle sought to articulate the method exemplified especially by Newtonian science. Its project combined observation and logic rather than eliminating either one."
+            },
+            {
+                question: "Why was explicit formulation needed even though the method had produced impressive scientific success?",
+                options: ["Successful scientists had stopped making observations", "The method could be used only in social science", "Practitioners often misunderstood or misdescribed the method they used", "No scientific theory had existed before the Vienna Circle"],
+                correctIndex: 2,
+                explanation: "Practical success did not guarantee accurate self-understanding. Even scientists who used the method effectively could give implausible accounts of how they formed theories."
+            },
+            {
+                question: "Which group composition best describes the Vienna Circle?",
+                options: ["Only philosophers and historians", "Only physicists and mathematicians", "Religious and cultural critics only", "Natural scientists, social scientists, mathematicians, and philosophers"],
+                correctIndex: 3,
+                explanation: "The Vienna Circle was interdisciplinary, including members from natural science, social science, mathematics, and philosophy. It was not restricted to one profession or to external critics."
+            },
+            {
+                question: "Newton described his formation of hypotheses as which process?",
+                options: ["Reducing all sciences to physics", "Generalizing from particular observations", "Choosing theories through cultural values", "Predicting observations without theories"],
+                correctIndex: 1,
+                explanation: "Newton characterized his method as inductive generalization from observations. The criticism is that this account cannot plausibly explain the creation of a theoretically sophisticated law."
+            },
+            {
+                question: "Which case most plausibly illustrates simple inductive generalization?",
+                options: ["Inferring that all ravens are black from a series of observed black ravens", "Deriving a universal force formula directly from unstructured observation", "Explaining an earlier constellation using a later one", "Relating a biological theory logically to a physical theory"],
+                correctIndex: 0,
+                explanation: "Repeated observations sharing an obvious property can support a generalization with the same conceptual structure. A novel mathematical law is not similarly read directly from observation."
+            },
+            {
+                question: "Why does Newton's gravitational law challenge his own account of hypothesis formation?",
+                options: ["The law makes no predictions about natural phenomena", "The law was formulated before any observations existed", "Its sophisticated theoretical form cannot plausibly be obtained merely by straightforward generalization from observations", "Its formulation depends exclusively on cultural values"],
+                correctIndex: 2,
+                explanation: "Observation does not already describe masses and forces through the law's exact mathematical relationship. The creative theoretical formulation requires more than simply extending an observed pattern."
+            },
+            {
+                question: "What broader distinction is illustrated by Newton's misdescription of his method?",
+                options: ["Explanation and prediction are identical", "Theory and technology are unrelated", "Rationalism and empiricism cannot be compared", "Being successful at science does not guarantee accurately describing how that success is achieved"],
+                correctIndex: 3,
+                explanation: "A practitioner may produce excellent science while giving an inadequate methodological account of that practice. Success and accurate methodological self-description are therefore distinct."
+            },
+            {
+                question: "When pure reason conflicts with sensory evidence, what does rationalism treat as authoritative?",
+                options: ["Pure reason", "Sensory observation", "Successful technology", "The newest theory"],
+                correctIndex: 0,
+                explanation: "Rationalism regards pure reason as the highest criterion and treats the senses as fallible. Empiricism reverses this priority by favoring observation."
+            },
+            {
+                question: "When reasoning conflicts with observation, why does empiricism favor observation?",
+                options: ["Logic has no role in any scientific activity", "Reasoning can mislead, while empirical evidence is treated as the more trustworthy foundation", "Every observation automatically produces a scientific theory", "Observation is identical to technological success"],
+                correctIndex: 1,
+                explanation: "Empiricism treats sensory evidence as the ultimate criterion because reasoning can go wrong. This does not imply that logic has no role, especially within logical empiricism."
+            },
+            {
+                question: "What feature distinguished Newtonian science from the previously dominant rationalist approach?",
+                options: ["Rejection of every general law", "Exclusive concern with technology", "Reliance on empirical observation as the ultimate criterion", "Abandonment of explanations and predictions"],
+                correctIndex: 2,
+                explanation: "Newtonian science exemplified an empiricist reliance on observation. It did not reject laws, theory, explanation, or prediction."
+            },
+            {
+                question: "Which statement most accurately contrasts rationalism with empiricism?",
+                options: ["Rationalism studies theories, whereas empiricism studies only technology", "Rationalism uses propositions, whereas empiricism uses no language", "Rationalism concerns old theories, whereas empiricism concerns new ones", "Rationalism gives ultimate priority to reason, whereas empiricism gives it to observation"],
+                correctIndex: 3,
+                explanation: "The decisive difference concerns which criterion prevails in a conflict: pure reason or sensory observation. Both approaches may discuss theories and use propositions."
+            },
+            {
+                question: "What distinguishes logical empiricism from classical empiricism?",
+                options: ["It recognizes that theory and observed fact are expressed as propositions related through logic", "It denies that knowledge can arise from observation", "It makes pure reason superior to all evidence", "It limits science to the generation of theories"],
+                correctIndex: 0,
+                explanation: "Logical empiricism analyzes both theories and observed facts propositionally, allowing logic to connect them. It retains observation rather than rejecting it."
+            },
+            {
+                question: "Within logical empiricism, what is a scientific theory?",
+                options: ["A collection of technologies", "A set of propositions", "A sensory organ", "An unexpressed intuition"],
+                correctIndex: 1,
+                explanation: "A theory is understood as a set of theoretical propositions. This permits its relation to empirical propositions to be governed by logic."
+            },
+            {
+                question: "What is an empirical proposition?",
+                options: ["A proposition accepted solely because it is logically consistent", "A rule governing every relation between disciplines", "A proposition that describes an observed fact", "A private intuition that cannot be stated"],
+                correctIndex: 2,
+                explanation: "Empirical propositions express observed facts. They differ from theoretical propositions, which belong to scientific theories."
+            },
+            {
+                question: "Why can logic extend empirical knowledge under logical empiricism?",
+                options: ["Logic creates observations without evidence", "Logic guarantees that every generated theory is reasonable", "Logic replaces all theoretical propositions", "Relations among propositions are governed by logical rules that can be applied to empirical propositions"],
+                correctIndex: 3,
+                explanation: "Once observations are expressed as propositions, trusted logical rules can operate on them. This does not mean logic creates evidence or guarantees that every methodological output is justified."
+            },
+            {
+                question: "Which restriction defines the positivist scientific method?",
+                options: ["Scientific operations must rely only on empirical observations and logic", "Scientific operations must rely only on pure reason", "Theory generation may use intuition, but evaluation must avoid observation", "Science must address technology while excluding explanation"],
+                correctIndex: 0,
+                explanation: "The positivist framework limits scientific operations to observation and logic. Intuition may help actual scientists, but it is not successfully incorporated into the formal method."
+            },
+            {
+                question: "Which formulation best describes theory generation in the positivist program?",
+                options: ["Generating theories independently of evidence and logic", "Generating theories from observation by using logic", "Generating theories from values alone", "Generating theories by comparing disciplines without observation"],
+                correctIndex: 1,
+                explanation: "The positivist task is to explain theory generation from observation through logical operations. A method based solely on values or independent of evidence would violate its restriction."
+            },
+            {
+                question: "How should a positivist method evaluate competing theories?",
+                options: ["By selecting the theory created most recently", "By asking which theory has the greatest cultural authority", "By using observations and logic", "By relying solely on the scientist's private intuition"],
+                correctIndex: 2,
+                explanation: "Logical positivism seeks to settle competition through empirical observations and logical relations. Recency, cultural authority, and private intuition are not its formal criteria."
+            },
+            {
+                question: "Which set contains only tasks for which the Vienna Circle developed systematic guidance?",
+                options: ["Authority, popularity, funding, and administration", "Observation, sensation, intuition, and experience", "Religion, culture, attendance, and technology", "Generation, confirmation, refutation, explanation, and prediction"],
+                correctIndex: 3,
+                explanation: "The method systematically addressed generation, evaluation through confirmation and refutation, and application through explanation and prediction. The other sets mix unrelated or non-methodological matters."
+            },
+            {
+                question: "What changed beginning in the 1960s regarding logical positivism?",
+                options: ["Fundamental problems increasingly surfaced and accumulated", "It was formulated for the first time by Newton", "Scientists abandoned observation in favor of reason", "A flawless replacement was immediately adopted"],
+                correctIndex: 0,
+                explanation: "From the 1960s onward, foundational problems became increasingly evident. No satisfactory replacement was immediately found."
+            },
+            {
+                question: "What would happen if the positivist guidebook were executed mechanically like a computer program?",
+                options: ["It would produce only justified explanations", "It could produce absurd and unjustifiable results as well as reasonable ones", "It would automatically incorporate common sense", "It would address technology but not scientific theories"],
+                correctIndex: 1,
+                explanation: "The formal rules fail to exclude every absurd output, which exposes their foundational weakness. Human scientists avoid many such outputs by using judgment not contained in the guidebook."
+            },
+            {
+                question: "Why do most scientists continue to operate largely within the positivist framework?",
+                options: ["Its foundational weaknesses have been disproved", "It guarantees correct theories when executed literally", "No satisfactory alternative has been found", "It has remained unchanged since the seventeenth century because criticism is impossible"],
+                correctIndex: 2,
+                explanation: "The framework persists because science lacks a satisfactory replacement, not because its problems have disappeared. Its weaknesses are described as well documented."
+            },
+            {
+                question: "A method generates useful theories only when an expert quietly rejects absurd outputs using experience. Which ideal requirement does the method fail most directly?",
+                options: ["It must give priority to technology over prediction", "It must express facts without propositions", "It must compare only theories from different disciplines", "It must provide foolproof instructions independent of the user's skill"],
+                correctIndex: 3,
+                explanation: "Dependence on expert filtering means the instructions are not sufficient by themselves. An ideal method should not require personal skill, intuition, or experience to avoid outputs it ought to exclude."
+            },
+            {
+                question: "A researcher claims that a method is good because scientists using it often succeed. Which response best reflects the methodological critique?",
+                options: ["Success may partly result from scientists supplementing defective rules with judgment", "Success proves that every rule in the method is intrinsically sound", "Success shows that explanation and prediction are unnecessary", "Success establishes rationalism as the only possible view"],
+                correctIndex: 0,
+                explanation: "Actual success may reflect both formal rules and informal human judgment. It therefore does not by itself show that the formal method is flawless."
+            },
+            {
+                question: "Suppose a method offers a logical way to derive predictions from a theory but no way to select that theory over a competitor. Why is the method incomplete?",
+                options: ["It lacks sensory organs", "It addresses application but not the relevant inter-theoretic decision", "It confuses rationalism with technology", "It studies diachronic relations instead of observation"],
+                correctIndex: 1,
+                explanation: "Deriving predictions is theory application, whereas choosing between competing theories belongs to inter-theoretic relations. A comprehensive method must address both."
+            },
+            {
+                question: "A critic argues that an observation conflicting with a theory can never count against that theory, even in principle. Which methodological requirement is denied?",
+                options: ["The relation between science and values", "The generation of hypotheses from observations", "A method for falsifying theories", "The synchronic relation between disciplines"],
+                correctIndex: 2,
+                explanation: "Falsification concerns how conflicting observations can count against a theory. Generation and inter-theoretic relations address different questions."
+            },
+            {
+                question: "Which conclusion best integrates the achievements and weaknesses of logical positivism?",
+                options: ["It failed to formulate any systematic scientific guidance", "It solved all methodological problems but was rejected for cultural reasons", "It was useful only before Newtonian science", "It provided influential systematic guidance, yet its rules permit foundationally problematic outputs and lack a satisfactory replacement"],
+                correctIndex: 3,
+                explanation: "Logical positivism was systematic, appealing, and influential, but later criticism revealed deep flaws. Its continued use reflects the absence of a satisfactory alternative rather than methodological perfection."
+            }
+        ];
+
+        const tfData = [
+            {
+                question: "The scientific method, in its ideal sense, describes how scientists ought to work rather than merely reporting how they actually work.",
+                answer: true,
+                explanation: "The ideal method is normative. Actual scientific practice may depart from or supplement its formal instructions."
+            },
+            {
+                question: "A flaw caused solely by a careless scientist is an intrinsic defect in the scientific method.",
+                answer: false,
+                explanation: "An intrinsic defect belongs to the instructions and persists independently of who applies them. Careless execution is an application problem."
+            },
+            {
+                question: "Reliable explanation and accurate prediction are treated as foundational because successful technology depends on them.",
+                answer: true,
+                explanation: "Technology is an aim of science, but its success relies on the success of scientific explanations and predictions."
+            },
+            {
+                question: "A good scientific method needs to guide theory construction but need not explain how theories are used.",
+                answer: false,
+                explanation: "A comprehensive method must guide both the generation of theories and their use in explaining and predicting phenomena."
+            },
+            {
+                question: "An ideal algorithm-like scientific method could, in principle, be programmed into a computer.",
+                answer: true,
+                explanation: "The algorithm ideal requires sufficiently exact procedures to execute scientific tasks without depending on personal judgment."
+            },
+            {
+                question: "Humanity has already developed a flawless algorithm for generating reliable theories and using them to explain and predict phenomena.",
+                answer: false,
+                explanation: "No such flawless scientific algorithm has been devised despite centuries of progress."
+            },
+            {
+                question: "Confirmation and falsification both belong to the theory-evaluation stage.",
+                answer: true,
+                explanation: "Evaluation asks how evidence can support a theory and how it can count against that theory."
+            },
+            {
+                question: "The use of theories to explain and predict observations belongs to theory generation.",
+                answer: false,
+                explanation: "Explanation and prediction are tasks of theory application. Generation concerns how theories are produced."
+            },
+            {
+                question: "A diachronic relation connects newer and older theories within the same discipline.",
+                answer: true,
+                explanation: "Diachronic relations concern change across time within a discipline."
+            },
+            {
+                question: "A synchronic relation concerns only the replacement of an old theory by a new theory in one discipline.",
+                answer: false,
+                explanation: "That is a diachronic relation. Synchronic relations connect theories from different scientific disciplines."
+            },
+            {
+                question: "Permitting irrelevant evidence to confirm a theory illustrates a method allowing something it should exclude.",
+                answer: true,
+                explanation: "The example of using a white shoe to confirm that all ravens are black illustrates this category of defect."
+            },
+            {
+                question: "A method's inability to decide between competing theories is an example of allowing an absurd outcome rather than failing to support a required task.",
+                answer: false,
+                explanation: "Choosing between competing theories is a task the method should support. Inability to do so belongs to the category of required operations it fails to permit."
+            },
+            {
+                question: "Scientists can compensate for weaknesses in formal methodology by using intuition and common sense.",
+                answer: true,
+                explanation: "Human judgment helps scientists avoid absurd or unproductive possibilities that the formal guidebook does not exclude."
+            },
+            {
+                question: "Because scientists use common sense successfully, it has already been incorporated into an exact scientific algorithm.",
+                answer: false,
+                explanation: "Scientists use common sense in practice, but no one has successfully formalized it as part of a flawless exact method."
+            },
+            {
+                question: "The Vienna Circle included natural scientists, social scientists, mathematicians, and philosophers.",
+                answer: true,
+                explanation: "Its interdisciplinary membership supported its project of systematically articulating scientific method."
+            },
+            {
+                question: "The Vienna Circle sought to invent a scientific method wholly unrelated to practices associated with the Scientific Revolution.",
+                answer: false,
+                explanation: "It sought to formulate explicitly the method practiced since the Scientific Revolution, especially as exemplified by Newton."
+            },
+            {
+                question: "A successful scientist may nevertheless misdescribe the method involved in that success.",
+                answer: true,
+                explanation: "Newton's account of hypothesis formation illustrates that successful practice and accurate methodological self-description can diverge."
+            },
+            {
+                question: "Newton held that his hypotheses arose without generalizing from observations.",
+                answer: false,
+                explanation: "Newton described his procedure as inductive generalization from particular observations."
+            },
+            {
+                question: "Generalizing that all ravens are black from observed black ravens illustrates inductive generalization.",
+                answer: true,
+                explanation: "The general claim extends a repeated observed property from particular ravens to all ravens."
+            },
+            {
+                question: "A sophisticated mathematical law such as Newton's gravitational law can plausibly be read directly from observation by simple generalization alone.",
+                answer: false,
+                explanation: "The law's novel theoretical and mathematical structure is not already given in ordinary observations, so simple generalization is inadequate."
+            },
+            {
+                question: "Rationalism gives pure reason priority when reason and sensory observation conflict.",
+                answer: true,
+                explanation: "Rationalism treats reason as reliable and the senses as fallible."
+            },
+            {
+                question: "Empiricism holds that reason should always override conflicting observation because the senses are unreliable.",
+                answer: false,
+                explanation: "That priority belongs to rationalism. Empiricism treats observation as the more trustworthy ultimate criterion."
+            },
+            {
+                question: "Logical empiricism understands both scientific theories and observed facts through propositions.",
+                answer: true,
+                explanation: "Theories consist of theoretical propositions, while observed facts are expressed through empirical propositions."
+            },
+            {
+                question: "Logical empiricism rejects logic because only direct sensory observation can contribute to knowledge.",
+                answer: false,
+                explanation: "It combines observation with logic, allowing logical rules to be applied to empirical propositions."
+            },
+            {
+                question: "Logical positivism and logical empiricism are two names for the same view in this framework.",
+                answer: true,
+                explanation: "Both names identify the approach that combines empirical observation and logical relations."
+            },
+            {
+                question: "A positivist method formally permits scientific operations to rely on unrestricted intuition in addition to observation and logic.",
+                answer: false,
+                explanation: "Its formal resources are empirical observation and logic only, even though actual scientists use intuition to compensate for weaknesses."
+            },
+            {
+                question: "The Vienna Circle developed systematic guidance for generation, confirmation, refutation, explanation, prediction, and relations between theories.",
+                answer: true,
+                explanation: "Its framework addressed these core scientific tasks as well as the relationship between science and values."
+            },
+            {
+                question: "Foundational criticism of logical positivism ended when a satisfactory replacement was adopted in the 1960s.",
+                answer: false,
+                explanation: "Problems became increasingly visible from the 1960s onward, but no satisfactory alternative was found."
+            },
+            {
+                question: "Mechanical execution of the positivist guidebook can yield absurd and unjustifiable results as well as reasonable ones.",
+                answer: true,
+                explanation: "The framework's rules fail to exclude every unreasonable theory, prediction, or explanation."
+            },
+            {
+                question: "Continued scientific use of the positivist framework establishes that its foundational weaknesses have been resolved.",
+                answer: false,
+                explanation: "Its continued use reflects the absence of a better satisfactory method, not the disappearance of its documented flaws."
+            }
+        ];
+
+        // --- Global State Variables ---
+        let currentCardIndex = 0;
+        let isCardFront = true;
+        let isCardAnimating = false;
+        let currentMCQIndex = 0;
+        let currentTFIndex = 0;
+        let mcqAnswers = new Array(mcqData.length).fill(null);
+        let tfAnswers = new Array(tfData.length).fill(null);
+
+        // --- DOM Element References ---
+        const flashcardContent = document.getElementById('flashcard-content');
+        const cardCounter = document.getElementById('card-counter');
+        const prevCardBtn = document.getElementById('prev-card');
+        const nextCardBtn = document.getElementById('next-card');
+        const mcqQuestion = document.getElementById('mcq-question');
+        const mcqOptions = document.getElementById('mcq-options');
+        const mcqFeedback = document.getElementById('mcq-feedback');
+        const mcqExplanation = document.getElementById('mcq-explanation');
+        const mcqCounter = document.getElementById('mcq-counter');
+        const prevMCQBtn = document.getElementById('prev-mcq');
+        const nextMCQBtn = document.getElementById('next-mcq');
+        const viewAllMCQBtn = document.getElementById('view-all-mcq');
+        const mcqSingleView = document.getElementById('mcq-single-view');
+        const mcqAllQuestionsContainer = document.getElementById('mcq-all-questions');
+        const tfQuestion = document.getElementById('tf-question');
+        const tfOptionsContainer = document.getElementById('tf-options');
+        const tfFeedback = document.getElementById('tf-feedback');
+        const tfExplanation = document.getElementById('tf-explanation');
+        const tfCounter = document.getElementById('tf-counter');
+        const prevTFBtn = document.getElementById('prev-tf');
+        const nextTFBtn = document.getElementById('next-tf');
+        const viewAllTFBtn = document.getElementById('view-all-tf');
+        const tfSingleView = document.getElementById('tf-single-view');
+        const tfAllQuestionsContainer = document.getElementById('tf-all-questions');
+
+        // --- MathJax Re-rendering Helper ---
+        function triggerMathJax() {
+            if (window.MathJax && window.MathJax.typesetPromise) {
+                window.MathJax.typesetPromise().catch((err) => console.error('MathJax error:', err.message));
+            }
+        }
+
+        function displayCard(index) {
+            if (!flashcardData || flashcardData.length === 0) return;
+            const cardData = flashcardData[index];
+            isCardFront = true;
+            flashcardContent.style.opacity = '1';
+            flashcardContent.textContent = cardData.term;
+            flashcardContent.className = 'flashcard-front-style';
+            cardCounter.textContent = `Card ${index + 1} / ${flashcardData.length}`;
+            prevCardBtn.disabled = index === 0;
+            nextCardBtn.disabled = index === flashcardData.length - 1;
+            triggerMathJax();
+        }
+
+        function flipCard() {
+            if (isCardAnimating || !flashcardData || flashcardData.length === 0) return;
+            isCardAnimating = true;
+            flashcardContent.style.opacity = '0';
+            setTimeout(() => {
+                isCardFront = !isCardFront;
+                const cardData = flashcardData[currentCardIndex];
+                if (isCardFront) {
+                    flashcardContent.textContent = cardData.term;
+                    flashcardContent.className = 'flashcard-front-style';
+                } else {
+                    flashcardContent.textContent = cardData.definition;
+                    flashcardContent.className = 'flashcard-back-style';
+                }
+                flashcardContent.style.opacity = '1';
+                isCardAnimating = false;
+                triggerMathJax();
+            }, 300);
+        }
+
+        function displayMCQuestion(index) {
+            if (!mcqData || mcqData.length === 0) return;
+            const qData = mcqData[index];
+            mcqQuestion.textContent = qData.question;
+            mcqOptions.innerHTML = '';
+            mcqFeedback.classList.add('hidden');
+            mcqExplanation.classList.add('hidden');
+            qData.options.forEach((option, i) => {
+                const button = document.createElement('button');
+                button.textContent = option;
+                button.onclick = () => handleMCQAnswer(index, i);
+                mcqOptions.appendChild(button);
+            });
+            mcqCounter.textContent = `Question ${index + 1} / ${mcqData.length}`;
+            prevMCQBtn.disabled = index === 0;
+            nextMCQBtn.disabled = index === mcqData.length - 1;
+            if (mcqAnswers[index] !== null) {
+                highlightMCQAnswer(mcqOptions, mcqFeedback, mcqExplanation, index, mcqAnswers[index].selected);
+            }
+            triggerMathJax();
+        }
+
+        function handleMCQAnswer(qIndex, selectedIndex) {
+            if (mcqAnswers[qIndex] !== null) return;
+            const isCorrect = selectedIndex === mcqData[qIndex].correctIndex;
+            mcqAnswers[qIndex] = { selected: selectedIndex, correct: isCorrect };
+            highlightMCQAnswer(mcqOptions, mcqFeedback, mcqExplanation, qIndex, selectedIndex);
+        }
+
+        function highlightMCQAnswer(optionsContainer, feedbackEl, explanationEl, qIndex, selectedIndex) {
+            const qData = mcqData[qIndex];
+            const buttons = optionsContainer.querySelectorAll('button');
+            buttons.forEach((button, i) => {
+                button.disabled = true;
+                if (i === qData.correctIndex) {
+                    button.classList.add('correct');
+                }
+                if (i === selectedIndex && i !== qData.correctIndex) {
+                    button.classList.add('incorrect');
+                }
+            });
+            feedbackEl.textContent = selectedIndex === qData.correctIndex ? "Correct!" : "Incorrect.";
+            feedbackEl.className = `feedback ${selectedIndex === qData.correctIndex ? 'correct' : 'incorrect'}`;
+            explanationEl.innerHTML = `<strong>Explanation:</strong> ${qData.explanation}`;
+            explanationEl.classList.remove('hidden');
+            triggerMathJax();
+        }
+
+        function displayAllMCQ() {
+            if (!mcqData || mcqData.length === 0) return;
+            mcqSingleView.classList.add('hidden');
+            mcqAllQuestionsContainer.innerHTML = '';
+            mcqData.forEach((qData, index) => {
+                const questionDiv = document.createElement('div');
+                questionDiv.className = 'question-container-all';
+                questionDiv.innerHTML = `
+                    <div class="question-text">${index + 1}. ${qData.question}</div>
+                    <div class="options">
+                        ${qData.options.map((option, i) => `<button data-qindex="${index}" data-oindex="${i}">${option}</button>`).join('')}
+                    </div>
+                    <div class="feedback hidden"></div>
+                    <div class="explanation hidden"></div>
+                `;
+                mcqAllQuestionsContainer.appendChild(questionDiv);
+                 const optionButtons = questionDiv.querySelectorAll('.options button');
+                 optionButtons.forEach(button => {
+                     button.onclick = () => {
+                        const qIndex = parseInt(button.dataset.qindex);
+                        const oIndex = parseInt(button.dataset.oindex);
+                        if (mcqAnswers[qIndex] === null) {
+                            const isCorrect = oIndex === mcqData[qIndex].correctIndex;
+                            mcqAnswers[qIndex] = { selected: oIndex, correct: isCorrect };
+                        }
+                        const optionsDiv = button.closest('.options');
+                        const feedbackDiv = questionDiv.querySelector('.feedback');
+                        const explanationDiv = questionDiv.querySelector('.explanation');
+                        highlightMCQAnswer(optionsDiv, feedbackDiv, explanationDiv, qIndex, mcqAnswers[qIndex].selected);
+                     };
+                 });
+                 if (mcqAnswers[index] !== null) {
+                    const optionsDiv = questionDiv.querySelector('.options');
+                    const feedbackDiv = questionDiv.querySelector('.feedback');
+                    const explanationDiv = questionDiv.querySelector('.explanation');
+                    highlightMCQAnswer(optionsDiv, feedbackDiv, explanationDiv, index, mcqAnswers[index].selected);
+                 }
+            });
+            mcqAllQuestionsContainer.classList.remove('hidden');
+            triggerMathJax();
+        }
+
+        function displayTFQuestion(index) {
+            if (!tfData || tfData.length === 0) return;
+            const qData = tfData[index];
+            tfQuestion.textContent = qData.question;
+            tfFeedback.classList.add('hidden');
+            tfExplanation.classList.add('hidden');
+             const buttons = tfOptionsContainer.querySelectorAll('button');
+             buttons.forEach(button => {
+                 button.disabled = false;
+                 button.classList.remove('correct', 'incorrect');
+                 button.onclick = () => handleTFAnswer(index, button.dataset.answer === 'true');
+             });
+            tfCounter.textContent = `Question ${index + 1} / ${tfData.length}`;
+            prevTFBtn.disabled = index === 0;
+            nextTFBtn.disabled = index === tfData.length - 1;
+            if (tfAnswers[index] !== null) {
+                highlightTFAnswer(tfOptionsContainer, tfFeedback, tfExplanation, index, tfAnswers[index].selected);
+            }
+            triggerMathJax();
+        }
+
+        function handleTFAnswer(qIndex, selectedAnswer) {
+            if (tfAnswers[qIndex] !== null) return;
+            const isCorrect = selectedAnswer === tfData[qIndex].answer;
+            tfAnswers[qIndex] = { selected: selectedAnswer, correct: isCorrect };
+            highlightTFAnswer(tfOptionsContainer, tfFeedback, tfExplanation, qIndex, selectedAnswer);
+        }
+
+        function highlightTFAnswer(optionsContainer, feedbackEl, explanationEl, qIndex, selectedAnswer) {
+             const qData = tfData[qIndex];
+             const buttons = optionsContainer.querySelectorAll('button');
+             buttons.forEach(button => {
+                 const buttonAnswer = button.dataset.answer === 'true';
+                 button.disabled = true;
+                 if (buttonAnswer === qData.answer) {
+                     button.classList.add('correct');
+                 }
+                 if (buttonAnswer === selectedAnswer && buttonAnswer !== qData.answer) {
+                     button.classList.add('incorrect');
+                 }
+             });
+             feedbackEl.textContent = selectedAnswer === qData.answer ? "Correct!" : "Incorrect.";
+             feedbackEl.className = `feedback ${selectedAnswer === qData.answer ? 'correct' : 'incorrect'}`;
+             explanationEl.innerHTML = `<strong>Explanation:</strong> ${qData.explanation}`;
+             explanationEl.classList.remove('hidden');
+             triggerMathJax();
+        }
+
+        function displayAllTF() {
+             if (!tfData || tfData.length === 0) return;
+             tfSingleView.classList.add('hidden');
+             tfAllQuestionsContainer.innerHTML = '';
+             tfData.forEach((qData, index) => {
+                 const questionDiv = document.createElement('div');
+                 questionDiv.className = 'question-container-all';
+                 questionDiv.innerHTML = `
+                     <div class="question-text">${index + 1}. ${qData.question}</div>
+                     <div class="tf-options">
+                         <button data-qindex="${index}" data-answer="true">True</button>
+                         <button data-qindex="${index}" data-answer="false">False</button>
+                     </div>
+                     <div class="feedback hidden"></div>
+                     <div class="explanation hidden"></div>
+                 `;
+                 tfAllQuestionsContainer.appendChild(questionDiv);
+                 const optionButtons = questionDiv.querySelectorAll('.tf-options button');
+                 optionButtons.forEach(button => {
+                     button.onclick = () => {
+                         const qIndex = parseInt(button.dataset.qindex);
+                         const selectedAnswer = button.dataset.answer === 'true';
+                         if (tfAnswers[qIndex] === null) {
+                             const isCorrect = selectedAnswer === tfData[qIndex].answer;
+                             tfAnswers[qIndex] = { selected: selectedAnswer, correct: isCorrect };
+                         }
+                         const optionsDiv = button.closest('.tf-options');
+                         const feedbackDiv = questionDiv.querySelector('.feedback');
+                         const explanationDiv = questionDiv.querySelector('.explanation');
+                         highlightTFAnswer(optionsDiv, feedbackDiv, explanationDiv, qIndex, tfAnswers[qIndex].selected);
+                     };
+                 });
+                 if (tfAnswers[index] !== null) {
+                    const optionsDiv = questionDiv.querySelector('.tf-options');
+                    const feedbackDiv = questionDiv.querySelector('.feedback');
+                    const explanationDiv = questionDiv.querySelector('.explanation');
+                    highlightTFAnswer(optionsDiv, feedbackDiv, explanationDiv, index, tfAnswers[index].selected);
+                 }
+             });
+             tfAllQuestionsContainer.classList.remove('hidden');
+             triggerMathJax();
+        }
+
+        function initialize() {
+            if (flashcardData.length > 0) displayCard(currentCardIndex);
+            if (mcqData.length > 0) displayMCQuestion(currentMCQIndex);
+            if (tfData.length > 0) displayTFQuestion(currentTFIndex);
+            flashcardContent.addEventListener('click', flipCard);
+            prevCardBtn.addEventListener('click', () => { if (currentCardIndex > 0) { currentCardIndex--; displayCard(currentCardIndex); } });
+            nextCardBtn.addEventListener('click', () => { if (currentCardIndex < flashcardData.length - 1) { currentCardIndex++; displayCard(currentCardIndex); } });
+            prevMCQBtn.addEventListener('click', () => { if (currentMCQIndex > 0) { currentMCQIndex--; displayMCQuestion(currentMCQIndex); } });
+            nextMCQBtn.addEventListener('click', () => { if (currentMCQIndex < mcqData.length - 1) { currentMCQIndex++; displayMCQuestion(currentMCQIndex); } });
+            viewAllMCQBtn.addEventListener('click', displayAllMCQ);
+            prevTFBtn.addEventListener('click', () => { if (currentTFIndex > 0) { currentTFIndex--; displayTFQuestion(currentTFIndex); } });
+            nextTFBtn.addEventListener('click', () => { if (currentTFIndex < tfData.length - 1) { currentTFIndex++; displayTFQuestion(currentTFIndex); } });
+            viewAllTFBtn.addEventListener('click', displayAllTF);
+
+            // Initial MathJax render for static HTML (like the Theory section)
+            triggerMathJax();
+        }
+
+        initialize();
+    });
+    </script>
+</body>
+</html>

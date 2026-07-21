@@ -1,0 +1,1196 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Logical Positivism and the Scientific Method</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+
+    <script>
+        window.MathJax = {
+            tex: {
+                inlineMath: [['$', '$'], ['\\(', '\\)']],
+                displayMath: [['$$', '$$'], ['\\[', '\\]']]
+            },
+            startup: {
+                typeset: false // We will trigger this manually via JS
+            }
+        };
+    </script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+    <style>
+        /* --- Root Variables for Theme --- */
+        :root {
+            --primary-bg: #0a0a0f;
+            --panel-bg: rgba(255, 255, 255, 0.03);
+            --panel-border: rgba(255, 255, 255, 0.1);
+
+            --accent-start: #6C63FF;
+            --accent-end: #A855F7;
+            --accent-gradient: linear-gradient(135deg, var(--accent-start), var(--accent-end));
+            --accent-color: #8B5CF6; /* Midpoint fallback */
+
+            --text-color: #E0E0E0;
+            --text-muted: #9ca3af;
+
+            --correct-color: rgba(16, 185, 129, 0.2);
+            --correct-border: #10b981;
+            --incorrect-color: rgba(239, 68, 68, 0.2);
+            --incorrect-border: #ef4444;
+
+            --insight-bg: rgba(168, 85, 247, 0.08);
+            --insight-border: #A855F7;
+        }
+
+        /* --- Global Styles & Glow Effects --- */
+        body {
+            background-color: var(--primary-bg);
+            background-image:
+                radial-gradient(circle at 15% 50%, rgba(108, 99, 255, 0.06), transparent 25vw),
+                radial-gradient(circle at 85% 30%, rgba(168, 85, 247, 0.06), transparent 25vw);
+            background-attachment: fixed;
+            color: var(--text-color);
+            font-family: 'Inter', sans-serif;
+            line-height: 1.6;
+            margin: 0;
+            padding: 20px;
+        }
+
+        /* --- Panel Containers (Optimized: No blur for performance) --- */
+        .container, .section, #flashcard-content, .question-container-single, .question-container-all, .explanation {
+            background: var(--panel-bg);
+            border: 1px solid var(--panel-border);
+            border-radius: 12px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+        }
+
+        .container {
+            width: 90%;
+            max-width: 1000px;
+            margin: 20px auto;
+            padding: 30px;
+        }
+
+        h1, h2 {
+            text-align: center;
+            border-bottom: 1px solid var(--panel-border);
+            padding-bottom: 15px;
+            font-weight: 700;
+            color: #fff;
+        }
+
+        .section {
+            padding: 25px;
+            margin-bottom: 30px;
+            animation: slideIn 0.5s ease-out forwards;
+        }
+
+        /* --- Theory & Key Insight Styling --- */
+        .theory-text {
+            font-size: 1.1em;
+            line-height: 1.8;
+            color: var(--text-muted);
+        }
+
+        .theory-text p, .theory-text li {
+            color: var(--text-color);
+        }
+
+        .theory-text h3 {
+            color: #fff;
+            margin-top: 25px;
+            border-bottom: none;
+            text-align: left;
+            font-size: 1.3em;
+        }
+
+        .insight-box {
+            background-color: var(--insight-bg);
+            border-left: 4px solid var(--insight-border);
+            padding: 18px;
+            margin: 25px 0;
+            border-radius: 8px;
+        }
+
+        .insight-box strong {
+            color: #fff;
+            display: block;
+            margin-bottom: 8px;
+            font-size: 1.1em;
+            text-shadow: 0 0 10px rgba(168, 85, 247, 0.4);
+        }
+
+        /* --- Study Cards Styling --- */
+        .flashcard-container {
+            height: 250px;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            perspective: 1000px;
+        }
+
+        #flashcard-content {
+            width: 100%;
+            height: 100%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            padding: 30px;
+            box-sizing: border-box;
+            transition: opacity 0.3s ease-in-out, transform 0.2s;
+        }
+
+        #flashcard-content:hover {
+            transform: translateY(-2px);
+            border-color: rgba(168, 85, 247, 0.4);
+            box-shadow: 0 10px 40px rgba(108, 99, 255, 0.15);
+        }
+
+        .flashcard-front-style {
+             font-size: 1.6em;
+             font-weight: 600;
+             font-family: 'JetBrains Mono', monospace;
+             color: var(--accent-end);
+        }
+
+        .flashcard-back-style {
+             font-size: 1.2em;
+             color: var(--text-color);
+        }
+
+        /* --- Questions Styling (MCQ & T/F) --- */
+         .question-container-single, .question-container-all {
+            margin-bottom: 20px;
+            padding: 20px;
+         }
+
+        .question-text {
+            font-weight: 600;
+            margin-bottom: 20px;
+            font-size: 1.1em;
+        }
+
+        /* Buttons & Glass Inputs */
+        .options button, .tf-options button, .nav-button, .view-all-button {
+            display: block;
+            width: 100%;
+            padding: 12px 15px;
+            margin: 8px 0;
+            background: rgba(255, 255, 255, 0.02);
+            color: var(--text-color);
+            border: 1px solid var(--panel-border);
+            border-radius: 8px;
+            cursor: pointer;
+            text-align: left;
+            font-family: 'Inter', sans-serif;
+            font-size: 1em;
+            transition: all 0.3s ease;
+        }
+
+        .nav-button, .view-all-button {
+            width: auto;
+            text-align: center;
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        .options button:hover:not(:disabled), .tf-options button:hover:not(:disabled), .nav-button:hover:not(:disabled), .view-all-button:hover {
+            background: var(--accent-gradient);
+            border-color: transparent;
+            color: #fff;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 15px rgba(108, 99, 255, 0.25);
+        }
+
+        .options button:disabled, .tf-options button:disabled, .nav-button:disabled {
+            cursor: not-allowed;
+            opacity: 0.5;
+            transform: none;
+        }
+
+        /* Correct/Incorrect States */
+        .options button.correct, .tf-options button.correct {
+            background: var(--correct-color);
+            border-color: var(--correct-border);
+            color: #fff;
+            opacity: 1;
+        }
+        .options button.incorrect, .tf-options button.incorrect {
+            background: var(--incorrect-color);
+            border-color: var(--incorrect-border);
+            color: #fff;
+            opacity: 1;
+        }
+
+        .feedback {
+            margin-top: 15px;
+            padding: 12px;
+            border-radius: 8px;
+            font-weight: 600;
+            text-align: center;
+            animation: fadeIn 0.3s ease-in;
+        }
+
+        .feedback.correct {
+            color: var(--correct-border);
+            background: var(--correct-color);
+            border: 1px solid var(--correct-border);
+        }
+
+        .feedback.incorrect {
+            color: var(--incorrect-border);
+            background: var(--incorrect-color);
+            border: 1px solid var(--incorrect-border);
+        }
+
+        .explanation {
+            margin-top: 15px;
+            font-style: italic;
+            font-size: 0.95em;
+            padding: 15px;
+            color: var(--text-muted);
+            border-left: 3px solid var(--accent-start);
+            animation: fadeIn 0.5s ease-in;
+        }
+
+        /* --- Navigation & Utility --- */
+        .navigation {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 20px;
+        }
+
+        .counter {
+            font-size: 0.9em;
+            color: var(--text-muted);
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        .view-all-container {
+            text-align: center;
+            margin-top: 25px;
+        }
+
+        .hidden { display: none !important; }
+
+        /* --- Animations --- */
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Logical Positivism and the Scientific Method</h1>
+
+        <div class="section">
+            <h2>Theory Summary and Key Insights</h2>
+            <div id="theory-content" class="theory-text">
+                <h3>The Purpose and Scope of Scientific Method</h3>
+                <p>The scientific method is a normative guide to how science ought to be conducted: it functions as an instruction manual for scientific practice. A good method helps science achieve its fundamental goals of providing reliable explanations of natural phenomena, enabling reliable predictions, and supporting the development of successful technologies. Science pursues these goals by formulating reliable theories and using them appropriately.</p>
+                <p>A complete scientific method must provide guidance for several connected tasks:</p>
+                <ul>
+                    <li><strong>Theory formation:</strong> generating scientific theories.</li>
+                    <li><strong>Theory evaluation:</strong> confirming or refuting theories through observation.</li>
+                    <li><strong>Theory application:</strong> using theories to predict and explain phenomena.</li>
+                    <li><strong>Inter-theoretic relations:</strong> choosing between competitors and relating theories across fields and historical periods.</li>
+                    <li><strong>Science and values:</strong> analyzing the connection between scientific inquiry and values.</li>
+                </ul>
+
+                <h3>Logical Positivism</h3>
+                <p>Logical positivism, also called logical empiricism, was formulated by the Vienna Circle, a group of scientists and philosophers in early twentieth-century Vienna. Inspired by the success of Newtonian physics, they sought to articulate the method that Newton had used. Logical positivism recognizes only two reliable sources of knowledge: <strong>empirical observation</strong> and <strong>logic</strong>. Legitimate scientific knowledge must therefore consist of direct observations or claims logically derived from observations.</p>
+                <p>The positivist project applies these two tools to every major scientific task. It offers systematic and intuitive instructions for generating, testing, applying, and relating theories. Although foundational problems began to accumulate from the 1960s onward, no satisfactory replacement has been established, so scientific practice continues to be strongly shaped by the positivist framework.</p>
+
+                <div class="insight-box">
+                    <strong>Key Insight:</strong>
+                    The central ambition of logical positivism is not merely to value evidence. It is to reconstruct every scientific task using only observation and logic, without relying on any additional source of knowledge.
+                </div>
+
+                <h3>Theory Formation: From Observation to a Candidate Theory</h3>
+                <p>Positivist theory formation begins with an observation that needs to be explained. The scientist searches for a theory, understood as a set of laws, from which that observation can be logically deduced. If the theory were true, the observed result would have to follow.</p>
+                <p>For example, suppose a resistor of resistance $R=5$ produces current $I=0.2$ at voltage $V=1$ and current $I=0.4$ at voltage $V=2$. Both of the following theories fit those observations:</p>
+                <p>$$I=\frac{V}{R}$$</p>
+                <p>$$I=\frac{V^2-2V+2}{R}$$</p>
+                <p>The observed cases therefore do not uniquely determine a theory. Multiple laws can logically entail the same initial evidence, so further observations are needed to distinguish the alternatives.</p>
+
+                <div class="insight-box">
+                    <strong>Key Insight:</strong>
+                    Explaining the observations used to construct a theory is not enough to establish that theory. Distinct theories can fit the same known data while implying sharply different results in untested cases.
+                </div>
+
+                <h3>Theory Evaluation: Confirmation and Refutation</h3>
+                <p>A candidate theory must undergo observational testing. Scientists deduce additional observations that the theory logically entails and then check whether those observations occur. If an entailed observation occurs, the theory is <strong>confirmed</strong>, meaning supported rather than proved. If the entailed observation does not occur, the theory is <strong>refuted</strong>, and inquiry returns to the theory-formation stage to seek an alternative.</p>
+                <p>The two resistor theories illustrate the value of a discriminating test. With $V=10$ and $R=5$, the first theory predicts:</p>
+                <p>$$I=\frac{10}{5}=2$$</p>
+                <p>The second predicts:</p>
+                <p>$$I=\frac{10^2-2(10)+2}{5}=16.4$$</p>
+                <p>An observation under these conditions can therefore distinguish the theories, unlike the original measurements at $V=1$ and $V=2$.</p>
+
+                <h3>The Semmelweis Case</h3>
+                <p>Carl Hempel used the work of Ignaz Semmelweis to illustrate positivist theory formation and evaluation. Between 1844 and 1848, 260 mothers died in one ward of a Vienna hospital. Several proposed explanations failed observational tests:</p>
+                <ul>
+                    <li>Cosmic-terrestrial atmospheric changes were undermined by comparison with other hospitals, where the expected difference was absent.</li>
+                    <li>Overcrowding was undermined because the second ward was more crowded.</li>
+                    <li>Injuries caused by inexperienced students were undermined by the greater seriousness of natural childbirth injuries and by the unchanged mortality rate after the number of students was halved.</li>
+                    <li>The birthing position hypothesis was undermined when changing from birth on the back to birth on the side did not change mortality.</li>
+                </ul>
+                <p>A decisive clue arose when a person accidentally cut during an autopsy died with symptoms like those of the mothers. Semmelweis proposed that doctors transferred material from corpses into the bloodstreams of birthing women. Requiring handwashing with calcium hypochlorite after dissections and before contact with patients dramatically reduced mortality, confirming the hypothesis. A broader hypothesis concerning decaying matter from living organisms was subsequently supported when handwashing after any such contact reduced mortality further.</p>
+
+                <h3>Prediction, Risk, and Retrodiction</h3>
+                <p>An observation logically necessitated by a theory is one of that theory's predictions. Testing therefore consists of deducing predictions and checking whether they occur. A particularly meaningful test uses a <strong>risky prediction</strong>: an outcome unlikely to occur unless the theory is true. Eddington's 1919 test of the general-relativistic prediction that light rays bend near heavy objects exemplifies this strategy.</p>
+                <p>After a theory passes risky tests, it is treated as reliable enough to predict other phenomena. General relativity, for example, predicts that clocks on satellites at an altitude of about 20,000 kilometers run faster because gravitational force there is about four times weaker. Satellite navigation must correct the resulting cumulative errors in ground-distance measurements.</p>
+                <p>Prediction is not limited to future events. A theory can also infer a past event; this is called <strong>retrodiction</strong>. Observational findings support the retrodiction that approximately 65 million years ago a giant asteroid struck the Yucatán Peninsula and contributed to an extinction involving about 70 percent of animal species then living, including the dinosaurs.</p>
+
+                <h3>Explanation and the Prediction Standard</h3>
+                <p>Predictions concern what is not yet observed and are challenging because they involve risk, although they cannot always be checked immediately. Explanations concern what is already known and can be checked immediately, but hindsight makes weak explanations easy to invent. Hempel therefore proposed holding explanations to the same standard as predictions:</p>
+                <p><strong>A hypothesis $H$ scientifically explains an observation $E$ if $H$ would have allowed $E$ to be predicted before $E$ occurred.</strong></p>
+                <p>For example, at a constant voltage of 10 volts, replacing a 5-ohm resistor with a 10-ohm resistor reduces current from 2 amperes to 1 ampere. The law $I=V/R$ explains this result because it would have predicted the decrease in advance.</p>
+
+                <div class="insight-box">
+                    <strong>Key Insight:</strong>
+                    In Hempel's account, prediction and explanation share the same logical relation: the theory entails the observation. Their principal difference is temporal or epistemic—the predicted result has not yet been observed, whereas the explained result is already known.
+                </div>
+
+                <h3>Inter-Theoretic Relations</h3>
+                <p><strong>Synchronic relations</strong> connect theories in different scientific fields at the same time. Logical positivism ideally arranges the sciences hierarchically, beginning with theories about the smallest objects, such as particle physics, and proceeding through chemistry, biology, psychology, and sociology. Each lower-level theory should explain the theory above it. The axioms of a higher-level science would thereby become theorems derivable from a lower-level science. This unified hierarchy is the <strong>Unity of Science Ideal</strong>.</p>
+                <p><strong>Diachronic relations</strong> connect theories within the same science at different times. An old theory can be replaced in two ways:</p>
+                <ol>
+                    <li><strong>Discarding:</strong> a refuted theory is completely replaced, as geocentrism was replaced by heliocentrism.</li>
+                    <li><strong>Explanation or reduction:</strong> the older theory becomes a special case of a broader and more general theory. Einstein's physics explains Newton's physics, which explains Galileo's dynamics and Kepler's astronomy.</li>
+                </ol>
+                <p>The resulting picture of progress from theory to theory is the <strong>Cumulative Science Ideal</strong>. The synchronic ideal unifies different disciplines at one time, whereas the diachronic ideal presents historical scientific progress as either replacement or reduction.</p>
+
+                <div class="insight-box">
+                    <strong>Key Insight:</strong>
+                    The Unity of Science Ideal and the Cumulative Science Ideal organize theories along different dimensions. The first seeks vertical integration across disciplines at the same time; the second seeks continuity or justified replacement within a discipline over time.
+                </div>
+
+                <h3>The Foundational Difficulty</h3>
+                <p>The positivist method remains influential despite fundamental flaws. It can permit outcomes that a sound scientific method should exclude, such as arbitrary hypotheses, implausible predictions, irrelevant confirmations, or backward explanations. At the same time, it can fail to license activities that science should support, such as straightforward refutation by a contradictory observation, deciding between competing theories, or reducing every higher-level science to physics.</p>
+                <p>Scientists nevertheless succeed partly because they use guiding intuitions beyond the official method. The difficulty is that these intuitions have not been translated into clear and unambiguous instructions. The methodological challenge is therefore not simply to identify flaws, but to formulate a more adequate replacement without losing the systematic guidance that made logical positivism attractive.</p>
+            </div>
+        </div>
+
+        <div class="section">
+            <h2>Study Cards</h2>
+            <div class="flashcard-container">
+                <div id="flashcard-content"></div>
+            </div>
+            <div class="navigation">
+                <button class="nav-button" id="prev-card">Previous</button>
+                <span class="counter" id="card-counter"></span>
+                <button class="nav-button" id="next-card">Next</button>
+            </div>
+        </div>
+
+        <div class="section">
+            <h2>Multiple-Choice Questions</h2>
+            <div id="mcq-single-view">
+                <div class="question-container-single" id="mcq-container">
+                    <div class="question-text" id="mcq-question"></div>
+                    <div class="options" id="mcq-options"></div>
+                    <div class="feedback hidden" id="mcq-feedback"></div>
+                    <div class="explanation hidden" id="mcq-explanation"></div>
+                </div>
+                <div class="navigation">
+                    <button class="nav-button" id="prev-mcq">Previous</button>
+                    <span class="counter" id="mcq-counter"></span>
+                    <button class="nav-button" id="next-mcq">Next</button>
+                </div>
+                 <div class="view-all-container">
+                     <button class="view-all-button" id="view-all-mcq">View All Questions</button>
+                 </div>
+            </div>
+            <div id="mcq-all-questions" class="hidden">
+                </div>
+        </div>
+
+        <div class="section">
+            <h2>True or False Questions</h2>
+             <div id="tf-single-view">
+                <div class="question-container-single" id="tf-container">
+                    <div class="question-text" id="tf-question"></div>
+                    <div class="tf-options" id="tf-options">
+                        <button data-answer="true">True</button>
+                        <button data-answer="false">False</button>
+                    </div>
+                    <div class="feedback hidden" id="tf-feedback"></div>
+                    <div class="explanation hidden" id="tf-explanation"></div>
+                </div>
+                <div class="navigation">
+                    <button class="nav-button" id="prev-tf">Previous</button>
+                    <span class="counter" id="tf-counter"></span>
+                    <button class="nav-button" id="next-tf">Next</button>
+                </div>
+                 <div class="view-all-container">
+                     <button class="view-all-button" id="view-all-tf">View All Questions</button>
+                 </div>
+            </div>
+             <div id="tf-all-questions" class="hidden">
+                 </div>
+        </div>
+    </div>
+
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+
+        const flashcardData = [
+            {
+                term: "Scientific Method",
+                definition: "A normative guide to how science ought to be conducted so that it can generate reliable theories and use them effectively."
+            },
+            {
+                term: "Fundamental Goals of Science",
+                definition: "Reliable explanation, reliable prediction, and the development of successful technologies."
+            },
+            {
+                term: "Logical Positivism",
+                definition: "A scientific methodology that seeks to perform every scientific task using empirical observation and logic alone."
+            },
+            {
+                term: "Vienna Circle",
+                definition: "The early twentieth-century group that sought to articulate the scientific method exemplified by Newtonian physics."
+            },
+            {
+                term: "Theory Formation",
+                definition: "Searching for a set of laws from which the observation requiring explanation can be logically deduced."
+            },
+            {
+                term: "Theory Evaluation",
+                definition: "Deducing additional observations from a theory and checking whether those observations actually occur."
+            },
+            {
+                term: "Confirmation",
+                definition: "Support gained when an observation logically entailed by a theory occurs; confirmation does not amount to proof."
+            },
+            {
+                term: "Refutation",
+                definition: "The result when an observation logically entailed by a theory fails to occur, requiring a return to theory formation."
+            },
+            {
+                term: "Prediction",
+                definition: "An observation logically entailed by a theory that has not yet been observed."
+            },
+            {
+                term: "Risky Prediction",
+                definition: "A predicted outcome that is unlikely to occur unless the theory is true and therefore provides a meaningful test."
+            },
+            {
+                term: "Retrodiction",
+                definition: "Using a theory and present evidence to infer an event in the past."
+            },
+            {
+                term: "Hempel's Explanation Criterion",
+                definition: "A hypothesis explains an observation scientifically if it would have allowed that observation to be predicted before it occurred."
+            },
+            {
+                term: "Synchronic Inter-Theoretic Relation",
+                definition: "A relation between theories in different scientific fields at the same time."
+            },
+            {
+                term: "Diachronic Inter-Theoretic Relation",
+                definition: "A relation between theories within the same scientific discipline at different times."
+            },
+            {
+                term: "Unity of Science Ideal",
+                definition: "The ideal of organizing the sciences hierarchically so that lower-level theories explain and derive higher-level theories."
+            },
+            {
+                term: "Cumulative Science Ideal",
+                definition: "The view that science progresses through justified replacement or through reduction of older theories to special cases of broader theories."
+            },
+            {
+                term: "Discarding a Theory",
+                definition: "Completely replacing an old theory after it has been refuted."
+            },
+            {
+                term: "Reduction",
+                definition: "Showing that an older theory is a special case of a newer, broader, and more general theory."
+            }
+        ];
+
+        const mcqData = [
+            {
+                question: "Which combination states the fundamental goals that a good scientific method is meant to help science achieve?",
+                options: ["Collect observations, preserve all old theories, and avoid technological applications", "Provide reliable explanations, enable reliable predictions, and support successful technologies", "Replace logical reasoning with intuition, generate certainty, and unify values", "Explain only past events, reject prediction, and classify scientific disciplines"],
+                correctIndex: 1,
+                explanation: "The scientific method is evaluated by whether it advances reliable explanation, reliable prediction, and successful technology. Collecting observations is important, but it is not presented as the complete set of fundamental goals."
+            },
+            {
+                question: "What is the central role of the scientific method in the positivist framework?",
+                options: ["To guarantee that every confirmed theory is permanently true", "To replace empirical observation with philosophical intuition", "To restrict science to the description of already known events", "To guide the generation of reliable theories and their use in explanation and prediction"],
+                correctIndex: 3,
+                explanation: "The method guides scientists in generating reliable theories and applying them to explain and predict phenomena. Confirmation provides support rather than a permanent guarantee of truth."
+            },
+            {
+                question: "Which activity belongs primarily to the theory-evaluation stage?",
+                options: ["Checking whether additional observations logically implied by a theory actually occur", "Arranging different sciences in a hierarchical structure", "Searching for an initial law that entails a known observation", "Using a tested theory to infer an event from the distant past"],
+                correctIndex: 0,
+                explanation: "Theory evaluation compares the additional observational consequences of a theory with what occurs. Searching for an initial law is theory formation, while inferring a past event is retrodiction."
+            },
+            {
+                question: "Which resources does logical positivism recognize as the only reliable sources of knowledge?",
+                options: ["Technological success and scientific authority", "Intuition and historical continuity", "Empirical observation and logic", "Explanation and prediction"],
+                correctIndex: 2,
+                explanation: "Logical positivism restricts legitimate knowledge to direct empirical observations and what can be logically derived from them. Scientific intuition may guide practice, but it is not one of the two official sources."
+            },
+            {
+                question: "Why was Newtonian physics important to the Vienna Circle?",
+                options: ["It showed that all scientific theories must eventually be discarded", "It was treated as a successful model whose actual method the Circle wanted to articulate", "It demonstrated that prediction was less reliable than hindsight", "It eliminated the need for empirical observation"],
+                correctIndex: 2,
+                explanation: "The Vienna Circle began from the success of Newtonian physics and sought to formulate the scientific method Newton had used. It did not treat Newtonian success as a reason to abandon observation."
+            },
+            {
+                question: "Which situation exemplifies a method allowing something that it should not allow?",
+                options: ["A contradictory observation refutes a universal theory", "A new theory reduces an older theory to a special case", "A single white shoe is treated as confirming that all ravens are black", "Two competing theories are compared through different predictions"],
+                correctIndex: 0,
+                explanation: "Treating an irrelevant observation such as a white shoe as confirmation of a claim about ravens is an unwanted permission attributed to the flawed method. Reduction and discriminating tests are legitimate scientific tasks."
+            },
+            {
+                question: "Why can scientists not simply add their successful intuitions to the official scientific method?",
+                options: ["The intuitions have not been translated into clear and unambiguous instructions", "The intuitions always conflict with empirical observations", "Logical positivism forbids scientists from forming hypotheses", "Intuitions can be used only in technological development"],
+                correctIndex: 3,
+                explanation: "Scientists rely on intuitions beyond the official method, but no one has successfully converted them into clear, unambiguous methodological rules. The problem is formulation, not the claim that intuition always contradicts evidence."
+            },
+            {
+                question: "What condition must a candidate theory satisfy at the theory-formation stage?",
+                options: ["It must already have survived a risky future test", "It must be reducible to a theory from another discipline", "The observation to be explained must follow logically if the theory is true", "It must explain every other scientific theory"],
+                correctIndex: 1,
+                explanation: "Theory formation seeks a set of laws from which the target observation can be logically deduced. Passing additional tests belongs to evaluation rather than initial formation."
+            },
+            {
+                question: "Two theories both yield $I=0.2$ when $V=1$ and $R=5$, and $I=0.4$ when $V=2$ and $R=5$. What follows from these observations alone?",
+                options: ["Neither theory can count as a candidate explanation", "Both theories fit the initial observations, so a discriminating test is needed", "Both theories have been proved true", "The mathematically simpler theory has been observationally confirmed while the other has been refuted"],
+                correctIndex: 0,
+                explanation: "Both theories entail the two initial observations, so those data do not distinguish them. Further observations for which the theories make different predictions are required."
+            },
+            {
+                question: "For $V=10$ and $R=5$, what current is predicted by $I=\\frac{V^2-2V+2}{R}$?",
+                options: ["2 amperes", "16.4 amperes", "10 amperes", "20.4 amperes"],
+                correctIndex: 2,
+                explanation: "Substitution gives $(100-20+2)/5=82/5=16.4$ amperes. The value 2 amperes is predicted by $I=V/R$, not by this alternative theory."
+            },
+            {
+                question: "An observation logically entailed by a theory occurs during a test. How should the result be described?",
+                options: ["The theory is confirmed or supported, but not proved", "The theory is reduced to an observation", "The theory is permanently established as true", "The theory is refuted because the observation was already implied"],
+                correctIndex: 1,
+                explanation: "Occurrence of an entailed result supports or confirms the theory without proving it. Treating confirmation as proof overstates what the test establishes."
+            },
+            {
+                question: "A theory entails a particular observational result, but the result does not occur. What does the positivist procedure require next?",
+                options: ["Retain the theory because entailment is more important than observation", "Reclassify the failed result as an explanation", "Refute the theory and return to theory formation for an alternative", "Declare the theory confirmed but technologically unsuccessful"],
+                correctIndex: 3,
+                explanation: "Failure of an entailed observational consequence constitutes refutation in the stated procedure. Inquiry must then return to theory formation rather than simply preserving the failed theory."
+            },
+            {
+                question: "Why did the comparison with the second maternity ward undermine overcrowding as the cause of the higher mortality?",
+                options: ["The second ward had fewer trained doctors", "The second ward was more crowded despite not displaying the targeted mortality pattern", "Both wards changed their birthing positions simultaneously", "Handwashing had already eliminated mortality in both wards"],
+                correctIndex: 3,
+                explanation: "The second ward was actually more crowded, so overcrowding did not match the contrast that required explanation. The decisive comparison concerned crowding, not handwashing."
+            },
+            {
+                question: "Which observation most directly challenged the hypothesis that insufficiently experienced students caused fatal injuries?",
+                options: ["Other hospitals experienced different atmospheric conditions", "The second ward used a different birthing position", "The number of students was halved, yet the mortality rate remained unchanged", "A satellite clock ran faster at high altitude"],
+                correctIndex: 1,
+                explanation: "If inexperienced students were responsible, substantially reducing their number should have affected mortality, but it did not. The atmospheric and birthing-position observations tested other hypotheses."
+            },
+            {
+                question: "How was the hypothesis that birthing position caused the mortality difference tested?",
+                options: ["Women were changed from giving birth on their backs to giving birth on their sides", "The number of students was reduced by half", "Doctors washed after every contact with decaying matter", "Mortality was compared only with distant hospitals"],
+                correctIndex: 2,
+                explanation: "The ward changed the birthing position to the side, but mortality did not change. Reducing student numbers tested a different proposed explanation."
+            },
+            {
+                question: "What observation led Semmelweis toward the hypothesis involving material from corpses?",
+                options: ["A more crowded ward had fewer patients", "The same resistor produced different currents", "A person cut during an autopsy died with symptoms resembling those of the mothers", "Atmospheric conditions differed sharply among hospitals"],
+                correctIndex: 0,
+                explanation: "The similar symptoms following an accidental autopsy injury suggested blood poisoning by material from a corpse. This clue motivated a new causal hypothesis rather than merely repeating a failed comparison."
+            },
+            {
+                question: "What result initially confirmed the hypothesis that doctors transferred material from corpses to birthing women?",
+                options: ["Mortality rose when the number of students was reduced", "Mortality dropped dramatically after calcium hypochlorite handwashing was required following dissections", "Changing the birthing position increased mortality", "Other hospitals displayed identical atmospheric conditions"],
+                correctIndex: 1,
+                explanation: "The dramatic decline after handwashing following dissections matched the intervention implied by the corpse-material hypothesis. Changing student numbers and birth position had failed to reduce mortality."
+            },
+            {
+                question: "Why was Semmelweis's later hypothesis about decaying matter broader than the original corpse-material hypothesis?",
+                options: ["It included decaying matter originating from living organisms as well as material associated with corpses", "It rejected any connection between doctors and mortality", "It applied only when doctors had performed an autopsy", "It attributed mortality exclusively to birthing position"],
+                correctIndex: 0,
+                explanation: "The revised hypothesis extended the suspected source beyond corpses to decaying matter from living organisms. Its broader handwashing requirement produced a further mortality decrease."
+            },
+            {
+                question: "Within the positivist account, what makes an observation a prediction of a theory?",
+                options: ["The observation is popular among scientists", "The observation explains why the theory was invented", "The observation is logically necessitated by the theory", "The observation must concern only the distant future"],
+                correctIndex: 3,
+                explanation: "A prediction is an observational consequence logically entailed by the theory. It need not concern the distant future, and retrodiction shows that theory-guided inference is not restricted to future events."
+            },
+            {
+                question: "Why is a risky prediction especially useful for evaluating a theory?",
+                options: ["It can always be checked immediately", "It is unlikely to occur unless the theory is true", "It guarantees that no rival theory can fit the result", "It converts confirmation into deductive proof"],
+                correctIndex: 2,
+                explanation: "A risky prediction presents a strong challenge because the predicted outcome is unlikely without the theory. Successful prediction supports the theory but does not transform confirmation into proof."
+            },
+            {
+                question: "Which prediction was selected for Eddington's 1919 test of general relativity?",
+                options: ["Light rays bend near heavy objects", "Satellite clocks stop at high altitude", "Resistance increases whenever voltage rises", "Asteroids strike Earth every 65 million years"],
+                correctIndex: 2,
+                explanation: "Eddington tested the risky prediction that light rays bend near heavy objects. The GPS clock effect is another application of general relativity, but it was not the specified 1919 test."
+            },
+            {
+                question: "Why must satellite navigation account for a general-relativistic clock effect?",
+                options: ["Satellite resistance changes whenever current is measured", "Satellite clocks run slower because gravitational force is stronger", "Ground clocks cannot be checked immediately", "At about 20,000 kilometers, weaker gravity makes satellite clocks run faster, producing cumulative distance errors unless corrected"],
+                correctIndex: 3,
+                explanation: "The gravitational force at the stated altitude is about four times weaker, and general relativity predicts faster-running satellite clocks. Ignoring this effect would accumulate errors in ground-distance measurements."
+            },
+            {
+                question: "Which activity is an example of retrodiction?",
+                options: ["Using current observational findings to infer that a giant asteroid struck Earth about 65 million years ago", "Waiting to see whether tomorrow's star constellation matches a theory", "Using a known current to calculate present resistance", "Changing hospital procedure to test a causal hypothesis"],
+                correctIndex: 0,
+                explanation: "Retrodiction uses theory and evidence to infer a past event, such as the ancient asteroid impact. Waiting for a future constellation is ordinary prediction."
+            },
+            {
+                question: "Which claim about the Cretaceous–Paleogene event is included in the retrodiction example?",
+                options: ["It occurred in Vienna and affected one hospital ward", "It was caused by stronger gravity at high altitude", "A giant asteroid struck in the Yucatán Peninsula and the event was associated with the extinction of about 70 percent of animal species then living", "It confirmed the law $I=V/R$"],
+                correctIndex: 1,
+                explanation: "The example retrodicts a giant impact in the Yucatán Peninsula about 65 million years ago and an extinction involving about 70 percent of animal species, including dinosaurs. The alternatives combine unrelated examples."
+            },
+            {
+                question: "What is a principal weakness of explanations formed after an event is already known?",
+                options: ["They can be invented too easily in hindsight and may therefore be unreliable", "They cannot be checked against an already known event", "They always involve more risk than predictions", "They necessarily refute the theory used"],
+                correctIndex: 0,
+                explanation: "Hindsight makes it easy to invent explanations that accommodate an event after it occurs. Their immediate checkability is an advantage, but it does not eliminate the danger of easy accommodation."
+            },
+            {
+                question: "Which statement best expresses Hempel's criterion for a scientific explanation?",
+                options: ["A hypothesis explains an event whenever it is proposed after the event", "A hypothesis explains an observation only if it belongs to physics", "A hypothesis explains an observation if it would have enabled the observation to be predicted before it occurred", "A hypothesis explains an event only when the event could not have been predicted"],
+                correctIndex: 2,
+                explanation: "Hempel holds explanations to the prediction standard: the hypothesis must have been capable of yielding the observation in advance. Merely inventing a story after the event is insufficient."
+            },
+            {
+                question: "At a constant voltage of 10 volts, resistance changes from 5 ohms to 10 ohms. Using $I=\\frac{V}{R}$, which result follows?",
+                options: ["Current falls from 2 amperes to 1 ampere", "Current rises from 1 ampere to 2 amperes", "Current remains fixed at 2 amperes", "Current falls from 10 amperes to 5 amperes"],
+                correctIndex: 3,
+                explanation: "Initially, $I=10/5=2$ amperes; afterward, $I=10/10=1$ ampere. The current is therefore halved rather than increased or held constant."
+            },
+            {
+                question: "In the summarized positivist account, what principally distinguishes prediction from explanation when both involve the same entailment from theory $T$ to observation $E$?",
+                options: ["Only explanations use logic", "Only predictions use empirical observations", "For prediction, $E$ has not yet been observed; for explanation, $E$ is already observed", "Explanations require a different theory from predictions"],
+                correctIndex: 1,
+                explanation: "Both applications rely on the theory logically entailing the observation. Their stated distinction concerns whether the observation is not yet observed or already known."
+            },
+            {
+                question: "What is a synchronic inter-theoretic relation?",
+                options: ["A relation between theories in different fields at the same time", "A relation between observations made in different centuries", "The complete rejection of an old theory", "A relation between successive theories within one discipline"],
+                correctIndex: 1,
+                explanation: "Synchronic relations connect theories across different fields at a given time. Relations between successive theories within one field are diachronic."
+            },
+            {
+                question: "Which ordering best represents the positivist hierarchy from lower-level to higher-level sciences?",
+                options: ["Sociology, psychology, biology, chemistry, particle physics", "Biology, particle physics, sociology, chemistry, psychology", "Psychology, chemistry, particle physics, sociology, biology", "Particle physics, chemistry, biology, psychology, sociology"],
+                correctIndex: 3,
+                explanation: "The hierarchy begins with theories concerning the smallest objects and proceeds upward through chemistry, biology, psychology, and sociology. Reversing the order reverses the intended explanatory direction."
+            },
+            {
+                question: "In the Unity of Science Ideal, what should happen to the axioms of a higher-level science?",
+                options: ["They should be accepted without any relation to lower-level science", "They should refute all lower-level theories", "They should become theorems derivable from a lower-level science", "They should be replaced by scientific intuitions"],
+                correctIndex: 0,
+                explanation: "Lower-level theories are supposed to explain the sciences above them, making higher-level axioms derivable theorems. Independence from lower levels would defeat the intended unity."
+            },
+            {
+                question: "Which description best captures the Unity of Science Ideal?",
+                options: ["Every old theory must be completely discarded", "Predictions should be replaced by explanations", "All sciences should be integrated into a coherent hierarchy through explanatory relations", "Scientific knowledge should be based on intuition rather than observation"],
+                correctIndex: 2,
+                explanation: "The ideal seeks a unified hierarchical system in which lower-level sciences explain higher-level sciences. It is a synchronic ideal and does not require every historical theory to be discarded."
+            },
+            {
+                question: "What is a diachronic inter-theoretic relation?",
+                options: ["A relation between different disciplines at one time", "A relation between theory and technology", "A relation between theories within the same science at different times", "A relation between an observation and an unrelated hypothesis"],
+                correctIndex: 3,
+                explanation: "Diachronic relations concern historical succession within a discipline. Cross-disciplinary relations at the same time are synchronic."
+            },
+            {
+                question: "Which example illustrates replacement by discarding?",
+                options: ["Geocentric theory is refuted and replaced by heliocentric theory", "Newtonian physics becomes a special case of Einsteinian physics", "Chemistry is derived from a lower-level physical theory", "A prediction becomes an explanation after it is observed"],
+                correctIndex: 0,
+                explanation: "Discarding completely replaces a refuted old theory, as in the stated geocentric-to-heliocentric example. Treating Newtonian physics as a special case illustrates reduction instead."
+            },
+            {
+                question: "What must be shown for an old theory to be replaced through explanation or reduction?",
+                options: ["The old theory contains no correct results", "The old theory is a special case of a newer, broader, and more general theory", "The new theory belongs to a higher-level science", "The new theory avoids every empirical test"],
+                correctIndex: 1,
+                explanation: "Reduction preserves the older theory as a limited special case of the broader successor. Complete falsity and total replacement characterize discarding, not reduction."
+            },
+            {
+                question: "Which sequence illustrates the stated chain of theoretical explanation?",
+                options: ["Galileo explains Newton, who explains Einstein", "Kepler explains Einstein, who explains Galileo", "Einstein explains Newton, who explains Galileo's dynamics and Kepler's astronomy", "Sociology explains biology, which explains chemistry"],
+                correctIndex: 2,
+                explanation: "The stated diachronic chain runs from the broader modern theory to older theories: Einstein explains Newton, and Newton explains Galileo and Kepler. Reversing that direction conflicts with the reduction model."
+            },
+            {
+                question: "What does the Cumulative Science Ideal emphasize?",
+                options: ["Scientific progress from theory to theory through replacement or reduction", "The use of only future predictions in scientific testing", "The separation of scientific disciplines into unrelated systems", "The permanent proof of every confirmed theory"],
+                correctIndex: 2,
+                explanation: "The cumulative ideal presents science as progressing across time through justified replacement or by incorporating older theories as special cases. It does not treat confirmation as permanent proof."
+            },
+            {
+                question: "Which comparison correctly distinguishes the two inter-theoretic ideals?",
+                options: ["Both ideals concern only the relation between observations and single theories", "The Unity of Science Ideal concerns different disciplines at the same time, while the Cumulative Science Ideal concerns theories within a discipline over time", "The Unity of Science Ideal is diachronic, while the Cumulative Science Ideal is synchronic", "The Unity of Science Ideal requires discarding, while the Cumulative Science Ideal forbids it"],
+                correctIndex: 1,
+                explanation: "Unity is synchronic and integrates fields into a hierarchy, whereas cumulative science is diachronic and describes progress across historical theories. Cumulative progress may involve either discarding or reduction."
+            },
+            {
+                question: "Why is fitting the observations used to formulate a theory insufficient for choosing between competing theories?",
+                options: ["Several different theories can entail the same initial observations while making different additional predictions", "A theory can be evaluated only through technological success", "Initial observations never have any scientific relevance", "Logic prevents a theory from entailing more than one observation"],
+                correctIndex: 0,
+                explanation: "The resistor example shows that different laws can fit the same initial measurements. A discriminating observation is needed where their additional implications diverge."
+            },
+            {
+                question: "Which assessment best represents the present methodological situation described for logical positivism?",
+                options: ["Its foundational problems were fully solved in the 1960s", "It was abandoned because scientists no longer use observation or logic", "It has documented fundamental weaknesses, but no satisfactory alternative has replaced it", "It succeeds because intuition has been converted into a complete set of unambiguous rules"],
+                correctIndex: 3,
+                explanation: "Logical positivism remains influential despite accumulated foundational weaknesses because no satisfactory replacement has been found. Scientific intuitions help practice, but they have not been converted into a complete clear method."
+            }
+        ];
+
+        const tfData = [
+            {
+                question: "A good scientific method is assessed partly by whether it helps science produce reliable explanations and predictions.",
+                answer: true,
+                explanation: "Reliable explanation and prediction are two fundamental goals of science, along with successful technology."
+            },
+            {
+                question: "Logical positivism treats scientific intuition as one of the two official and reliable sources of knowledge.",
+                answer: false,
+                explanation: "Its two recognized sources are empirical observation and logic. Intuition may guide scientists informally, but it is not part of the official two-source framework."
+            },
+            {
+                question: "A complete scientific method must address theory formation, evaluation, application, and relations among theories.",
+                answer: true,
+                explanation: "The method is intended to guide all of these major scientific tasks rather than testing alone."
+            },
+            {
+                question: "The Vienna Circle sought to articulate a modern scientific method using the success of Newtonian physics as its starting point.",
+                answer: true,
+                explanation: "Newtonian physics served as the Circle's successful model of scientific practice."
+            },
+            {
+                question: "If an observation follows from a theory, that fact alone proves that the theory is true.",
+                answer: false,
+                explanation: "An occurring entailed observation confirms or supports the theory but does not prove it."
+            },
+            {
+                question: "At the theory-formation stage, a scientist must begin with a theory and avoid considering the observation that needs explanation.",
+                answer: false,
+                explanation: "The positivist procedure begins with the observation to be explained and searches for a theory from which it follows."
+            },
+            {
+                question: "Two distinct theories can explain the same initial observations yet make different predictions in a new test condition.",
+                answer: true,
+                explanation: "The two resistor formulas fit the measurements at voltages 1 and 2 but diverge sharply at voltage 10."
+            },
+            {
+                question: "For $V=10$ and $R=5$, the formulas $I=\\frac{V}{R}$ and $I=\\frac{V^2-2V+2}{R}$ both predict a current of 2 amperes.",
+                answer: false,
+                explanation: "The first predicts 2 amperes, while the second predicts 16.4 amperes."
+            },
+            {
+                question: "When an observational consequence entailed by a theory fails to occur, the stated positivist procedure classifies the theory as refuted.",
+                answer: true,
+                explanation: "Failure of an entailed observation triggers refutation and a return to theory formation."
+            },
+            {
+                question: "The overcrowding hypothesis in the Semmelweis case was strengthened by the fact that the second ward was even more crowded.",
+                answer: false,
+                explanation: "That comparison undermined overcrowding because the more crowded second ward did not display the mortality contrast that required explanation."
+            },
+            {
+                question: "Halving the number of students sharply reduced mortality and thereby confirmed the student-injury hypothesis.",
+                answer: false,
+                explanation: "Mortality remained unchanged after the number of students was halved, so the intervention did not confirm that hypothesis."
+            },
+            {
+                question: "Changing the birthing position without changing mortality counted against the hypothesis that birthing position caused the mortality difference.",
+                answer: true,
+                explanation: "The proposed cause was altered, but the outcome persisted, so the expected observational consequence failed."
+            },
+            {
+                question: "The similar symptoms of a person injured during an autopsy and the birthing mothers helped generate Semmelweis's corpse-material hypothesis.",
+                answer: true,
+                explanation: "The accidental autopsy injury provided the clue that material entering the bloodstream might cause the shared symptoms."
+            },
+            {
+                question: "The first calcium hypochlorite handwashing intervention increased mortality and refuted the corpse-material hypothesis.",
+                answer: false,
+                explanation: "Mortality dropped dramatically, so the intervention supported the hypothesis."
+            },
+            {
+                question: "Semmelweis's later hypothesis expanded the suspected source to decaying matter originating from living organisms.",
+                answer: true,
+                explanation: "The revised hypothesis was broader than one restricted to material transferred from corpses."
+            },
+            {
+                question: "A risky prediction is considered useful because it is likely to occur whether or not the tested theory is true.",
+                answer: false,
+                explanation: "Its value lies in being unlikely to occur unless the theory is true, making it a demanding test."
+            },
+            {
+                question: "Eddington's 1919 experiment tested the prediction that light rays bend near heavy objects.",
+                answer: true,
+                explanation: "This was presented as a highly risky prediction of general relativity."
+            },
+            {
+                question: "General relativity predicts that stronger gravity at a satellite altitude of about 20,000 kilometers makes satellite clocks run faster.",
+                answer: false,
+                explanation: "The gravitational force there is described as about four times weaker, and this weaker gravity is associated with faster-running satellite clocks."
+            },
+            {
+                question: "Retrodiction is restricted to forecasting events that will happen after a theory has been tested.",
+                answer: false,
+                explanation: "Retrodiction concerns past events, inferred through theory and observational findings."
+            },
+            {
+                question: "Inferring an ancient asteroid impact from current observational findings is an example of retrodiction.",
+                answer: true,
+                explanation: "The inferred impact occurred in the past, so the application is retrodictive rather than an ordinary future prediction."
+            },
+            {
+                question: "Predictions are risky and challenging, but a disadvantage is that they cannot necessarily be checked immediately.",
+                answer: true,
+                explanation: "Their risk can make them reliable tests, while their future orientation can delay evaluation."
+            },
+            {
+                question: "Hempel's criterion allows any story invented after an event to count as a scientific explanation.",
+                answer: false,
+                explanation: "The hypothesis must have been capable of predicting the event before it occurred; hindsight alone is insufficient."
+            },
+            {
+                question: "In Hempel's account, theory $T$ may both predict and explain observation $E$ by logically entailing it, with the difference depending on whether $E$ is already observed.",
+                answer: true,
+                explanation: "The logical relation is shared, while the status of the observation distinguishes prediction from explanation."
+            },
+            {
+                question: "At a constant voltage of 10 volts, increasing resistance from 5 ohms to 10 ohms raises the current from 1 ampere to 2 amperes under $I=\\frac{V}{R}$.",
+                answer: false,
+                explanation: "Current falls from 2 amperes to 1 ampere because doubling resistance halves the current at the stated voltage."
+            },
+            {
+                question: "Synchronic inter-theoretic relations concern theories within one discipline at different historical times.",
+                answer: false,
+                explanation: "That is the diachronic category. Synchronic relations connect different fields at the same time."
+            },
+            {
+                question: "The Unity of Science Ideal requires lower-level theories to explain higher-level theories in a coherent hierarchy.",
+                answer: true,
+                explanation: "The ideal aims to derive higher-level scientific principles from lower-level theories."
+            },
+            {
+                question: "Under the Unity of Science Ideal, the axioms of a lower-level science become theorems derived from an unrelated higher-level science.",
+                answer: false,
+                explanation: "The direction is reversed: axioms of a higher-level science should become theorems derivable from the lower-level science."
+            },
+            {
+                question: "Discarding and reduction are two different ways in which an old theory may be replaced by a new theory.",
+                answer: true,
+                explanation: "Discarding completely replaces a refuted theory, while reduction preserves it as a special case of a broader theory."
+            },
+            {
+                question: "Treating Newtonian physics as a special case explained by Einsteinian physics exemplifies reduction rather than complete discarding.",
+                answer: true,
+                explanation: "Reduction incorporates the old theory within the explanatory scope of the newer and more general theory."
+            },
+            {
+                question: "The existence of foundational flaws in logical positivism means that a satisfactory alternative method has already replaced it.",
+                answer: false,
+                explanation: "No satisfactory alternative has been found, which helps explain why the positivist framework remains influential."
+            }
+        ];
+
+        // --- Global State Variables ---
+        let currentCardIndex = 0;
+        let isCardFront = true;
+        let isCardAnimating = false;
+        let currentMCQIndex = 0;
+        let currentTFIndex = 0;
+        let mcqAnswers = new Array(mcqData.length).fill(null);
+        let tfAnswers = new Array(tfData.length).fill(null);
+
+        // --- DOM Element References ---
+        const flashcardContent = document.getElementById('flashcard-content');
+        const cardCounter = document.getElementById('card-counter');
+        const prevCardBtn = document.getElementById('prev-card');
+        const nextCardBtn = document.getElementById('next-card');
+        const mcqQuestion = document.getElementById('mcq-question');
+        const mcqOptions = document.getElementById('mcq-options');
+        const mcqFeedback = document.getElementById('mcq-feedback');
+        const mcqExplanation = document.getElementById('mcq-explanation');
+        const mcqCounter = document.getElementById('mcq-counter');
+        const prevMCQBtn = document.getElementById('prev-mcq');
+        const nextMCQBtn = document.getElementById('next-mcq');
+        const viewAllMCQBtn = document.getElementById('view-all-mcq');
+        const mcqSingleView = document.getElementById('mcq-single-view');
+        const mcqAllQuestionsContainer = document.getElementById('mcq-all-questions');
+        const tfQuestion = document.getElementById('tf-question');
+        const tfOptionsContainer = document.getElementById('tf-options');
+        const tfFeedback = document.getElementById('tf-feedback');
+        const tfExplanation = document.getElementById('tf-explanation');
+        const tfCounter = document.getElementById('tf-counter');
+        const prevTFBtn = document.getElementById('prev-tf');
+        const nextTFBtn = document.getElementById('next-tf');
+        const viewAllTFBtn = document.getElementById('view-all-tf');
+        const tfSingleView = document.getElementById('tf-single-view');
+        const tfAllQuestionsContainer = document.getElementById('tf-all-questions');
+
+        // --- MathJax Re-rendering Helper ---
+        function triggerMathJax() {
+            if (window.MathJax && window.MathJax.typesetPromise) {
+                window.MathJax.typesetPromise().catch((err) => console.error('MathJax error:', err.message));
+            }
+        }
+
+        function displayCard(index) {
+            if (!flashcardData || flashcardData.length === 0) return;
+            const cardData = flashcardData[index];
+            isCardFront = true;
+            flashcardContent.style.opacity = '1';
+            flashcardContent.textContent = cardData.term;
+            flashcardContent.className = 'flashcard-front-style';
+            cardCounter.textContent = `Card ${index + 1} / ${flashcardData.length}`;
+            prevCardBtn.disabled = index === 0;
+            nextCardBtn.disabled = index === flashcardData.length - 1;
+            triggerMathJax();
+        }
+
+        function flipCard() {
+            if (isCardAnimating || !flashcardData || flashcardData.length === 0) return;
+            isCardAnimating = true;
+            flashcardContent.style.opacity = '0';
+            setTimeout(() => {
+                isCardFront = !isCardFront;
+                const cardData = flashcardData[currentCardIndex];
+                if (isCardFront) {
+                    flashcardContent.textContent = cardData.term;
+                    flashcardContent.className = 'flashcard-front-style';
+                } else {
+                    flashcardContent.textContent = cardData.definition;
+                    flashcardContent.className = 'flashcard-back-style';
+                }
+                flashcardContent.style.opacity = '1';
+                isCardAnimating = false;
+                triggerMathJax();
+            }, 300);
+        }
+
+        function displayMCQuestion(index) {
+            if (!mcqData || mcqData.length === 0) return;
+            const qData = mcqData[index];
+            mcqQuestion.textContent = qData.question;
+            mcqOptions.innerHTML = '';
+            mcqFeedback.classList.add('hidden');
+            mcqExplanation.classList.add('hidden');
+            qData.options.forEach((option, i) => {
+                const button = document.createElement('button');
+                button.textContent = option;
+                button.onclick = () => handleMCQAnswer(index, i);
+                mcqOptions.appendChild(button);
+            });
+            mcqCounter.textContent = `Question ${index + 1} / ${mcqData.length}`;
+            prevMCQBtn.disabled = index === 0;
+            nextMCQBtn.disabled = index === mcqData.length - 1;
+            if (mcqAnswers[index] !== null) {
+                highlightMCQAnswer(mcqOptions, mcqFeedback, mcqExplanation, index, mcqAnswers[index].selected);
+            }
+            triggerMathJax();
+        }
+
+        function handleMCQAnswer(qIndex, selectedIndex) {
+            if (mcqAnswers[qIndex] !== null) return;
+            const isCorrect = selectedIndex === mcqData[qIndex].correctIndex;
+            mcqAnswers[qIndex] = { selected: selectedIndex, correct: isCorrect };
+            highlightMCQAnswer(mcqOptions, mcqFeedback, mcqExplanation, qIndex, selectedIndex);
+        }
+
+        function highlightMCQAnswer(optionsContainer, feedbackEl, explanationEl, qIndex, selectedIndex) {
+            const qData = mcqData[qIndex];
+            const buttons = optionsContainer.querySelectorAll('button');
+            buttons.forEach((button, i) => {
+                button.disabled = true;
+                if (i === qData.correctIndex) {
+                    button.classList.add('correct');
+                }
+                if (i === selectedIndex && i !== qData.correctIndex) {
+                    button.classList.add('incorrect');
+                }
+            });
+            feedbackEl.textContent = selectedIndex === qData.correctIndex ? "Correct!" : "Incorrect.";
+            feedbackEl.className = `feedback ${selectedIndex === qData.correctIndex ? 'correct' : 'incorrect'}`;
+            explanationEl.innerHTML = `<strong>Explanation:</strong> ${qData.explanation}`;
+            explanationEl.classList.remove('hidden');
+            triggerMathJax();
+        }
+
+        function displayAllMCQ() {
+            if (!mcqData || mcqData.length === 0) return;
+            mcqSingleView.classList.add('hidden');
+            mcqAllQuestionsContainer.innerHTML = '';
+            mcqData.forEach((qData, index) => {
+                const questionDiv = document.createElement('div');
+                questionDiv.className = 'question-container-all';
+                questionDiv.innerHTML = `
+                    <div class="question-text">${index + 1}. ${qData.question}</div>
+                    <div class="options">
+                        ${qData.options.map((option, i) => `<button data-qindex="${index}" data-oindex="${i}">${option}</button>`).join('')}
+                    </div>
+                    <div class="feedback hidden"></div>
+                    <div class="explanation hidden"></div>
+                `;
+                mcqAllQuestionsContainer.appendChild(questionDiv);
+                 const optionButtons = questionDiv.querySelectorAll('.options button');
+                 optionButtons.forEach(button => {
+                     button.onclick = () => {
+                        const qIndex = parseInt(button.dataset.qindex);
+                        const oIndex = parseInt(button.dataset.oindex);
+                        if (mcqAnswers[qIndex] === null) {
+                            const isCorrect = oIndex === mcqData[qIndex].correctIndex;
+                            mcqAnswers[qIndex] = { selected: oIndex, correct: isCorrect };
+                        }
+                        const optionsDiv = button.closest('.options');
+                        const feedbackDiv = questionDiv.querySelector('.feedback');
+                        const explanationDiv = questionDiv.querySelector('.explanation');
+                        highlightMCQAnswer(optionsDiv, feedbackDiv, explanationDiv, qIndex, mcqAnswers[qIndex].selected);
+                     };
+                 });
+                 if (mcqAnswers[index] !== null) {
+                    const optionsDiv = questionDiv.querySelector('.options');
+                    const feedbackDiv = questionDiv.querySelector('.feedback');
+                    const explanationDiv = questionDiv.querySelector('.explanation');
+                    highlightMCQAnswer(optionsDiv, feedbackDiv, explanationDiv, index, mcqAnswers[index].selected);
+                 }
+            });
+            mcqAllQuestionsContainer.classList.remove('hidden');
+            triggerMathJax();
+        }
+
+        function displayTFQuestion(index) {
+            if (!tfData || tfData.length === 0) return;
+            const qData = tfData[index];
+            tfQuestion.textContent = qData.question;
+            tfFeedback.classList.add('hidden');
+            tfExplanation.classList.add('hidden');
+             const buttons = tfOptionsContainer.querySelectorAll('button');
+             buttons.forEach(button => {
+                 button.disabled = false;
+                 button.classList.remove('correct', 'incorrect');
+                 button.onclick = () => handleTFAnswer(index, button.dataset.answer === 'true');
+             });
+            tfCounter.textContent = `Question ${index + 1} / ${tfData.length}`;
+            prevTFBtn.disabled = index === 0;
+            nextTFBtn.disabled = index === tfData.length - 1;
+            if (tfAnswers[index] !== null) {
+                highlightTFAnswer(tfOptionsContainer, tfFeedback, tfExplanation, index, tfAnswers[index].selected);
+            }
+            triggerMathJax();
+        }
+
+        function handleTFAnswer(qIndex, selectedAnswer) {
+            if (tfAnswers[qIndex] !== null) return;
+            const isCorrect = selectedAnswer === tfData[qIndex].answer;
+            tfAnswers[qIndex] = { selected: selectedAnswer, correct: isCorrect };
+            highlightTFAnswer(tfOptionsContainer, tfFeedback, tfExplanation, qIndex, selectedAnswer);
+        }
+
+        function highlightTFAnswer(optionsContainer, feedbackEl, explanationEl, qIndex, selectedAnswer) {
+             const qData = tfData[qIndex];
+             const buttons = optionsContainer.querySelectorAll('button');
+             buttons.forEach(button => {
+                 const buttonAnswer = button.dataset.answer === 'true';
+                 button.disabled = true;
+                 if (buttonAnswer === qData.answer) {
+                     button.classList.add('correct');
+                 }
+                 if (buttonAnswer === selectedAnswer && buttonAnswer !== qData.answer) {
+                     button.classList.add('incorrect');
+                 }
+             });
+             feedbackEl.textContent = selectedAnswer === qData.answer ? "Correct!" : "Incorrect.";
+             feedbackEl.className = `feedback ${selectedAnswer === qData.answer ? 'correct' : 'incorrect'}`;
+             explanationEl.innerHTML = `<strong>Explanation:</strong> ${qData.explanation}`;
+             explanationEl.classList.remove('hidden');
+             triggerMathJax();
+        }
+
+        function displayAllTF() {
+             if (!tfData || tfData.length === 0) return;
+             tfSingleView.classList.add('hidden');
+             tfAllQuestionsContainer.innerHTML = '';
+             tfData.forEach((qData, index) => {
+                 const questionDiv = document.createElement('div');
+                 questionDiv.className = 'question-container-all';
+                 questionDiv.innerHTML = `
+                     <div class="question-text">${index + 1}. ${qData.question}</div>
+                     <div class="tf-options">
+                         <button data-qindex="${index}" data-answer="true">True</button>
+                         <button data-qindex="${index}" data-answer="false">False</button>
+                     </div>
+                     <div class="feedback hidden"></div>
+                     <div class="explanation hidden"></div>
+                 `;
+                 tfAllQuestionsContainer.appendChild(questionDiv);
+                 const optionButtons = questionDiv.querySelectorAll('.tf-options button');
+                 optionButtons.forEach(button => {
+                     button.onclick = () => {
+                         const qIndex = parseInt(button.dataset.qindex);
+                         const selectedAnswer = button.dataset.answer === 'true';
+                         if (tfAnswers[qIndex] === null) {
+                             const isCorrect = selectedAnswer === tfData[qIndex].answer;
+                             tfAnswers[qIndex] = { selected: selectedAnswer, correct: isCorrect };
+                         }
+                         const optionsDiv = button.closest('.tf-options');
+                         const feedbackDiv = questionDiv.querySelector('.feedback');
+                         const explanationDiv = questionDiv.querySelector('.explanation');
+                         highlightTFAnswer(optionsDiv, feedbackDiv, explanationDiv, qIndex, tfAnswers[qIndex].selected);
+                     };
+                 });
+                 if (tfAnswers[index] !== null) {
+                    const optionsDiv = questionDiv.querySelector('.tf-options');
+                    const feedbackDiv = questionDiv.querySelector('.feedback');
+                    const explanationDiv = questionDiv.querySelector('.explanation');
+                    highlightTFAnswer(optionsDiv, feedbackDiv, explanationDiv, index, tfAnswers[index].selected);
+                 }
+             });
+             tfAllQuestionsContainer.classList.remove('hidden');
+             triggerMathJax();
+        }
+
+        function initialize() {
+            if (flashcardData.length > 0) displayCard(currentCardIndex);
+            if (mcqData.length > 0) displayMCQuestion(currentMCQIndex);
+            if (tfData.length > 0) displayTFQuestion(currentTFIndex);
+            flashcardContent.addEventListener('click', flipCard);
+            prevCardBtn.addEventListener('click', () => { if (currentCardIndex > 0) { currentCardIndex--; displayCard(currentCardIndex); } });
+            nextCardBtn.addEventListener('click', () => { if (currentCardIndex < flashcardData.length - 1) { currentCardIndex++; displayCard(currentCardIndex); } });
+            prevMCQBtn.addEventListener('click', () => { if (currentMCQIndex > 0) { currentMCQIndex--; displayMCQuestion(currentMCQIndex); } });
+            nextMCQBtn.addEventListener('click', () => { if (currentMCQIndex < mcqData.length - 1) { currentMCQIndex++; displayMCQuestion(currentMCQIndex); } });
+            viewAllMCQBtn.addEventListener('click', displayAllMCQ);
+            prevTFBtn.addEventListener('click', () => { if (currentTFIndex > 0) { currentTFIndex--; displayTFQuestion(currentTFIndex); } });
+            nextTFBtn.addEventListener('click', () => { if (currentTFIndex < tfData.length - 1) { currentTFIndex++; displayTFQuestion(currentTFIndex); } });
+            viewAllTFBtn.addEventListener('click', displayAllTF);
+
+            // Initial MathJax render for static HTML (like the Theory section)
+            triggerMathJax();
+        }
+
+        initialize();
+    });
+    </script>
+</body>
+</html>

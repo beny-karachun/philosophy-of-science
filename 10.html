@@ -1,0 +1,1181 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Inter-Theoretic Explanation and Unity of Science</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+
+    <script>
+        window.MathJax = {
+            tex: {
+                inlineMath: [['$', '$'], ['\\(', '\\)']],
+                displayMath: [['$$', '$$'], ['\\[', '\\]']]
+            },
+            startup: {
+                typeset: false // We will trigger this manually via JS
+            }
+        };
+    </script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+    <style>
+        /* --- Root Variables for Theme --- */
+        :root {
+            --primary-bg: #0a0a0f;
+            --panel-bg: rgba(255, 255, 255, 0.03);
+            --panel-border: rgba(255, 255, 255, 0.1);
+
+            --accent-start: #6C63FF;
+            --accent-end: #A855F7;
+            --accent-gradient: linear-gradient(135deg, var(--accent-start), var(--accent-end));
+            --accent-color: #8B5CF6; /* Midpoint fallback */
+
+            --text-color: #E0E0E0;
+            --text-muted: #9ca3af;
+
+            --correct-color: rgba(16, 185, 129, 0.2);
+            --correct-border: #10b981;
+            --incorrect-color: rgba(239, 68, 68, 0.2);
+            --incorrect-border: #ef4444;
+
+            --insight-bg: rgba(168, 85, 247, 0.08);
+            --insight-border: #A855F7;
+        }
+
+        /* --- Global Styles & Glow Effects --- */
+        body {
+            background-color: var(--primary-bg);
+            background-image:
+                radial-gradient(circle at 15% 50%, rgba(108, 99, 255, 0.06), transparent 25vw),
+                radial-gradient(circle at 85% 30%, rgba(168, 85, 247, 0.06), transparent 25vw);
+            background-attachment: fixed;
+            color: var(--text-color);
+            font-family: 'Inter', sans-serif;
+            line-height: 1.6;
+            margin: 0;
+            padding: 20px;
+        }
+
+        /* --- Panel Containers (Optimized: No blur for performance) --- */
+        .container, .section, #flashcard-content, .question-container-single, .question-container-all, .explanation {
+            background: var(--panel-bg);
+            border: 1px solid var(--panel-border);
+            border-radius: 12px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+        }
+
+        .container {
+            width: 90%;
+            max-width: 1000px;
+            margin: 20px auto;
+            padding: 30px;
+        }
+
+        h1, h2 {
+            text-align: center;
+            border-bottom: 1px solid var(--panel-border);
+            padding-bottom: 15px;
+            font-weight: 700;
+            color: #fff;
+        }
+
+        .section {
+            padding: 25px;
+            margin-bottom: 30px;
+            animation: slideIn 0.5s ease-out forwards;
+        }
+
+        /* --- Theory & Key Insight Styling --- */
+        .theory-text {
+            font-size: 1.1em;
+            line-height: 1.8;
+            color: var(--text-muted);
+        }
+
+        .theory-text p, .theory-text li {
+            color: var(--text-color);
+        }
+
+        .theory-text h3 {
+            color: #fff;
+            margin-top: 25px;
+            border-bottom: none;
+            text-align: left;
+            font-size: 1.3em;
+        }
+
+        .insight-box {
+            background-color: var(--insight-bg);
+            border-left: 4px solid var(--insight-border);
+            padding: 18px;
+            margin: 25px 0;
+            border-radius: 8px;
+        }
+
+        .insight-box strong {
+            color: #fff;
+            display: block;
+            margin-bottom: 8px;
+            font-size: 1.1em;
+            text-shadow: 0 0 10px rgba(168, 85, 247, 0.4);
+        }
+
+        /* --- Study Cards Styling --- */
+        .flashcard-container {
+            height: 250px;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            perspective: 1000px;
+        }
+
+        #flashcard-content {
+            width: 100%;
+            height: 100%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            padding: 30px;
+            box-sizing: border-box;
+            transition: opacity 0.3s ease-in-out, transform 0.2s;
+        }
+
+        #flashcard-content:hover {
+            transform: translateY(-2px);
+            border-color: rgba(168, 85, 247, 0.4);
+            box-shadow: 0 10px 40px rgba(108, 99, 255, 0.15);
+        }
+
+        .flashcard-front-style {
+             font-size: 1.6em;
+             font-weight: 600;
+             font-family: 'JetBrains Mono', monospace;
+             color: var(--accent-end);
+        }
+
+        .flashcard-back-style {
+             font-size: 1.2em;
+             color: var(--text-color);
+        }
+
+        /* --- Questions Styling (MCQ & T/F) --- */
+         .question-container-single, .question-container-all {
+            margin-bottom: 20px;
+            padding: 20px;
+         }
+
+        .question-text {
+            font-weight: 600;
+            margin-bottom: 20px;
+            font-size: 1.1em;
+        }
+
+        /* Buttons & Glass Inputs */
+        .options button, .tf-options button, .nav-button, .view-all-button {
+            display: block;
+            width: 100%;
+            padding: 12px 15px;
+            margin: 8px 0;
+            background: rgba(255, 255, 255, 0.02);
+            color: var(--text-color);
+            border: 1px solid var(--panel-border);
+            border-radius: 8px;
+            cursor: pointer;
+            text-align: left;
+            font-family: 'Inter', sans-serif;
+            font-size: 1em;
+            transition: all 0.3s ease;
+        }
+
+        .nav-button, .view-all-button {
+            width: auto;
+            text-align: center;
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        .options button:hover:not(:disabled), .tf-options button:hover:not(:disabled), .nav-button:hover:not(:disabled), .view-all-button:hover {
+            background: var(--accent-gradient);
+            border-color: transparent;
+            color: #fff;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 15px rgba(108, 99, 255, 0.25);
+        }
+
+        .options button:disabled, .tf-options button:disabled, .nav-button:disabled {
+            cursor: not-allowed;
+            opacity: 0.5;
+            transform: none;
+        }
+
+        /* Correct/Incorrect States */
+        .options button.correct, .tf-options button.correct {
+            background: var(--correct-color);
+            border-color: var(--correct-border);
+            color: #fff;
+            opacity: 1;
+        }
+        .options button.incorrect, .tf-options button.incorrect {
+            background: var(--incorrect-color);
+            border-color: var(--incorrect-border);
+            color: #fff;
+            opacity: 1;
+        }
+
+        .feedback {
+            margin-top: 15px;
+            padding: 12px;
+            border-radius: 8px;
+            font-weight: 600;
+            text-align: center;
+            animation: fadeIn 0.3s ease-in;
+        }
+
+        .feedback.correct {
+            color: var(--correct-border);
+            background: var(--correct-color);
+            border: 1px solid var(--correct-border);
+        }
+
+        .feedback.incorrect {
+            color: var(--incorrect-border);
+            background: var(--incorrect-color);
+            border: 1px solid var(--incorrect-border);
+        }
+
+        .explanation {
+            margin-top: 15px;
+            font-style: italic;
+            font-size: 0.95em;
+            padding: 15px;
+            color: var(--text-muted);
+            border-left: 3px solid var(--accent-start);
+            animation: fadeIn 0.5s ease-in;
+        }
+
+        /* --- Navigation & Utility --- */
+        .navigation {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 20px;
+        }
+
+        .counter {
+            font-size: 0.9em;
+            color: var(--text-muted);
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        .view-all-container {
+            text-align: center;
+            margin-top: 25px;
+        }
+
+        .hidden { display: none !important; }
+
+        /* --- Animations --- */
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Inter-Theoretic Explanation and Unity of Science</h1>
+
+        <div class="section">
+            <h2>Theory Summary and Key Insights</h2>
+            <div id="theory-content" class="theory-text">
+                <h3>Explanation, Prediction, and the D-N Model</h3>
+                <p>The Deductive-Nomological model, or D-N model, represents a scientific explanation or prediction as a deductive argument. A general law and an initial condition logically entail a phenomenon. If the phenomenon has already been observed, the argument is treated as an explanation; if it has not yet been observed, it is treated as a prediction.</p>
+                <p>A successful definition must apply only to the things being defined and to all of them. A definition is <strong>too weak</strong> when it includes cases that are not genuine instances, and <strong>too strong</strong> when it excludes genuine instances. Critics argue that the D-N model has both defects.</p>
+                <ul>
+                    <li><strong>Symmetry problem:</strong> Newtonian laws and Monday's stellar configuration can permit calculation of Sunday's configuration, but Monday does not explain Sunday. Similarly, a flagpole's shadow can be used to calculate its height without explaining that height.</li>
+                    <li><strong>Excluded causal explanations:</strong> Untreated syphilis can explain paresis even though paresis does not deductively follow from untreated syphilis. A spilled cup can also explain a carpet stain without an explicitly stated universal law.</li>
+                </ul>
+                <div class="insight-box">
+                    <strong>Key Insight:</strong>
+                    Logical derivability and causal explanation can point in different directions. Being able to calculate or infer a phenomenon from some information does not establish that the information caused or explained the phenomenon.
+                </div>
+                <p>Prediction concerns logical direction: a phenomenon is predicted when it follows logically from the assumptions. Explanation concerns causal direction: the proposed explanation must be a cause of the phenomenon. When logical and causal directions coincide, one argument may serve both roles. When they diverge, a prediction need not be an explanation, and an explanation need not be a prediction. The D-N model is therefore a model of prediction but not a general model of explanation.</p>
+                <p>The alternative causal-power model says that one event explains another when it causes it. Its central problem is that causality itself has not been defined, so it attempts to clarify explanation by appealing to something even less understood.</p>
+
+                <h3>Inter-Theoretic Explanation</h3>
+                <p>Inter-theoretic explanation asks when one theory explains another. The proposed criterion is that theory T1 explains theory T2 when T2 logically follows from T1. This relation can be considered synchronically, between theories operating at different levels at the same time, or diachronically, between theories across scientific history.</p>
+                <p>In the synchronic ideal, a theory is explained by a more basic theory involving smaller underlying objects. If chemistry follows logically from physics, physics explains chemistry. The thermodynamics and statistical-mechanics example illustrates the intended structure: heating is identified with increased molecular motion, while increased pressure is identified with more collisions against container walls. The lower-level theory can then derive the higher-level relationship.</p>
+                <p>This approach requires two stages:</p>
+                <ol>
+                    <li><strong>Bridge statements:</strong> establish identities between terms in the theories.</li>
+                    <li><strong>Derivation:</strong> derive the laws of the theory being explained from the laws of the explaining theory.</li>
+                </ol>
+                <p>Such reductions are meant to provide additional validity for both theories and a unified picture of science. The resulting ideal is called the <strong>unity of science</strong>: all knowledge would form one organized structure. Its methodological counterpart is <strong>methodological individualism</strong>, according to which events at the level of wholes occur because of events at the level of individuals, rather than the reverse.</p>
+                <div class="insight-box">
+                    <strong>Key Insight:</strong>
+                    Inter-theoretic derivation requires more than parallel regularities. Bridge statements must connect the vocabularies of the two theories before the higher-level law can be derived from the lower-level law.
+                </div>
+
+                <h3>Teleology and the Biological Challenge</h3>
+                <p>A causal explanation explains a later event by an earlier event, as when rain explains subsequent grass growth. A teleological explanation is goal-directed and explains an earlier event by a later goal, as when rain is said to occur in order for grass to grow. Physics and chemistry came to be regarded as causal sciences, whereas biology, psychology, and sociology appeared predominantly teleological.</p>
+                <p>This difference initially threatened the unity of science because a goal-directed science seemed impossible to derive from causal sciences. Biological functions appeared to explain biological traits: a sunflower turns toward the sun in order to grow, or a giraffe has a long neck in order to reach high leaves. Adaptation also supported arguments for intelligent design.</p>
+                <p>Darwinian evolution replaced apparent purpose with a causal history. In the giraffe example, random variation produced a slightly longer neck. Access to more food increased survival and reproduction, so the trait spread over generations. The neck did not arise for the purpose of reaching leaves; it persisted because it had previously increased survival.</p>
+                <p>The general mechanism combines <strong>heritability</strong>, <strong>variation</strong>, and <strong>differential fitness</strong>. These conditions produce non-random reproduction, or natural selection, and thereby increasing adaptation. Any system with these three features can appear purposeful without a guiding hand.</p>
+                <div class="insight-box">
+                    <strong>Key Insight:</strong>
+                    Natural selection does not deny that traits have functions. It changes the explanatory direction: a useful effect does not act as a future goal that creates the trait; past variation, differential survival, and reproduction explain why the trait became common.
+                </div>
+
+                <h3>Biology as a Historical Science</h3>
+                <p>Darwin moved biology to the causal side of the explanatory divide, but a new obstacle emerged. Every adaptation can create selective pressure on other species, producing a coevolutionary arms race known as the Red Queen dynamic. Biology consequently depends on continuing historical change.</p>
+                <p>On an extreme view, this historical variability prevents universal biological laws, with natural selection proposed as the only true biological law. Biological explanations often use tendencies, models, and broad generalizations that admit exceptions, unlike the stable and exceptionless laws attributed to physics and chemistry. Some critics argue that even natural selection is not a genuine law because it depends on background conditions and can fail when those conditions are disrupted.</p>
+                <p>This qualitative difference raises doubts about complete reduction of biology to chemistry and physics. Because psychology and sociology rely on biology, it also raises doubts about exceptionless laws in those higher-level sciences.</p>
+
+                <h3>Psychology, Brain Science, and Reduction</h3>
+                <p>The reductionist ideal for psychology models mental-to-brain reduction on the reduction of thermodynamics to statistical mechanics. Bridge statements would identify mental states with brain states, such as pain with brain state A and the desire to eliminate pain with brain state B. Brain laws would then derive psychological laws.</p>
+                <p>Several objections challenge this project:</p>
+                <ul>
+                    <li><strong>Multiple realization:</strong> Fodor argues that one mental state can be realized by more than one physical state, as illustrated by possible human, octopus, or Martian pain. A single psychological law may therefore correspond to many physical laws, blocking one-to-one translation.</li>
+                    <li><strong>Accessibility:</strong> brain states appear publicly accessible, while mental states are accessible only to the subject. The toaster response distinguishes access from performance: everyone may observe an action although only the toaster performs it. Similarly, a physical mental activity could be publicly observable while being performed by one subject.</li>
+                    <li><strong>Chinese Room:</strong> Searle argues that correct input-output processing is insufficient for understanding or consciousness. The systems response claims that the whole room understands even if the person does not. Searle replies by imagining that the person memorizes the entire rulebook while still lacking understanding.</li>
+                    <li><strong>Black-and-White Mary:</strong> Jackson imagines Mary knowing every physical fact about color vision but learning something when she first sees red. The intended conclusion is that experiential facts extend beyond physical facts.</li>
+                    <li><strong>Explanatory gap:</strong> a complete physical account appears not to explain why experience exists at all or why a particular physical state is accompanied by this experience rather than another. A physically identical being without experience, called a zombie, is presented as conceivable.</li>
+                    <li><strong>Metaphysical or windmill argument:</strong> observation inside a brain reveals physical processes rather than experiential characteristics, suggesting that material mechanisms cannot explain perception.</li>
+                </ul>
+                <p>A response to the metaphysical argument distinguishes an experience from an experience of that experience. If Jack's experience is his brain state, Alice's observation of that state gives Alice an experience of Jack's experience. Jack's experience of a bus and Alice's experience of Jack's experience of a bus are different objects of experience, so their qualitative difference does not refute the identity of mental and brain states.</p>
+                <div class="insight-box">
+                    <strong>Key Insight:</strong>
+                    The objections to psychological reduction target different steps. Multiple realization challenges bridge identities, the Chinese Room challenges the sufficiency of input-output processing, and Mary and the explanatory gap challenge whether physical facts capture experience itself.
+                </div>
+            </div>
+        </div>
+
+        <div class="section">
+            <h2>Study Cards</h2>
+            <div class="flashcard-container">
+                <div id="flashcard-content"></div>
+            </div>
+            <div class="navigation">
+                <button class="nav-button" id="prev-card">Previous</button>
+                <span class="counter" id="card-counter"></span>
+                <button class="nav-button" id="next-card">Next</button>
+            </div>
+        </div>
+
+        <div class="section">
+            <h2>Multiple-Choice Questions</h2>
+            <div id="mcq-single-view">
+                <div class="question-container-single" id="mcq-container">
+                    <div class="question-text" id="mcq-question"></div>
+                    <div class="options" id="mcq-options"></div>
+                    <div class="feedback hidden" id="mcq-feedback"></div>
+                    <div class="explanation hidden" id="mcq-explanation"></div>
+                </div>
+                <div class="navigation">
+                    <button class="nav-button" id="prev-mcq">Previous</button>
+                    <span class="counter" id="mcq-counter"></span>
+                    <button class="nav-button" id="next-mcq">Next</button>
+                </div>
+                 <div class="view-all-container">
+                     <button class="view-all-button" id="view-all-mcq">View All Questions</button>
+                 </div>
+            </div>
+            <div id="mcq-all-questions" class="hidden">
+                </div>
+        </div>
+
+        <div class="section">
+            <h2>True or False Questions</h2>
+             <div id="tf-single-view">
+                <div class="question-container-single" id="tf-container">
+                    <div class="question-text" id="tf-question"></div>
+                    <div class="tf-options" id="tf-options">
+                        <button data-answer="true">True</button>
+                        <button data-answer="false">False</button>
+                    </div>
+                    <div class="feedback hidden" id="tf-feedback"></div>
+                    <div class="explanation hidden" id="tf-explanation"></div>
+                </div>
+                <div class="navigation">
+                    <button class="nav-button" id="prev-tf">Previous</button>
+                    <span class="counter" id="tf-counter"></span>
+                    <button class="nav-button" id="next-tf">Next</button>
+                </div>
+                 <div class="view-all-container">
+                     <button class="view-all-button" id="view-all-tf">View All Questions</button>
+                 </div>
+            </div>
+             <div id="tf-all-questions" class="hidden">
+                 </div>
+        </div>
+    </div>
+
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+
+        const flashcardData = [
+            {
+                term: "Deductive-Nomological Model",
+                definition: "A model in which a general law and an initial condition deductively entail a phenomenon."
+            },
+            {
+                term: "Too Weak",
+                definition: "A definition is too weak when it includes cases that are not genuine instances of what it defines."
+            },
+            {
+                term: "Too Strong",
+                definition: "A definition is too strong when it excludes genuine instances of what it defines."
+            },
+            {
+                term: "Symmetry Problem",
+                definition: "The D-N model can reverse explanatory direction and treat information useful for calculation as though it explained the phenomenon."
+            },
+            {
+                term: "Causal-Power Model",
+                definition: "The proposal that H explains e when H is the cause of e; its difficulty is the lack of a definition of causality."
+            },
+            {
+                term: "Inter-Theoretic Explanation",
+                definition: "The relation in which one theory explains another because the second theory logically follows from the first."
+            },
+            {
+                term: "Bridge Statement",
+                definition: "An identity connecting terms in two theories so that the laws of one can be derived from the laws of the other."
+            },
+            {
+                term: "Unity of Science",
+                definition: "The ideal of organizing all scientific knowledge into one connected structure through inter-theoretic explanation."
+            },
+            {
+                term: "Methodological Individualism",
+                definition: "The view that events at the level of wholes occur because of events at the level of individuals."
+            },
+            {
+                term: "Causal Explanation",
+                definition: "An explanation of a later phenomenon by an earlier cause."
+            },
+            {
+                term: "Teleological Explanation",
+                definition: "A goal-directed explanation that accounts for an earlier phenomenon by reference to a later purpose."
+            },
+            {
+                term: "Natural Selection",
+                definition: "Non-random reproduction arising from heritability, variation, and differential fitness, resulting in adaptation."
+            },
+            {
+                term: "Red Queen Dynamic",
+                definition: "A coevolutionary arms race in which each adaptation creates new selective pressures for other species."
+            },
+            {
+                term: "Multiple Realization",
+                definition: "The possibility that the same mental state can be implemented by more than one physical state."
+            },
+            {
+                term: "Accessibility Objection",
+                definition: "The objection that brain states are publicly accessible whereas a mental state is accessible only to its subject."
+            },
+            {
+                term: "Chinese Room",
+                definition: "Searle's argument that correct input-output rule following is insufficient for understanding or consciousness."
+            },
+            {
+                term: "Black-and-White Mary",
+                definition: "Jackson's argument that complete physical knowledge may omit what an experience is like."
+            },
+            {
+                term: "Explanatory Gap",
+                definition: "The difficulty of explaining why physical processes produce experience at all and why they produce a particular experience."
+            },
+            {
+                term: "Physical Zombie",
+                definition: "A conceivable being physically identical to a conscious person but lacking the accompanying experiential aspect."
+            },
+            {
+                term: "Windmill Argument",
+                definition: "The claim that inspecting physical mechanisms reveals no experiential qualities and therefore cannot explain perception."
+            }
+        ];
+
+        const mcqData = [
+            {
+                question: "Which structure characterizes the Deductive-Nomological model?",
+                options: ["Initial condition, observed correlation, and probable conclusion", "General law, initial condition, and deductively entailed phenomenon", "Goal, function, and later outcome", "Bridge statement, causal history, and exception"],
+                correctIndex: 1,
+                explanation: "The D-N model combines a general law with an initial condition to deductively entail the phenomenon. A merely probable conclusion would not have the required deductive structure."
+            },
+            {
+                question: "A definition includes several items that are not genuine examples of the concept being defined. What is wrong with it?",
+                options: ["It is too strong", "It is circular", "It lacks a bridge statement", "It is too weak"],
+                correctIndex: 3,
+                explanation: "A definition is too weak when it applies beyond the genuine instances. A definition is too strong when it excludes genuine instances."
+            },
+            {
+                question: "Newtonian laws and Monday's stellar configuration allow a scientist to calculate Sunday's configuration. Why does this not establish that Monday explains Sunday?",
+                options: ["The logical calculation runs opposite to the causal direction", "Newtonian laws cannot support deductions", "Sunday's configuration is not a phenomenon", "Scientific explanations cannot concern past events"],
+                correctIndex: 0,
+                explanation: "Logical derivability can run from Monday to Sunday even though Monday did not cause Sunday. The example exposes the D-N model's failure to represent explanatory direction."
+            },
+            {
+                question: "Why does the example of untreated syphilis explaining paresis challenge the D-N model?",
+                options: ["The cause occurs after the effect", "Paresis cannot be scientifically explained", "The explanation is causal although paresis does not deductively follow from untreated syphilis", "The example contains too many initial conditions"],
+                correctIndex: 2,
+                explanation: "Untreated syphilis can causally explain paresis without guaranteeing that every untreated case produces paresis. The D-N requirement of deductive entailment therefore excludes a genuine explanation."
+            },
+            {
+                question: "What is the main lesson of the flagpole-shadow example?",
+                options: ["Measurements never contribute to science", "A shadow is always a cause of a flagpole", "Calculating a quantity from another quantity is not necessarily explaining it", "Geometrical relations cannot be deductive"],
+                correctIndex: 2,
+                explanation: "Shadow length may permit calculation of flagpole height, but the shadow does not cause or explain the height. The example separates inferential usefulness from explanatory relevance."
+            },
+            {
+                question: "When the logical and causal directions both run from H to e, what role may the same argument play?",
+                options: ["Both explanation and prediction", "Explanation but never prediction", "Prediction but never explanation", "Neither explanation nor prediction"],
+                correctIndex: 0,
+                explanation: "When H both entails and causes e, it satisfies the proposed requirements for prediction and explanation. The roles separate only when the directions diverge."
+            },
+            {
+                question: "Why is the D-N model ultimately classified as a model of prediction rather than a general model of explanation?",
+                options: ["It uses only accidental generalizations", "It excludes every causal relationship", "It applies only to future phenomena", "Its defining relation is logical entailment rather than causal direction"],
+                correctIndex: 3,
+                explanation: "Prediction is tied to logical consequence, which the D-N model directly represents. Explanation depends on causal direction, which deductive form alone does not capture."
+            },
+            {
+                question: "What is the stated problem with defining explanation through the causal-power model?",
+                options: ["Causes can never precede effects", "Causality itself lacks a definition", "The model permits no scientific predictions", "All causal claims are teleological"],
+                correctIndex: 1,
+                explanation: "The causal-power model says that H explains e when H causes e, but causality remains undefined. It therefore clarifies explanation by invoking a concept presented as even less understood."
+            },
+            {
+                question: "Under the proposed criterion for inter-theoretic explanation, when does T1 explain T2?",
+                options: ["When T2 logically follows from T1", "When T1 was historically proposed before T2", "When T1 and T2 use identical terminology", "When T2 concerns smaller objects than T1"],
+                correctIndex: 0,
+                explanation: "The criterion requires the explained theory to follow logically from the explaining theory. Historical priority or shared vocabulary alone does not provide the derivation."
+            },
+            {
+                question: "Which example best represents a synchronic inter-theoretic explanation?",
+                options: ["Galileo's theory being replaced by Newton's theory over time", "A prediction being confirmed by a later observation", "A future goal explaining an earlier action", "Chemistry being derived from the more basic theory of physics"],
+                correctIndex: 3,
+                explanation: "A synchronic relation connects levels of science, such as chemistry and its underlying physics. Historical succession between Galileo and Newton is diachronic."
+            },
+            {
+                question: "What must occur during Stage A of an inter-theoretic reduction?",
+                options: ["The higher-level theory must be falsified", "Identity or bridge statements must connect terms in the two theories", "Every exception must be removed from the lower-level theory", "A teleological law must replace a causal law"],
+                correctIndex: 1,
+                explanation: "Stage A establishes identities between the vocabularies of the theories. Only after these bridges are available can Stage B derive the higher-level laws."
+            },
+            {
+                question: "In the thermodynamics example, which pair functions as a bridge identity?",
+                options: ["Heating and increased pressure", "Molecular motion and container size", "Heating and increased molecular motion", "Pressure and random variation"],
+                correctIndex: 2,
+                explanation: "Heating is identified with increased molecular motion. Heating causing pressure increase is the higher-level law, not the bridge between levels."
+            },
+            {
+                question: "After bridge identities have been established, what is required in Stage B?",
+                options: ["Replacing deduction with induction", "Showing that the two theories arose simultaneously", "Proving that both theories are teleological", "Deriving the explained theory's laws from the explaining theory's laws"],
+                correctIndex: 3,
+                explanation: "Stage B performs the derivation that constitutes the inter-theoretic explanation. Bridge identities alone connect terms but do not yet derive the laws."
+            },
+            {
+                question: "Which pair of benefits is attributed to successful inter-theoretic explanation?",
+                options: ["Elimination of causality and elimination of prediction", "Additional validity for both theories and a more unified picture of science", "Replacement of laws by historical narratives and tendencies", "Proof that higher-level objects do not exist"],
+                correctIndex: 1,
+                explanation: "The proposed benefits are additional validity for both theories and greater scientific unity. Reduction is not presented as proving that higher-level objects are unreal."
+            },
+            {
+                question: "Which statement expresses methodological individualism?",
+                options: ["Wholes explain individuals, but individuals never explain wholes", "Every scientific law must concern social groups", "Events at the level of wholes occur because of events at the level of individuals", "Historical theories are always superior to current theories"],
+                correctIndex: 2,
+                explanation: "Methodological individualism explains whole-level events through individual-level events. The reverse explanatory direction characterizes the contrasting holistic approach."
+            },
+            {
+                question: "Which description correctly distinguishes causal and teleological explanations?",
+                options: ["Causal explanations explain the later by the earlier; teleological explanations explain the earlier by a later goal", "Causal explanations use laws; teleological explanations never use regularities", "Causal explanations concern physics only; teleological explanations concern sociology only", "Causal explanations predict; teleological explanations explain"],
+                correctIndex: 0,
+                explanation: "The decisive distinction is explanatory direction in time: earlier cause to later effect versus earlier occurrence explained by a later goal. The distinction is not simply between prediction and explanation."
+            },
+            {
+                question: "Why did teleological biology initially appear to threaten the unity of science?",
+                options: ["It contained no observations", "Its goal-directed explanatory structure seemed impossible to derive from causal physics and chemistry", "It had already been reduced to statistical mechanics", "It rejected all functional descriptions"],
+                correctIndex: 1,
+                explanation: "Biology appeared to explain traits through purposes, while physics and chemistry used earlier causes. These opposed directions seemed to block inter-theoretic derivation."
+            },
+            {
+                question: "What transformation is associated with Newton's mechanistic physics?",
+                options: ["Physics was moved from a teleological interpretation to a causal one", "Biology was reduced directly to psychology", "All sciences were declared historical", "Natural selection was established as an exceptionless law"],
+                correctIndex: 0,
+                explanation: "Newtonian mechanistic physics treated physics as causal rather than goal-directed. It did not itself provide the later Darwinian treatment of biology."
+            },
+            {
+                question: "Which claim represents the rejected teleological account of the giraffe's neck?",
+                options: ["Longer-necked giraffes reproduced more successfully", "Random variation produced differences in neck length", "The neck is long in order to reach high leaves", "Past access to food helped the trait spread"],
+                correctIndex: 2,
+                explanation: "The teleological account makes the later function the explanation for the trait's existence. Darwin's account instead appeals to past variation and differential reproduction."
+            },
+            {
+                question: "Which sequence best captures the Darwinian explanation of the giraffe's long neck?",
+                options: ["Need for leaves, intentional lengthening, inheritance, adaptation", "Stable law, bridge identity, deduction, intelligent design", "Future function, present variation, random reproduction, extinction", "Random variation, improved access to food, greater survival and reproduction, spread of the trait"],
+                correctIndex: 3,
+                explanation: "Darwin's account begins with variation and explains spread through differential survival and reproduction. It does not treat the future purpose of reaching leaves as the cause of the trait."
+            },
+            {
+                question: "Which three conditions generate natural selection in the general mechanism presented?",
+                options: ["Causality, prediction, and deduction", "Identity, derivation, and unity", "Heritability, variation, and differential fitness", "Purpose, design, and universal law"],
+                correctIndex: 2,
+                explanation: "Heritability, variation, and differential fitness produce non-random reproduction and adaptation. Purpose and design describe the appearance generated by this mechanism, not its conditions."
+            },
+            {
+                question: "Why can a system governed by natural selection look purposeful?",
+                options: ["Every variation occurs because the system foresees a need", "Adaptation increases through non-random reproduction without a guiding hand", "Natural selection converts every tendency into an exceptionless law", "The future directly causes present hereditary changes"],
+                correctIndex: 1,
+                explanation: "Selection preserves variants with greater fitness, producing increasing adaptation. This causal process can mimic design without future goals directing variation."
+            },
+            {
+                question: "What is the Red Queen dynamic?",
+                options: ["A coevolutionary arms race in which one species' adaptation creates selective pressure for others", "A bridge law identifying biological traits with chemical events", "A claim that all species approach a fixed final form", "A thought experiment about private mental access"],
+                correctIndex: 0,
+                explanation: "The Red Queen dynamic describes continuous coevolutionary change driven by reciprocal selective pressures. It does not imply movement toward one predetermined final state."
+            },
+            {
+                question: "Why does biology's historical character pose a new challenge to inter-theoretic unification?",
+                options: ["Historical explanations are necessarily teleological", "Biology cannot contain causal processes", "Chemistry contains no stable laws", "Biological generalizations often depend on changing histories and admit exceptions"],
+                correctIndex: 3,
+                explanation: "Constant historical and coevolutionary change makes biological explanations resemble tendencies or models with exceptions. This differs from the stable, exceptionless laws attributed to physics and chemistry."
+            },
+            {
+                question: "What qualification is raised even about natural selection as a candidate biological law?",
+                options: ["It is logically identical to intelligent design", "It applies only to psychological states", "It depends on background conditions and can fail under disruption", "It eliminates heritability from evolution"],
+                correctIndex: 2,
+                explanation: "Some critics deny that natural selection is a genuine universal law because its operation depends on background conditions. This challenges the stronger claim that it is biology's single exceptionless law."
+            },
+            {
+                question: "Why might doubts about biological laws extend to psychology and sociology?",
+                options: ["Psychology and sociology are older than biology", "They use the same terms as thermodynamics", "They reject every causal explanation", "They rely on biology, whose historical character already challenges exceptionless laws"],
+                correctIndex: 3,
+                explanation: "If biology lacks stable exceptionless laws, sciences that depend on it may face the same difficulty. The concern follows the hierarchy of inter-theoretic dependence."
+            },
+            {
+                question: "How would the proposed reduction of psychology to brain science begin?",
+                options: ["By identifying mental states with corresponding brain states", "By proving that mental states occur before brain states", "By replacing all brain laws with functional goals", "By showing that experience is publicly accessible in exactly the same way as matter"],
+                correctIndex: 0,
+                explanation: "The model begins with bridge identities, such as pain being identified with brain state A. Derivation of psychological laws is a later stage."
+            },
+            {
+                question: "What does Fodor's multiple-realization objection claim?",
+                options: ["One physical state must always produce many incompatible mental states", "No organism other than a human can have mental states", "Mental states can exist without any physical realization", "The same mental state may be realized by several different physical states"],
+                correctIndex: 3,
+                explanation: "Multiple realization permits one mental kind, such as pain, to have different physical implementations. This undermines a simple one-to-one bridge identity."
+            },
+            {
+                question: "Why does multiple realization obstruct translation between psychological and physical laws?",
+                options: ["Psychological laws contain no regularities", "One psychological law may correspond to many different underlying physical laws", "Physical states cannot cause behavior", "Bridge statements require future goals"],
+                correctIndex: 1,
+                explanation: "A mental state that has several physical realizations cannot be translated through one simple physical identity. The obstacle can remain even if both levels possess laws."
+            },
+            {
+                question: "What distinction supports the toaster response to the accessibility objection?",
+                options: ["The distinction between public access to an action and being the entity that performs it", "The distinction between natural selection and intelligent design", "The distinction between synchronic and diachronic theory change", "The distinction between universal laws and accidental generalizations"],
+                correctIndex: 0,
+                explanation: "Everyone can observe a toaster's physical action even though only the toaster performs it. The response uses this distinction to argue that public accessibility does not prevent a physical activity from belonging to one subject."
+            },
+            {
+                question: "What does Searle's Chinese Room primarily challenge?",
+                options: ["The claim that evolution can explain adaptation", "The use of bridge statements in thermodynamics", "The existence of publicly observable brain states", "The claim that correct input-output processing is sufficient for understanding or consciousness"],
+                correctIndex: 3,
+                explanation: "The room can produce appropriate outputs by rule following while the person lacks understanding. The argument therefore targets computational input-output sufficiency."
+            },
+            {
+                question: "What is the systems response to the Chinese Room?",
+                options: ["The person understands each symbol before applying the rules", "The room cannot produce correct outputs", "The whole room may understand even if the person inside does not", "Consciousness is identical to natural selection"],
+                correctIndex: 2,
+                explanation: "The systems response assigns understanding to the entire person-plus-rulebook system rather than to one component. It parallels the idea that no single brain part understands although the whole brain does."
+            },
+            {
+                question: "How does Searle answer the systems response?",
+                options: ["He identifies understanding with observable behavior", "He imagines the person memorizing the entire instruction manual while still not understanding", "He argues that only the rulebook understands", "He accepts that the whole room must be conscious"],
+                correctIndex: 1,
+                explanation: "By internalizing the rulebook, the person becomes the whole relevant system yet is still described as lacking understanding. This is intended to preserve the original objection."
+            },
+            {
+                question: "What is Jackson's intended conclusion from the Black-and-White Mary scenario?",
+                options: ["Complete physical knowledge includes every experiential fact by definition", "Color vision cannot support predictions", "Mary learns only an accidental generalization", "There are experiential facts above and beyond the physical facts Mary already knew"],
+                correctIndex: 3,
+                explanation: "Mary is stipulated to know all physical facts yet learns something upon seeing red. Jackson uses this apparent gain to argue for non-physical experiential facts."
+            },
+            {
+                question: "Which question is central to the explanatory gap?",
+                options: ["Why do logical deductions require premises?", "Why is there conscious experience at all, and why does a given physical state have this experience?", "Why do organisms exhibit heritable variation?", "Why does heating increase molecular motion?"],
+                correctIndex: 1,
+                explanation: "The explanatory gap concerns the existence and particular character of experience. A physical account of behavior appears not to determine why an experiential movie accompanies it."
+            },
+            {
+                question: "What is a physical zombie in the argument about consciousness?",
+                options: ["A being physically identical to us but lacking the mental experiential movie", "A being with experiences but no physical characteristics", "An organism lacking heritability and variation", "A computer that knowingly speaks every language"],
+                correctIndex: 0,
+                explanation: "The zombie is stipulated to match ordinary physical life from an outside perspective while lacking experience. Its conceivability is used to highlight the apparent explanatory gap."
+            },
+            {
+                question: "In the modern windmill argument, what does Alice find when she examines Jack's head?",
+                options: ["Jack's experience with exactly the same experiential character Jack has", "A future goal directing Jack's perception", "Physical facts but nothing displaying the experiential characteristics of Jack's apple experience", "A bridge statement proving that all mental states are multiply realized"],
+                correctIndex: 2,
+                explanation: "Alice observes physical processes rather than experiential qualities resembling Jack's experience. The argument uses this mismatch to challenge purely mechanical explanation."
+            },
+            {
+                question: "Suppose Jack's experience is identical to Jack's brain state. What is Alice's experience when she observes that brain state?",
+                options: ["It must be qualitatively identical to Jack's original experience", "It proves that Jack has no experience", "It is Jack's experience transferred into Alice", "It is Alice's experience of Jack's experience"],
+                correctIndex: 3,
+                explanation: "Under the identity assumption, observing Jack's brain state is observing Jack's experience. Alice nevertheless has her own higher-order experience of that experience."
+            },
+            {
+                question: "Why does the response to the windmill argument say that Alice's and Jack's experiences need not be the same?",
+                options: ["Jack experiences an object, while Alice experiences Jack's experience of that object", "Only Alice has a physical brain state", "Experiences can never be compared", "Jack's experience occurs after Alice's observation"],
+                correctIndex: 0,
+                explanation: "Their experiences have different objects: Jack experiences the bus, while Alice experiences Jack's experience of the bus. A qualitative difference is therefore expected and does not by itself refute identity."
+            },
+            {
+                question: "Which objection most directly attacks one-to-one bridge identities rather than the sufficiency of computation or completeness of physical knowledge?",
+                options: ["The Chinese Room", "Multiple realization", "Black-and-White Mary", "The explanatory gap"],
+                correctIndex: 1,
+                explanation: "Multiple realization argues that one mental state can correspond to several physical states, directly undermining simple identity bridges. The other objections focus on understanding or experience."
+            }
+        ];
+
+        const tfData = [
+            {
+                question: "In the D-N model, a general law and an initial condition deductively entail a phenomenon.",
+                answer: true,
+                explanation: "This deductive structure defines the model. Whether the result is called explanation or prediction depends on whether the phenomenon has already been observed."
+            },
+            {
+                question: "A definition is too strong when it includes cases that are not genuine instances of the concept.",
+                answer: false,
+                explanation: "Including non-instances makes a definition too weak. It is too strong when it excludes genuine instances."
+            },
+            {
+                question: "The symmetry problem shows that successful calculation can occur in a direction that is not explanatory.",
+                answer: true,
+                explanation: "Later information may permit deduction of an earlier state without causing or explaining it. Logical usability therefore does not guarantee explanatory direction."
+            },
+            {
+                question: "Because untreated syphilis can explain paresis, paresis must deductively follow from every case of untreated syphilis.",
+                answer: false,
+                explanation: "The causal explanation is accepted even though untreated syphilis does not guarantee paresis. This is why the case challenges the D-N requirement."
+            },
+            {
+                question: "When causal and logical directions coincide from H to e, one argument may function as both explanation and prediction.",
+                answer: true,
+                explanation: "H then both causes and logically entails e, satisfying the respective requirements assigned to explanation and prediction."
+            },
+            {
+                question: "The causal-power model fully resolves the problem of explanation because causality has a clear definition.",
+                answer: false,
+                explanation: "Its stated weakness is precisely that causality lacks a definition. The model therefore appeals to something presented as less understood."
+            },
+            {
+                question: "The proposed criterion for inter-theoretic explanation requires the explained theory to follow logically from the explaining theory.",
+                answer: true,
+                explanation: "Logical derivation is the criterion used to determine whether T1 explains T2."
+            },
+            {
+                question: "Bridge statements are unnecessary when two theories describe different levels using different terms.",
+                answer: false,
+                explanation: "Bridge statements connect the different vocabularies. Without them, the lower-level laws cannot straightforwardly derive the higher-level laws."
+            },
+            {
+                question: "The unity-of-science ideal seeks a single organized structure of scientific knowledge.",
+                answer: true,
+                explanation: "Successful inter-theoretic explanations are intended to connect theories into one unified picture."
+            },
+            {
+                question: "Methodological individualism explains individual-level events solely through properties of wholes.",
+                answer: false,
+                explanation: "It uses the opposite direction: events at the level of wholes occur because of events at the level of individuals."
+            },
+            {
+                question: "A teleological explanation accounts for an earlier event by reference to a later goal.",
+                answer: true,
+                explanation: "Teleology is goal-directed, whereas causal explanation accounts for a later event through an earlier cause."
+            },
+            {
+                question: "Newton's mechanistic physics preserved the view that elementary physics is fundamentally teleological.",
+                answer: false,
+                explanation: "Newtonian mechanistic physics moved physics from a teleological interpretation to a causal one."
+            },
+            {
+                question: "The Darwinian explanation says that giraffes developed long necks because the future goal of reaching leaves produced the variation.",
+                answer: false,
+                explanation: "Variation arises randomly in the account. Past survival and reproductive advantages explain why longer necks spread."
+            },
+            {
+                question: "Heritability, variation, and differential fitness can produce non-random reproduction and adaptation.",
+                answer: true,
+                explanation: "These are the three conditions in the general mechanism of natural selection."
+            },
+            {
+                question: "Natural selection explains apparent purpose without requiring a guiding hand.",
+                answer: true,
+                explanation: "Differential reproduction can increase adaptation and make a system look designed even though no future goal directs it."
+            },
+            {
+                question: "Darwin's causal account implies that biological traits cannot have useful effects.",
+                answer: false,
+                explanation: "Traits can have useful effects. The claim is that those effects do not act as future purposes that create the traits."
+            },
+            {
+                question: "The Red Queen dynamic describes stable biological conditions in which adaptations create no new selective pressures.",
+                answer: false,
+                explanation: "It describes the opposite: adaptations continually create new pressures and drive a coevolutionary arms race."
+            },
+            {
+                question: "Biological explanations may use tendencies and models that hold broadly while admitting exceptions.",
+                answer: true,
+                explanation: "Biology's historical and changing character is presented as a reason its generalizations may not resemble exceptionless physical laws."
+            },
+            {
+                question: "Every critic accepts natural selection as an exceptionless universal law of nature.",
+                answer: false,
+                explanation: "Some argue that natural selection depends on background conditions and can fail under disruption, so they deny that it is a genuine universal law."
+            },
+            {
+                question: "Doubts about exceptionless biological laws can also affect psychology and sociology because those sciences rely on biology.",
+                answer: true,
+                explanation: "The challenge can propagate upward through the proposed hierarchy of sciences."
+            },
+            {
+                question: "The proposed psychology-to-brain reduction first identifies mental states with brain states and then derives psychological laws from brain laws.",
+                answer: true,
+                explanation: "These are the bridge-statement and derivation stages modeled on the reduction of thermodynamics."
+            },
+            {
+                question: "Multiple realization means that every distinct mental state must have one and only one physical realization.",
+                answer: false,
+                explanation: "It means that the same mental state may be realized by several different physical states."
+            },
+            {
+                question: "Multiple realization can obstruct reduction even if both psychological and physical laws exist.",
+                answer: true,
+                explanation: "One psychological law may correspond to many physical laws, preventing a simple translation between them."
+            },
+            {
+                question: "The toaster response claims that public accessibility and being the performer of an action are the same property.",
+                answer: false,
+                explanation: "The response distinguishes them. Everyone may observe the toaster's action although only the toaster performs it."
+            },
+            {
+                question: "The Chinese Room is intended to show that correct input-output behavior is sufficient for consciousness.",
+                answer: false,
+                explanation: "Searle uses it to argue that input-output rule following is not sufficient for understanding or consciousness."
+            },
+            {
+                question: "The systems response assigns understanding to the entire Chinese Room rather than to the person alone.",
+                answer: true,
+                explanation: "It argues that the whole person-plus-instructions system may understand even if one component does not."
+            },
+            {
+                question: "In Jackson's scenario, Mary supposedly learns nothing when she first sees a red apple.",
+                answer: false,
+                explanation: "The scenario stipulates that she learns a new experiential fact despite already knowing all physical facts about color vision."
+            },
+            {
+                question: "The explanatory gap asks both why experience exists and why a particular physical state is accompanied by one experience rather than another.",
+                answer: true,
+                explanation: "These are the two central questions expressed through the metaphor of the mental movie."
+            },
+            {
+                question: "A physical zombie is conceived as physically identical to an ordinary person but without conscious experience.",
+                answer: true,
+                explanation: "The zombie behaves and appears physically the same from the outside while lacking the experiential movie."
+            },
+            {
+                question: "If Jack's experience is his brain state, the fact that Alice's experience of that state differs from Jack's original experience necessarily refutes the identity.",
+                answer: false,
+                explanation: "Jack experiences an object, while Alice experiences Jack's experience of that object. Their different objects of experience make the difference expected rather than contradictory."
+            }
+        ];
+
+        // --- Global State Variables ---
+        let currentCardIndex = 0;
+        let isCardFront = true;
+        let isCardAnimating = false;
+        let currentMCQIndex = 0;
+        let currentTFIndex = 0;
+        let mcqAnswers = new Array(mcqData.length).fill(null);
+        let tfAnswers = new Array(tfData.length).fill(null);
+
+        // --- DOM Element References ---
+        const flashcardContent = document.getElementById('flashcard-content');
+        const cardCounter = document.getElementById('card-counter');
+        const prevCardBtn = document.getElementById('prev-card');
+        const nextCardBtn = document.getElementById('next-card');
+        const mcqQuestion = document.getElementById('mcq-question');
+        const mcqOptions = document.getElementById('mcq-options');
+        const mcqFeedback = document.getElementById('mcq-feedback');
+        const mcqExplanation = document.getElementById('mcq-explanation');
+        const mcqCounter = document.getElementById('mcq-counter');
+        const prevMCQBtn = document.getElementById('prev-mcq');
+        const nextMCQBtn = document.getElementById('next-mcq');
+        const viewAllMCQBtn = document.getElementById('view-all-mcq');
+        const mcqSingleView = document.getElementById('mcq-single-view');
+        const mcqAllQuestionsContainer = document.getElementById('mcq-all-questions');
+        const tfQuestion = document.getElementById('tf-question');
+        const tfOptionsContainer = document.getElementById('tf-options');
+        const tfFeedback = document.getElementById('tf-feedback');
+        const tfExplanation = document.getElementById('tf-explanation');
+        const tfCounter = document.getElementById('tf-counter');
+        const prevTFBtn = document.getElementById('prev-tf');
+        const nextTFBtn = document.getElementById('next-tf');
+        const viewAllTFBtn = document.getElementById('view-all-tf');
+        const tfSingleView = document.getElementById('tf-single-view');
+        const tfAllQuestionsContainer = document.getElementById('tf-all-questions');
+
+        // --- MathJax Re-rendering Helper ---
+        function triggerMathJax() {
+            if (window.MathJax && window.MathJax.typesetPromise) {
+                window.MathJax.typesetPromise().catch((err) => console.error('MathJax error:', err.message));
+            }
+        }
+
+        function displayCard(index) {
+            if (!flashcardData || flashcardData.length === 0) return;
+            const cardData = flashcardData[index];
+            isCardFront = true;
+            flashcardContent.style.opacity = '1';
+            flashcardContent.textContent = cardData.term;
+            flashcardContent.className = 'flashcard-front-style';
+            cardCounter.textContent = `Card ${index + 1} / ${flashcardData.length}`;
+            prevCardBtn.disabled = index === 0;
+            nextCardBtn.disabled = index === flashcardData.length - 1;
+            triggerMathJax();
+        }
+
+        function flipCard() {
+            if (isCardAnimating || !flashcardData || flashcardData.length === 0) return;
+            isCardAnimating = true;
+            flashcardContent.style.opacity = '0';
+            setTimeout(() => {
+                isCardFront = !isCardFront;
+                const cardData = flashcardData[currentCardIndex];
+                if (isCardFront) {
+                    flashcardContent.textContent = cardData.term;
+                    flashcardContent.className = 'flashcard-front-style';
+                } else {
+                    flashcardContent.textContent = cardData.definition;
+                    flashcardContent.className = 'flashcard-back-style';
+                }
+                flashcardContent.style.opacity = '1';
+                isCardAnimating = false;
+                triggerMathJax();
+            }, 300);
+        }
+
+        function displayMCQuestion(index) {
+            if (!mcqData || mcqData.length === 0) return;
+            const qData = mcqData[index];
+            mcqQuestion.textContent = qData.question;
+            mcqOptions.innerHTML = '';
+            mcqFeedback.classList.add('hidden');
+            mcqExplanation.classList.add('hidden');
+            qData.options.forEach((option, i) => {
+                const button = document.createElement('button');
+                button.textContent = option;
+                button.onclick = () => handleMCQAnswer(index, i);
+                mcqOptions.appendChild(button);
+            });
+            mcqCounter.textContent = `Question ${index + 1} / ${mcqData.length}`;
+            prevMCQBtn.disabled = index === 0;
+            nextMCQBtn.disabled = index === mcqData.length - 1;
+            if (mcqAnswers[index] !== null) {
+                highlightMCQAnswer(mcqOptions, mcqFeedback, mcqExplanation, index, mcqAnswers[index].selected);
+            }
+            triggerMathJax();
+        }
+
+        function handleMCQAnswer(qIndex, selectedIndex) {
+            if (mcqAnswers[qIndex] !== null) return;
+            const isCorrect = selectedIndex === mcqData[qIndex].correctIndex;
+            mcqAnswers[qIndex] = { selected: selectedIndex, correct: isCorrect };
+            highlightMCQAnswer(mcqOptions, mcqFeedback, mcqExplanation, qIndex, selectedIndex);
+        }
+
+        function highlightMCQAnswer(optionsContainer, feedbackEl, explanationEl, qIndex, selectedIndex) {
+            const qData = mcqData[qIndex];
+            const buttons = optionsContainer.querySelectorAll('button');
+            buttons.forEach((button, i) => {
+                button.disabled = true;
+                if (i === qData.correctIndex) {
+                    button.classList.add('correct');
+                }
+                if (i === selectedIndex && i !== qData.correctIndex) {
+                    button.classList.add('incorrect');
+                }
+            });
+            feedbackEl.textContent = selectedIndex === qData.correctIndex ? "Correct!" : "Incorrect.";
+            feedbackEl.className = `feedback ${selectedIndex === qData.correctIndex ? 'correct' : 'incorrect'}`;
+            explanationEl.innerHTML = `<strong>Explanation:</strong> ${qData.explanation}`;
+            explanationEl.classList.remove('hidden');
+            triggerMathJax();
+        }
+
+        function displayAllMCQ() {
+            if (!mcqData || mcqData.length === 0) return;
+            mcqSingleView.classList.add('hidden');
+            mcqAllQuestionsContainer.innerHTML = '';
+            mcqData.forEach((qData, index) => {
+                const questionDiv = document.createElement('div');
+                questionDiv.className = 'question-container-all';
+                questionDiv.innerHTML = `
+                    <div class="question-text">${index + 1}. ${qData.question}</div>
+                    <div class="options">
+                        ${qData.options.map((option, i) => `<button data-qindex="${index}" data-oindex="${i}">${option}</button>`).join('')}
+                    </div>
+                    <div class="feedback hidden"></div>
+                    <div class="explanation hidden"></div>
+                `;
+                mcqAllQuestionsContainer.appendChild(questionDiv);
+                 const optionButtons = questionDiv.querySelectorAll('.options button');
+                 optionButtons.forEach(button => {
+                     button.onclick = () => {
+                        const qIndex = parseInt(button.dataset.qindex);
+                        const oIndex = parseInt(button.dataset.oindex);
+                        if (mcqAnswers[qIndex] === null) {
+                            const isCorrect = oIndex === mcqData[qIndex].correctIndex;
+                            mcqAnswers[qIndex] = { selected: oIndex, correct: isCorrect };
+                        }
+                        const optionsDiv = button.closest('.options');
+                        const feedbackDiv = questionDiv.querySelector('.feedback');
+                        const explanationDiv = questionDiv.querySelector('.explanation');
+                        highlightMCQAnswer(optionsDiv, feedbackDiv, explanationDiv, qIndex, mcqAnswers[qIndex].selected);
+                     };
+                 });
+                 if (mcqAnswers[index] !== null) {
+                    const optionsDiv = questionDiv.querySelector('.options');
+                    const feedbackDiv = questionDiv.querySelector('.feedback');
+                    const explanationDiv = questionDiv.querySelector('.explanation');
+                    highlightMCQAnswer(optionsDiv, feedbackDiv, explanationDiv, index, mcqAnswers[index].selected);
+                 }
+            });
+            mcqAllQuestionsContainer.classList.remove('hidden');
+            triggerMathJax();
+        }
+
+        function displayTFQuestion(index) {
+            if (!tfData || tfData.length === 0) return;
+            const qData = tfData[index];
+            tfQuestion.textContent = qData.question;
+            tfFeedback.classList.add('hidden');
+            tfExplanation.classList.add('hidden');
+             const buttons = tfOptionsContainer.querySelectorAll('button');
+             buttons.forEach(button => {
+                 button.disabled = false;
+                 button.classList.remove('correct', 'incorrect');
+                 button.onclick = () => handleTFAnswer(index, button.dataset.answer === 'true');
+             });
+            tfCounter.textContent = `Question ${index + 1} / ${tfData.length}`;
+            prevTFBtn.disabled = index === 0;
+            nextTFBtn.disabled = index === tfData.length - 1;
+            if (tfAnswers[index] !== null) {
+                highlightTFAnswer(tfOptionsContainer, tfFeedback, tfExplanation, index, tfAnswers[index].selected);
+            }
+            triggerMathJax();
+        }
+
+        function handleTFAnswer(qIndex, selectedAnswer) {
+            if (tfAnswers[qIndex] !== null) return;
+            const isCorrect = selectedAnswer === tfData[qIndex].answer;
+            tfAnswers[qIndex] = { selected: selectedAnswer, correct: isCorrect };
+            highlightTFAnswer(tfOptionsContainer, tfFeedback, tfExplanation, qIndex, selectedAnswer);
+        }
+
+        function highlightTFAnswer(optionsContainer, feedbackEl, explanationEl, qIndex, selectedAnswer) {
+             const qData = tfData[qIndex];
+             const buttons = optionsContainer.querySelectorAll('button');
+             buttons.forEach(button => {
+                 const buttonAnswer = button.dataset.answer === 'true';
+                 button.disabled = true;
+                 if (buttonAnswer === qData.answer) {
+                     button.classList.add('correct');
+                 }
+                 if (buttonAnswer === selectedAnswer && buttonAnswer !== qData.answer) {
+                     button.classList.add('incorrect');
+                 }
+             });
+             feedbackEl.textContent = selectedAnswer === qData.answer ? "Correct!" : "Incorrect.";
+             feedbackEl.className = `feedback ${selectedAnswer === qData.answer ? 'correct' : 'incorrect'}`;
+             explanationEl.innerHTML = `<strong>Explanation:</strong> ${qData.explanation}`;
+             explanationEl.classList.remove('hidden');
+             triggerMathJax();
+        }
+
+        function displayAllTF() {
+             if (!tfData || tfData.length === 0) return;
+             tfSingleView.classList.add('hidden');
+             tfAllQuestionsContainer.innerHTML = '';
+             tfData.forEach((qData, index) => {
+                 const questionDiv = document.createElement('div');
+                 questionDiv.className = 'question-container-all';
+                 questionDiv.innerHTML = `
+                     <div class="question-text">${index + 1}. ${qData.question}</div>
+                     <div class="tf-options">
+                         <button data-qindex="${index}" data-answer="true">True</button>
+                         <button data-qindex="${index}" data-answer="false">False</button>
+                     </div>
+                     <div class="feedback hidden"></div>
+                     <div class="explanation hidden"></div>
+                 `;
+                 tfAllQuestionsContainer.appendChild(questionDiv);
+                 const optionButtons = questionDiv.querySelectorAll('.tf-options button');
+                 optionButtons.forEach(button => {
+                     button.onclick = () => {
+                         const qIndex = parseInt(button.dataset.qindex);
+                         const selectedAnswer = button.dataset.answer === 'true';
+                         if (tfAnswers[qIndex] === null) {
+                             const isCorrect = selectedAnswer === tfData[qIndex].answer;
+                             tfAnswers[qIndex] = { selected: selectedAnswer, correct: isCorrect };
+                         }
+                         const optionsDiv = button.closest('.tf-options');
+                         const feedbackDiv = questionDiv.querySelector('.feedback');
+                         const explanationDiv = questionDiv.querySelector('.explanation');
+                         highlightTFAnswer(optionsDiv, feedbackDiv, explanationDiv, qIndex, tfAnswers[qIndex].selected);
+                     };
+                 });
+                 if (tfAnswers[index] !== null) {
+                    const optionsDiv = questionDiv.querySelector('.tf-options');
+                    const feedbackDiv = questionDiv.querySelector('.feedback');
+                    const explanationDiv = questionDiv.querySelector('.explanation');
+                    highlightTFAnswer(optionsDiv, feedbackDiv, explanationDiv, index, tfAnswers[index].selected);
+                 }
+             });
+             tfAllQuestionsContainer.classList.remove('hidden');
+             triggerMathJax();
+        }
+
+        function initialize() {
+            if (flashcardData.length > 0) displayCard(currentCardIndex);
+            if (mcqData.length > 0) displayMCQuestion(currentMCQIndex);
+            if (tfData.length > 0) displayTFQuestion(currentTFIndex);
+            flashcardContent.addEventListener('click', flipCard);
+            prevCardBtn.addEventListener('click', () => { if (currentCardIndex > 0) { currentCardIndex--; displayCard(currentCardIndex); } });
+            nextCardBtn.addEventListener('click', () => { if (currentCardIndex < flashcardData.length - 1) { currentCardIndex++; displayCard(currentCardIndex); } });
+            prevMCQBtn.addEventListener('click', () => { if (currentMCQIndex > 0) { currentMCQIndex--; displayMCQuestion(currentMCQIndex); } });
+            nextMCQBtn.addEventListener('click', () => { if (currentMCQIndex < mcqData.length - 1) { currentMCQIndex++; displayMCQuestion(currentMCQIndex); } });
+            viewAllMCQBtn.addEventListener('click', displayAllMCQ);
+            prevTFBtn.addEventListener('click', () => { if (currentTFIndex > 0) { currentTFIndex--; displayTFQuestion(currentTFIndex); } });
+            nextTFBtn.addEventListener('click', () => { if (currentTFIndex < tfData.length - 1) { currentTFIndex++; displayTFQuestion(currentTFIndex); } });
+            viewAllTFBtn.addEventListener('click', displayAllTF);
+
+            // Initial MathJax render for static HTML (like the Theory section)
+            triggerMathJax();
+        }
+
+        initialize();
+    });
+    </script>
+</body>
+</html>

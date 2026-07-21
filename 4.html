@@ -1,0 +1,1192 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Logic, Scientific Inquiry, and Falsifiability</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+
+    <script>
+        window.MathJax = {
+            tex: {
+                inlineMath: [['$', '$'], ['\\(', '\\)']],
+                displayMath: [['$$', '$$'], ['\\[', '\\]']]
+            },
+            startup: {
+                typeset: false // We will trigger this manually via JS
+            }
+        };
+    </script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+    <style>
+        /* --- Root Variables for Theme --- */
+        :root {
+            --primary-bg: #0a0a0f;
+            --panel-bg: rgba(255, 255, 255, 0.03);
+            --panel-border: rgba(255, 255, 255, 0.1);
+
+            --accent-start: #6C63FF;
+            --accent-end: #A855F7;
+            --accent-gradient: linear-gradient(135deg, var(--accent-start), var(--accent-end));
+            --accent-color: #8B5CF6; /* Midpoint fallback */
+
+            --text-color: #E0E0E0;
+            --text-muted: #9ca3af;
+
+            --correct-color: rgba(16, 185, 129, 0.2);
+            --correct-border: #10b981;
+            --incorrect-color: rgba(239, 68, 68, 0.2);
+            --incorrect-border: #ef4444;
+
+            --insight-bg: rgba(168, 85, 247, 0.08);
+            --insight-border: #A855F7;
+        }
+
+        /* --- Global Styles & Glow Effects --- */
+        body {
+            background-color: var(--primary-bg);
+            background-image:
+                radial-gradient(circle at 15% 50%, rgba(108, 99, 255, 0.06), transparent 25vw),
+                radial-gradient(circle at 85% 30%, rgba(168, 85, 247, 0.06), transparent 25vw);
+            background-attachment: fixed;
+            color: var(--text-color);
+            font-family: 'Inter', sans-serif;
+            line-height: 1.6;
+            margin: 0;
+            padding: 20px;
+        }
+
+        /* --- Panel Containers (Optimized: No blur for performance) --- */
+        .container, .section, #flashcard-content, .question-container-single, .question-container-all, .explanation {
+            background: var(--panel-bg);
+            border: 1px solid var(--panel-border);
+            border-radius: 12px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+        }
+
+        .container {
+            width: 90%;
+            max-width: 1000px;
+            margin: 20px auto;
+            padding: 30px;
+        }
+
+        h1, h2 {
+            text-align: center;
+            border-bottom: 1px solid var(--panel-border);
+            padding-bottom: 15px;
+            font-weight: 700;
+            color: #fff;
+        }
+
+        .section {
+            padding: 25px;
+            margin-bottom: 30px;
+            animation: slideIn 0.5s ease-out forwards;
+        }
+
+        /* --- Theory & Key Insight Styling --- */
+        .theory-text {
+            font-size: 1.1em;
+            line-height: 1.8;
+            color: var(--text-muted);
+        }
+
+        .theory-text p, .theory-text li {
+            color: var(--text-color);
+        }
+
+        .theory-text h3 {
+            color: #fff;
+            margin-top: 25px;
+            border-bottom: none;
+            text-align: left;
+            font-size: 1.3em;
+        }
+
+        .insight-box {
+            background-color: var(--insight-bg);
+            border-left: 4px solid var(--insight-border);
+            padding: 18px;
+            margin: 25px 0;
+            border-radius: 8px;
+        }
+
+        .insight-box strong {
+            color: #fff;
+            display: block;
+            margin-bottom: 8px;
+            font-size: 1.1em;
+            text-shadow: 0 0 10px rgba(168, 85, 247, 0.4);
+        }
+
+        /* --- Study Cards Styling --- */
+        .flashcard-container {
+            height: 250px;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            perspective: 1000px;
+        }
+
+        #flashcard-content {
+            width: 100%;
+            height: 100%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            padding: 30px;
+            box-sizing: border-box;
+            transition: opacity 0.3s ease-in-out, transform 0.2s;
+        }
+
+        #flashcard-content:hover {
+            transform: translateY(-2px);
+            border-color: rgba(168, 85, 247, 0.4);
+            box-shadow: 0 10px 40px rgba(108, 99, 255, 0.15);
+        }
+
+        .flashcard-front-style {
+             font-size: 1.6em;
+             font-weight: 600;
+             font-family: 'JetBrains Mono', monospace;
+             color: var(--accent-end);
+        }
+
+        .flashcard-back-style {
+             font-size: 1.2em;
+             color: var(--text-color);
+        }
+
+        /* --- Questions Styling (MCQ & T/F) --- */
+         .question-container-single, .question-container-all {
+            margin-bottom: 20px;
+            padding: 20px;
+         }
+
+        .question-text {
+            font-weight: 600;
+            margin-bottom: 20px;
+            font-size: 1.1em;
+        }
+
+        /* Buttons & Glass Inputs */
+        .options button, .tf-options button, .nav-button, .view-all-button {
+            display: block;
+            width: 100%;
+            padding: 12px 15px;
+            margin: 8px 0;
+            background: rgba(255, 255, 255, 0.02);
+            color: var(--text-color);
+            border: 1px solid var(--panel-border);
+            border-radius: 8px;
+            cursor: pointer;
+            text-align: left;
+            font-family: 'Inter', sans-serif;
+            font-size: 1em;
+            transition: all 0.3s ease;
+        }
+
+        .nav-button, .view-all-button {
+            width: auto;
+            text-align: center;
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        .options button:hover:not(:disabled), .tf-options button:hover:not(:disabled), .nav-button:hover:not(:disabled), .view-all-button:hover {
+            background: var(--accent-gradient);
+            border-color: transparent;
+            color: #fff;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 15px rgba(108, 99, 255, 0.25);
+        }
+
+        .options button:disabled, .tf-options button:disabled, .nav-button:disabled {
+            cursor: not-allowed;
+            opacity: 0.5;
+            transform: none;
+        }
+
+        /* Correct/Incorrect States */
+        .options button.correct, .tf-options button.correct {
+            background: var(--correct-color);
+            border-color: var(--correct-border);
+            color: #fff;
+            opacity: 1;
+        }
+        .options button.incorrect, .tf-options button.incorrect {
+            background: var(--incorrect-color);
+            border-color: var(--incorrect-border);
+            color: #fff;
+            opacity: 1;
+        }
+
+        .feedback {
+            margin-top: 15px;
+            padding: 12px;
+            border-radius: 8px;
+            font-weight: 600;
+            text-align: center;
+            animation: fadeIn 0.3s ease-in;
+        }
+
+        .feedback.correct {
+            color: var(--correct-border);
+            background: var(--correct-color);
+            border: 1px solid var(--correct-border);
+        }
+
+        .feedback.incorrect {
+            color: var(--incorrect-border);
+            background: var(--incorrect-color);
+            border: 1px solid var(--incorrect-border);
+        }
+
+        .explanation {
+            margin-top: 15px;
+            font-style: italic;
+            font-size: 0.95em;
+            padding: 15px;
+            color: var(--text-muted);
+            border-left: 3px solid var(--accent-start);
+            animation: fadeIn 0.5s ease-in;
+        }
+
+        /* --- Navigation & Utility --- */
+        .navigation {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 20px;
+        }
+
+        .counter {
+            font-size: 0.9em;
+            color: var(--text-muted);
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        .view-all-container {
+            text-align: center;
+            margin-top: 25px;
+        }
+
+        .hidden { display: none !important; }
+
+        /* --- Animations --- */
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Logic, Scientific Inquiry, and Falsifiability</h1>
+
+        <div class="section">
+            <h2>Theory Summary and Key Insights</h2>
+            <div id="theory-content" class="theory-text">
+                <h3>Deductive and Non-Deductive Arguments</h3>
+                <p>A deductive argument is <strong>valid</strong> when its premises necessitate its conclusion. If the premises are true, the conclusion cannot be false. A non-deductive argument is <strong>strong</strong> when the premises make the conclusion more likely to be true than false, expressed as $P(c) &gt; 0.5$.</p>
+                <p>This distinction affects how arguments respond to additional information. Adding premises cannot turn a valid deductive argument into an invalid one, whereas new premises may strengthen or weaken a non-deductive argument.</p>
+                <ul>
+                    <li><strong>Modus ponens:</strong> From if $P$ then $Q$, together with $P$, infer $Q$.</li>
+                    <li><strong>Modus tollens:</strong> From if $P$ then $Q$, together with not-$Q$, infer not-$P$.</li>
+                    <li><strong>Hypothetical syllogism:</strong> From if $P$ then $Q$ and if $Q$ then $R$, infer if $P$ then $R$.</li>
+                    <li><strong>Transposition:</strong> If $P$ then $Q$ is equivalent to if not-$Q$ then not-$P$.</li>
+                    <li><strong>Disjunctive syllogism:</strong> From $P$ or $Q$, together with not-$P$, infer $Q$.</li>
+                </ul>
+                <p>Natural deduction proves validity by deriving a conclusion from premises through recognized rules of inference. A familiar error is to infer $P$ from if $P$ then $Q$ and $Q$. That form does not match modus ponens or modus tollens.</p>
+
+                <h3>Induction and Its Main Forms</h3>
+                <p>Inductive arguments support conclusions without making them certain. A <strong>statistical syllogism</strong> applies a general statistical claim to an individual: most or all $F$ objects are $G$, an object $x$ is $F$, and therefore $x$ is probably $G$.</p>
+                <p>An <strong>inductive generalization</strong> moves from examined cases to a larger class. It requires that a representative amount has been examined. A <strong>combined inductive generalization</strong> first generalizes from examined cases and then applies the resulting generalization to an individual. An <strong>analogical inference</strong> transfers a property from one object to another on the basis of extensive similarity.</p>
+                <p>Induction has an important limitation in theory construction. Its conclusion cannot introduce terms absent from its observational premises. It can generalize that all examined $F$ objects were $G$ into a claim that all $F$ objects are $G$, but it cannot thereby invent a new theoretical concept such as mass, gravitational field, spin, super-ego, or demand.</p>
+
+                <h3>Abduction and Theory Under-Determination</h3>
+                <p><strong>Abduction</strong> is inference to the best explanation. Its general form is: phenomenon $Q$ occurs; hypothesis $P$ is the best explanation of $Q$; therefore, $P$. The hypothesis must entail the phenomenon, but the observations do not deductively guarantee that the selected explanation is true.</p>
+                <p>There is no mechanical method for inventing the explanatory hypothesis. Inventiveness, intuition, and luck are involved. Moreover, another explanation $P^*$ may entail the same phenomenon. This is <strong>theory under-determination</strong>: the same observations can support multiple explanatory theories.</p>
+                <p>A crucial experiment addresses under-determination by locating a point at which competing theories make contradictory predictions and then testing those predictions through observation or experiment.</p>
+
+                <div class="insight-box">
+                    <strong>Key Insight:</strong>
+                    Abduction can introduce new theoretical terms because it proposes an explanation rather than merely extending the vocabulary of observed cases. Its creative power is also its logical limitation: several incompatible hypotheses may explain the same evidence.
+                </div>
+
+                <h3>The Positivist Scientific Method</h3>
+                <p>The positivist scientific method treats observation and logic as the legitimate sources of knowledge. It distinguishes the relationship between theories and observations from the relationship among theories.</p>
+                <ol>
+                    <li><strong>Formulation or context of discovery:</strong> Begin with observations requiring explanation and formulate a theory from which those observations logically follow.</li>
+                    <li><strong>Testing or context of justification:</strong> derive additional observational implications and determine whether they occur.</li>
+                    <li><strong>Application:</strong> use the theory to predict observations not yet made or explain observations already made.</li>
+                </ol>
+                <p>The relationship among theories may be <strong>synchronic</strong> or <strong>diachronic</strong>. Synchronically, a more basic theory explains a less basic theory in another field at the same time. Diachronically, a newer theory in a field explains the roughly correct theory that preceded it. In both cases, explanation requires the explained theory to be logically derived from the explaining theory.</p>
+
+                <h3>Matching Logical Tools to Scientific Tasks</h3>
+                <p>The central scientific tasks are formulation, refutation, verification, and confirmation. Their logical structures differ:</p>
+                <ul>
+                    <li><strong>Formulation:</strong> Deduction cannot derive a general hypothesis from particular observations. Induction can formulate only hypotheses that generalize observational statements. Abduction is the main route to hypotheses containing new theoretical terms.</li>
+                    <li><strong>Refutation:</strong> A hypothesis can be deductively refuted by modus tollens: if $H$ then $e$; not-$e$; therefore, not-$H$.</li>
+                    <li><strong>Verification:</strong> General hypotheses cannot be verified from particular observations. Verification would require certainty, so only deduction could provide it, but deduction cannot move from particular observational claims to a more informative general claim.</li>
+                    <li><strong>Confirmation:</strong> Confirmation is inductive and therefore non-certain. The observed occurrence of predicted consequences raises the plausibility of a hypothesis but does not verify it.</li>
+                </ul>
+                <p>The apparent confirmation form is: if $H$ then $e$; $e$ occurs; therefore, probably $H$. For a general hypothesis that all $F$ objects are $G$, the evidence is that all examined $F$ objects are $G$. The move from examined cases to all cases is inductive generalization. Abduction is not the confirmation method in this framework because abduction is used while searching for a hypothesis, whereas confirmation begins with a hypothesis already given.</p>
+
+                <div class="insight-box">
+                    <strong>Key Insight:</strong>
+                    The asymmetry between refutation and verification follows from logic. A failed predicted consequence can support the certain deductive conclusion not-$H$, but any finite collection of particular successes still falls short of deductively establishing a general hypothesis.
+                </div>
+
+                <div class="insight-box">
+                    <strong>Key Insight:</strong>
+                    Formulation and confirmation can both involve induction, but they are not the same task. In formulation, induction generalizes observed cases into a limited kind of hypothesis; in confirmation, it evaluates an already available hypothesis through its successfully observed implications.
+                </div>
+
+                <h3>Popper, Falsification, and Demarcation</h3>
+                <p>Karl Popper sought a demarcation principle distinguishing scientific theories from non-scientific ones. He was concerned that Marxism, Freudian psychoanalysis, and Adlerian psychology appeared able to explain every possible event, including an event and its opposite, while still treating each outcome as confirmation.</p>
+                <p>Popper rejected induction because it does not provide certainty and therefore rejected confirmation as scientifically authoritative. Science should instead formulate hypotheses and actively attempt to refute them deductively. Scientists should derive risky predictions whose failure would count against the theory.</p>
+                <p>A theory is <strong>falsifiable</strong> when it specifies observations that could refute it through deductive inference. Popper's demarcation principle states that a theory is scientific if and only if it is falsifiable. The more possible observations that could refute a theory, the more scientific it is considered within this account.</p>
+                <p>Theories that survive many serious refutation attempts differ from untested conjectures. In the presented Popperian account, surviving repeated tests raises a theory's plausibility without turning the surviving results into verification.</p>
+
+                <h3>The Eddington Experiment</h3>
+                <p>Einstein's General Theory of Relativity predicted that light would bend around massive objects because of spacetime curvature. During the 1919 solar eclipse expedition, Eddington observed the apparent displacement of stars near the Sun, supporting the predicted bending of starlight.</p>
+                <p>The case illustrates falsifiability because failure to observe the predicted light bending could have refuted the theory. Its scientific significance does not arise merely from obtaining a favorable observation, but from exposing the theory to an observational result that could have counted against it.</p>
+
+                <div class="insight-box">
+                    <strong>Key Insight:</strong>
+                    A theory that accommodates both an observation and its negation without identifying any adverse outcome is not strengthened by its flexibility in Popper's framework. That flexibility removes the possibility of a genuine deductive refutation and therefore undermines its scientific status.
+                </div>
+            </div>
+        </div>
+
+        <div class="section">
+            <h2>Study Cards</h2>
+            <div class="flashcard-container">
+                <div id="flashcard-content"></div>
+            </div>
+            <div class="navigation">
+                <button class="nav-button" id="prev-card">Previous</button>
+                <span class="counter" id="card-counter"></span>
+                <button class="nav-button" id="next-card">Next</button>
+            </div>
+        </div>
+
+        <div class="section">
+            <h2>Multiple-Choice Questions</h2>
+            <div id="mcq-single-view">
+                <div class="question-container-single" id="mcq-container">
+                    <div class="question-text" id="mcq-question"></div>
+                    <div class="options" id="mcq-options"></div>
+                    <div class="feedback hidden" id="mcq-feedback"></div>
+                    <div class="explanation hidden" id="mcq-explanation"></div>
+                </div>
+                <div class="navigation">
+                    <button class="nav-button" id="prev-mcq">Previous</button>
+                    <span class="counter" id="mcq-counter"></span>
+                    <button class="nav-button" id="next-mcq">Next</button>
+                </div>
+                 <div class="view-all-container">
+                     <button class="view-all-button" id="view-all-mcq">View All Questions</button>
+                 </div>
+            </div>
+            <div id="mcq-all-questions" class="hidden">
+                </div>
+        </div>
+
+        <div class="section">
+            <h2>True or False Questions</h2>
+             <div id="tf-single-view">
+                <div class="question-container-single" id="tf-container">
+                    <div class="question-text" id="tf-question"></div>
+                    <div class="tf-options" id="tf-options">
+                        <button data-answer="true">True</button>
+                        <button data-answer="false">False</button>
+                    </div>
+                    <div class="feedback hidden" id="tf-feedback"></div>
+                    <div class="explanation hidden" id="tf-explanation"></div>
+                </div>
+                <div class="navigation">
+                    <button class="nav-button" id="prev-tf">Previous</button>
+                    <span class="counter" id="tf-counter"></span>
+                    <button class="nav-button" id="next-tf">Next</button>
+                </div>
+                 <div class="view-all-container">
+                     <button class="view-all-button" id="view-all-tf">View All Questions</button>
+                 </div>
+            </div>
+             <div id="tf-all-questions" class="hidden">
+                 </div>
+        </div>
+    </div>
+
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+
+        const flashcardData = [
+            {
+                term: "Deductive validity",
+                definition: "A deductive argument is valid when its premises necessitate its conclusion."
+            },
+            {
+                term: "Strength",
+                definition: "A non-deductive argument is strong when its premises make its conclusion more likely true than false, so $P(c) > 0.5$."
+            },
+            {
+                term: "Modus ponens",
+                definition: "From if $P$ then $Q$, together with $P$, infer $Q$."
+            },
+            {
+                term: "Modus tollens",
+                definition: "From if $P$ then $Q$, together with not-$Q$, infer not-$P$."
+            },
+            {
+                term: "Hypothetical syllogism",
+                definition: "From if $P$ then $Q$ and if $Q$ then $R$, infer if $P$ then $R$."
+            },
+            {
+                term: "Inductive generalization",
+                definition: "An inference from a representative amount of examined $F$ cases being $G$ to most or all $F$ cases being $G$."
+            },
+            {
+                term: "Statistical syllogism",
+                definition: "An inference from most or all $F$ objects being $G$ and $x$ being $F$ to the probable conclusion that $x$ is $G$."
+            },
+            {
+                term: "Analogical inference",
+                definition: "An inference that transfers a property from one object to another because most of what is true of the first is true of the second."
+            },
+            {
+                term: "Abduction",
+                definition: "Inference to the best explanation: $Q$ occurs, $P$ best explains $Q$, and therefore $P$ is accepted plausibly."
+            },
+            {
+                term: "Theory under-determination",
+                definition: "The same observations may be explained by multiple competing theories with different conclusions."
+            },
+            {
+                term: "Crucial experiment",
+                definition: "A test focused on a point where competing theories make contradictory predictions."
+            },
+            {
+                term: "Context of discovery",
+                definition: "The stage in which a theory is formulated from observations requiring explanation."
+            },
+            {
+                term: "Context of justification",
+                definition: "The stage in which additional observational implications are derived from a theory and tested."
+            },
+            {
+                term: "Refutation",
+                definition: "Deductive rejection of a hypothesis using the form: if $H$ then $e$; not-$e$; therefore, not-$H$."
+            },
+            {
+                term: "Verification",
+                definition: "Certain establishment of a hypothesis; general scientific hypotheses cannot be verified from particular observations."
+            },
+            {
+                term: "Confirmation",
+                definition: "Inductive, non-certain support given to a hypothesis when its observational implications occur."
+            },
+            {
+                term: "Synchronic relationship",
+                definition: "An explanatory relationship between theories in different fields at the same time."
+            },
+            {
+                term: "Diachronic relationship",
+                definition: "An explanatory relationship in which a newer theory derives the roughly correct theory that preceded it in the same field."
+            },
+            {
+                term: "Falsifiability",
+                definition: "The property of specifying possible observations that could deductively refute a theory."
+            },
+            {
+                term: "Popper's demarcation principle",
+                definition: "A theory is scientific if and only if it is falsifiable."
+            }
+        ];
+
+        const mcqData = [
+            {
+                question: "What makes a deductive argument valid?",
+                options: ["Its conclusion is probably true.", "Its premises necessitate its conclusion.", "Its premises are based on many observations.", "Its conclusion provides the best explanation."],
+                correctIndex: 1,
+                explanation: "Validity requires that the conclusion cannot be false if the premises are true. Probability greater than one-half characterizes a strong non-deductive argument, not deductive validity."
+            },
+            {
+                question: "A non-deductive argument raises the probability of its conclusion to $P(c) = 0.7$. How is it classified under the stated definition?",
+                options: ["Invalid, because the probability is below 1.", "Valid, because the conclusion is likely.", "Weak, because uncertainty remains.", "Strong, because the conclusion is more likely true than false."],
+                correctIndex: 3,
+                explanation: "A non-deductive argument is strong when the premises raise the conclusion's probability above $0.5$. Strength does not require certainty."
+            },
+            {
+                question: "Which inference correctly applies modus ponens?",
+                options: ["If $P$ then $Q$; $P$; therefore, $Q$.", "If $P$ then $Q$; $Q$; therefore, $P$.", "If $P$ then $Q$; not-$P$; therefore, not-$Q$.", "If $P$ then $Q$; not-$Q$; therefore, $Q$."],
+                correctIndex: 0,
+                explanation: "Modus ponens combines a conditional with its antecedent to derive its consequent. Inferring the antecedent merely because the consequent occurs does not use this rule."
+            },
+            {
+                question: "Given if $P$ then $Q$ and not-$Q$, which conclusion follows deductively?",
+                options: ["$Q$", "$P$", "Not-$P$", "$P$ or $Q$"],
+                correctIndex: 2,
+                explanation: "Modus tollens derives not-$P$ when the consequence required by $P$ fails. It does not infer $P$ from evidence against $Q$."
+            },
+            {
+                question: "From if $P$ then $Q$ and if $Q$ then $R$, what does hypothetical syllogism derive?",
+                options: ["If $R$ then $P$", "If $P$ then $R$", "If not-$P$ then not-$R$", "$P$ and $R$"],
+                correctIndex: 1,
+                explanation: "Hypothetical syllogism links the two conditionals into if $P$ then $R$. Reversing the direction to if $R$ then $P$ is not licensed."
+            },
+            {
+                question: "Either inflation will occur or debts will increase. The central bank does not raise rates, and if it does not raise rates, inflation will not occur. What conclusion follows after applying modus ponens and then disjunctive syllogism?",
+                options: ["Debts will increase.", "Inflation will occur.", "The central bank will raise rates.", "Debts will not increase."],
+                correctIndex: 0,
+                explanation: "Modus ponens first yields no inflation. Disjunctive syllogism then eliminates inflation from the disjunction, leaving the conclusion that debts will increase."
+            },
+            {
+                question: "Which feature distinguishes the response of deductive validity from the response of non-deductive strength to additional premises?",
+                options: ["Additional premises always improve both.", "Additional premises can destroy validity but not strength.", "Additional premises affect neither.", "Additional premises cannot change validity but may change strength."],
+                correctIndex: 3,
+                explanation: "A valid conclusion remains necessitated when further premises are added. A non-deductive argument can become stronger or weaker as new information changes the support for its conclusion."
+            },
+            {
+                question: "Most examined $F$ objects are $G$, and a representative amount has been examined. The conclusion that most $F$ objects are $G$ exemplifies which inference?",
+                options: ["Statistical syllogism", "Analogical inference", "Inductive generalization", "Modus tollens"],
+                correctIndex: 2,
+                explanation: "Inductive generalization projects a pattern in a representative set of examined cases to the larger class. A statistical syllogism instead applies an existing generalization to an individual."
+            },
+            {
+                question: "Most or all $F$ objects are $G$, and object $x$ is an $F$. Concluding that $x$ is probably $G$ is an example of:",
+                options: ["Abduction", "Inductive generalization", "Analogical inference", "A statistical syllogism"],
+                correctIndex: 3,
+                explanation: "A statistical syllogism applies a claim about a class to a member of that class. Inductive generalization moves in the opposite direction, from examined members to the class."
+            },
+            {
+                question: "Most properties true of object $x$ are also true of object $y$. Property $F$ is true of $x$, so property $F$ is inferred for $y$. What type of reasoning is this?",
+                options: ["Analogical inference", "Disjunctive syllogism", "Deductive verification", "Hypothetical syllogism"],
+                correctIndex: 0,
+                explanation: "The conclusion transfers a property on the basis of similarity between two objects, which is analogical inference. The shared properties support but do not necessitate the conclusion."
+            },
+            {
+                question: "Investigators observe a collection of facts and conclude that hypothesis $H$ is true because it is the most reasonable explanation of all those facts. Which logical tool are they using?",
+                options: ["Deduction", "Statistical syllogism", "Abduction", "Transposition"],
+                correctIndex: 2,
+                explanation: "Abduction is inference to the best explanation. The evidence does not necessitate $H$, and the reasoning is not a projection from a sample to a target population."
+            },
+            {
+                question: "Which condition is imposed on a hypothesis $P$ in the general abductive form concerning phenomenon $Q$?",
+                options: ["$P$ must have already survived every possible test.", "$P$ must entail $Q$.", "$P$ must contain only observational terms.", "$P$ must be deductively entailed by $Q$."],
+                correctIndex: 1,
+                explanation: "The abductive explanation must entail the phenomenon it is intended to explain. The observation does not, however, deductively entail the explanatory hypothesis."
+            },
+            {
+                question: "Why does the availability of an alternative hypothesis $P^*$ illustrate theory under-determination?",
+                options: ["The same observations can support different explanatory conclusions.", "Every theory makes exactly the same predictions.", "Observations cannot be used in scientific reasoning.", "A theory can be derived only from another theory."],
+                correctIndex: 0,
+                explanation: "Under-determination occurs because multiple hypotheses may explain the same observational evidence. It does not mean that the theories must agree on every further prediction."
+            },
+            {
+                question: "How is a crucial experiment intended to distinguish between competing explanations?",
+                options: ["It verifies both theories from their shared evidence.", "It selects the theory with fewer theoretical terms.", "It repeats only observations both theories predict.", "It tests a case in which the theories make contradictory predictions."],
+                correctIndex: 3,
+                explanation: "A crucial experiment targets a point of predictive disagreement. Repeating a consequence shared by both theories cannot decide between them."
+            },
+            {
+                question: "Which activity belongs to the context of justification rather than the context of discovery?",
+                options: ["Inventing a hypothesis through intuition", "Testing additional observational implications of a theory", "Introducing new theoretical terms", "Selecting a best explanation for initial observations"],
+                correctIndex: 1,
+                explanation: "The context of justification tests a theory against additional observations. Discovery concerns formulating the theory that will later be tested."
+            },
+            {
+                question: "A theory entails an observation that has not yet been made. What is the role of that entailment?",
+                options: ["Verification", "Formulation", "Prediction", "Diachronic explanation"],
+                correctIndex: 2,
+                explanation: "When an entailed observation has not yet occurred or been observed, the theory predicts it. If the entailed observation were already known, the same logical relationship would function as an explanation."
+            },
+            {
+                question: "A theory logically derives an observation that has already been observed. How is this application classified?",
+                options: ["Explanation", "Prediction", "Refutation", "Inductive formulation"],
+                correctIndex: 0,
+                explanation: "Deriving an already observed phenomenon from a theory explains that phenomenon. Prediction concerns an observation not yet made."
+            },
+            {
+                question: "Which description correctly identifies a diachronic relationship between theories?",
+                options: ["A theory explains observations gathered simultaneously.", "Two theories make contradictory predictions in one experiment.", "A more basic theory explains a less basic theory in another field at the same time.", "A newer theory explains a roughly correct predecessor in the same field."],
+                correctIndex: 3,
+                explanation: "Diachronic relationships connect theories in the same field at different times. Explanation across different fields at the same time is synchronic."
+            },
+            {
+                question: "Within the stated scientific method, what does it mean for one theory to explain another?",
+                options: ["The explaining theory is more popular.", "Both theories use the same observational terms.", "The explained theory is logically derived from the explaining theory.", "The theories have survived the same number of tests."],
+                correctIndex: 2,
+                explanation: "Inter-theory explanation is defined through logical derivation. Similar vocabulary or comparable testing histories do not by themselves establish explanation."
+            },
+            {
+                question: "Why can a general scientific hypothesis not be formulated deductively from particular observations alone?",
+                options: ["Deduction cannot use observational premises.", "The general hypothesis adds content beyond the particular observations.", "General hypotheses never entail observations.", "Particular observations are always false."],
+                correctIndex: 1,
+                explanation: "A valid deduction cannot derive a more general, more informative claim from particular observations alone. The obstacle is the added content, not a prohibition on using observations as premises."
+            },
+            {
+                question: "Which hypothesis can induction formulate most directly from observations?",
+                options: ["A theory introducing an unobserved gravitational field", "A hypothesis that has no observational implications", "A theory selected from incompatible explanations", "A generalization using the same terms as the examined cases"],
+                correctIndex: 3,
+                explanation: "Induction can generalize an observed pattern while retaining the terms found in the premises. It cannot by that structure introduce a new theoretical term absent from the observations."
+            },
+            {
+                question: "Why is induction limited as a general method for constructing scientific theories?",
+                options: ["It cannot introduce new theoretical terms beyond those in its premises.", "It always produces invalid deductive arguments.", "It can formulate only hypotheses already refuted.", "It necessarily excludes representative samples."],
+                correctIndex: 0,
+                explanation: "Inductive generalization extends a claim from examined cases to a class without adding new vocabulary. Many scientific theories require theoretical concepts not present in observational premises."
+            },
+            {
+                question: "Observations concern different accelerations on Earth and the Moon. A proposed formula containing new theoretical terms is selected as the best explanation. Which method primarily supports this formulation?",
+                options: ["Deductive verification", "Disjunctive syllogism", "Abduction", "Modus tollens"],
+                correctIndex: 2,
+                explanation: "Abduction can formulate a hypothesis with new theoretical terms by treating it as the best explanation of the observations. Induction alone is structurally unable to introduce those terms."
+            },
+            {
+                question: "A hypothesis $H$ entails observational consequence $e$, but the experiment yields not-$e$. Which conclusion and method are appropriate?",
+                options: ["Probably $H$, by induction", "Not-$H$, by deductive modus tollens", "$H$, by abduction", "Not-$e$, by analogical inference"],
+                correctIndex: 1,
+                explanation: "The form if $H$ then $e$; not-$e$; therefore, not-$H$ is modus tollens. It provides the deductive structure used for refutation."
+            },
+            {
+                question: "Why are induction and abduction not the tools for scientific refutation in the presented framework?",
+                options: ["Refutation is certain, whereas induction and abduction provide only plausibility.", "They cannot use observations.", "They always confirm every hypothesis.", "They apply only to relationships between theories."],
+                correctIndex: 0,
+                explanation: "Refutation is treated as a certain result reached deductively. Induction and abduction are non-deductive and therefore provide plausibility rather than certainty."
+            },
+            {
+                question: "Why is verification of a general hypothesis impossible in principle within this account?",
+                options: ["Verification requires abduction, which has no rules.", "Every general hypothesis lacks consequences.", "Deduction can verify only hypotheses with new theoretical terms.", "Deduction cannot derive a general claim from particular observations, and only deduction could provide certainty."],
+                correctIndex: 2,
+                explanation: "Verification demands certainty, so deduction is the only candidate. Yet particular observations do not deductively entail a more general hypothesis, making verification impossible."
+            },
+            {
+                question: "In confirmation, a hypothesis $H$ predicts $e$, and $e$ is observed. What is the justified conclusion?",
+                options: ["$H$ is deductively verified.", "$H$ is certainly true.", "$H$ is refuted.", "$H$ receives non-certain support."],
+                correctIndex: 3,
+                explanation: "Successful observation of a predicted consequence confirms the hypothesis inductively. It does not establish the hypothesis with deductive certainty."
+            },
+            {
+                question: "Why is the form if $H$ then $e$; $e$; therefore, probably $H$ treated as induction in scientific confirmation?",
+                options: ["It is an instance of modus ponens.", "For a general hypothesis, it projects from examined cases to all cases.", "It derives not-$H$ through modus tollens.", "It selects $H$ as a newly invented best explanation."],
+                correctIndex: 1,
+                explanation: "When $H$ says all $F$ objects are $G$ and $e$ says all examined $F$ objects are $G$, the move to $H$ is inductive generalization. It is not the deductive rule modus ponens."
+            },
+            {
+                question: "Why is abduction excluded as the method of confirmation in the presented division of tasks?",
+                options: ["Abduction is used to find a hypothesis, while confirmation begins with a hypothesis already given.", "Abduction provides deductive certainty.", "Abduction cannot explain observations.", "Abduction applies only after verification."],
+                correctIndex: 0,
+                explanation: "Abduction belongs to hypothesis discovery because the hypothesis is its conclusion. Confirmation instead assesses a hypothesis that has already been formulated."
+            },
+            {
+                question: "Which mapping of logical tools to scientific tasks matches the resulting logical-empiricist picture?",
+                options: ["Formulation by deduction, refutation by induction, and verification by abduction", "Formulation by induction only, verification by deduction, and confirmation by abduction", "Formulation by abduction, refutation by induction, and verification by deduction", "Formulation mainly by abduction, refutation by deduction, verification impossible, and confirmation by induction"],
+                correctIndex: 3,
+                explanation: "Abduction is the main formulation tool, deduction supports refutation, and induction supports confirmation. Verification remains impossible because observations cannot deductively establish a general theory."
+            },
+            {
+                question: "What problem motivated Popper's search for a demarcation principle?",
+                options: ["Scientific theories never explain observations.", "Deductive arguments change validity when premises are added.", "Theories he regarded as pseudo-scientific were gaining recognition as scientific.", "General relativity contained no predictions."],
+                correctIndex: 2,
+                explanation: "Popper sought a criterion separating scientific from non-scientific theories because some theories he considered pseudo-scientific presented themselves as science. His concern was not a lack of explanatory claims but their ability to accommodate everything."
+            },
+            {
+                question: "Why did Popper reject confirmation as scientifically authoritative?",
+                options: ["Confirmation depends on deduction.", "Confirmation is inductive, and induction does not provide certainty.", "Confirmation always refutes a hypothesis.", "Confirmation introduces theoretical terms."],
+                correctIndex: 1,
+                explanation: "Popper insisted that science rely on deduction rather than uncertain induction. Since confirmation is inductive, he proposed abandoning it in favor of deductive refutation attempts."
+            },
+            {
+                question: "What should scientists actively seek under Popper's approach?",
+                options: ["Risky predictions and serious attempts to refute theories", "Observations that every competing theory predicts", "Ways to interpret every event as confirmation", "Deductive verification from successful observations"],
+                correctIndex: 0,
+                explanation: "Popperian testing exposes a theory to risky predictions whose failure would refute it. Seeking only accommodating evidence makes testing too easy and removes the force of possible failure."
+            },
+            {
+                question: "Which statement best expresses Popper's demarcation principle?",
+                options: ["A theory is scientific if it has many explanations.", "A theory is scientific if every observation confirms it.", "A theory is scientific if it uses theoretical terms.", "A theory is scientific if and only if it is falsifiable."],
+                correctIndex: 3,
+                explanation: "Falsifiability is Popper's criterion of scientific status. Broad explanatory reach is not sufficient if no possible observation can count against the theory."
+            },
+            {
+                question: "What does it mean for a theory to be falsifiable?",
+                options: ["The theory is already known to be false.", "The theory has been inductively verified.", "Possible observations could refute it through deductive inference.", "Every observation can be reinterpreted to fit it."],
+                correctIndex: 2,
+                explanation: "Falsifiability means that the theory identifies possible adverse observations that would support a deductive refutation. It does not mean that the theory has actually been refuted."
+            },
+            {
+                question: "A theory explains both an event and its exact opposite and identifies neither outcome as evidence against it. How would Popper classify it?",
+                options: ["Unscientific because it is not falsifiable", "Highly scientific because it has many confirmations", "Verified because it explains every outcome", "Deductively valid because no outcome contradicts it"],
+                correctIndex: 0,
+                explanation: "If no possible outcome counts against a theory, the theory cannot be deductively refuted and is not falsifiable. Its ability to reinterpret every event as confirmation is the problem, not a scientific advantage."
+            },
+            {
+                question: "What is the proposed difference between a theory that has survived many refutation attempts and an untested conjecture?",
+                options: ["The first is deductively verified.", "The first has greater plausibility because it withstood serious attempts at refutation.", "The second is automatically false.", "The second is more scientific because it risks less."],
+                correctIndex: 1,
+                explanation: "The presented Popperian response assigns greater plausibility to a theory that survives repeated refutation attempts. Survival does not convert the theory into a deductively verified claim."
+            },
+            {
+                question: "Why was the 1919 Eddington eclipse observation a test of General Relativity?",
+                options: ["It introduced the concept of spacetime through induction.", "It made all alternative explanations impossible.", "It verified every claim in General Relativity.", "Failure to observe the predicted bending of light could have refuted the theory."],
+                correctIndex: 3,
+                explanation: "General Relativity risked an observational prediction concerning the apparent displacement of stars near the Sun. The possibility that the predicted bending might not appear made the theory testable and falsifiable."
+            },
+            {
+                question: "Which outcome did Eddington's solar eclipse expedition observe?",
+                options: ["Heavy bodies falling faster than light bodies", "No apparent change in stellar positions", "Apparent displacement of stars near the Sun consistent with bent starlight", "A representative sample of free-falling bodies accelerating identically"],
+                correctIndex: 2,
+                explanation: "The expedition observed apparent displacement of stars near the Sun, supporting the prediction that the Sun's gravity bends light. The other outcomes concern different examples or contradict the reported observation."
+            },
+            {
+                question: "A new theory specifies numerous possible observations that would refute it. Within Popper's account, what follows?",
+                options: ["It is less scientific because it is vulnerable.", "It is more scientific because it exposes itself to more possible refutations.", "It is already refuted.", "It has been verified by deduction."],
+                correctIndex: 1,
+                explanation: "Popper associates greater scientific character with greater exposure to possible refutation. Vulnerability to adverse evidence is a virtue in this framework, not proof that the theory is false."
+            }
+        ];
+
+        const tfData = [
+            {
+                question: "A valid deductive argument can have its validity destroyed merely by adding another premise.",
+                answer: false,
+                explanation: "Adding premises cannot make a valid deductive inference invalid, because the original premises still necessitate the conclusion. Non-deductive strength, by contrast, may change with new premises."
+            },
+            {
+                question: "A strong non-deductive argument must make its conclusion certain.",
+                answer: false,
+                explanation: "Strength requires only that the conclusion be more likely true than false in light of the premises. Certainty belongs to successful deduction."
+            },
+            {
+                question: "From if $P$ then $Q$ and not-$Q$, modus tollens licenses the conclusion not-$P$.",
+                answer: true,
+                explanation: "The failure of a consequence required by $P$ deductively rules out $P$ through modus tollens."
+            },
+            {
+                question: "Inductive generalization moves from a representative set of examined cases to a claim about the larger class.",
+                answer: true,
+                explanation: "Its structure projects the observed pattern among examined cases to most or all members of the class."
+            },
+            {
+                question: "A statistical syllogism begins with an individual case and concludes a general claim about the entire class.",
+                answer: false,
+                explanation: "A statistical syllogism moves from a class-level claim to a probable conclusion about an individual member. Moving from examined individuals to a class is inductive generalization."
+            },
+            {
+                question: "Abduction is deductive because the observed phenomenon entails its best explanation.",
+                answer: false,
+                explanation: "In abduction, the proposed explanation entails the phenomenon, but the phenomenon does not deductively entail that explanation. Alternative explanations may fit the same evidence."
+            },
+            {
+                question: "Theory under-determination means that the same observations may be explained by different hypotheses.",
+                answer: true,
+                explanation: "Multiple abductive conclusions can share the same observational premise, so the evidence alone may not uniquely determine a theory."
+            },
+            {
+                question: "A crucial experiment is useful when competing theories make contradictory predictions.",
+                answer: true,
+                explanation: "Testing a point of predictive disagreement can discriminate between theories that explain the same initial observations."
+            },
+            {
+                question: "In the positivist scientific method, an entailed but not-yet-observed consequence functions as an explanation rather than a prediction.",
+                answer: false,
+                explanation: "An entailed consequence not yet observed is a prediction. An entailed phenomenon already observed is explained by the theory."
+            },
+            {
+                question: "A synchronic relationship concerns theories in different fields at the same time.",
+                answer: true,
+                explanation: "The synchronic relation connects theories across fields at one time, while the diachronic relation connects older and newer theories in the same field."
+            },
+            {
+                question: "Deduction from particular observations can formulate any general scientific hypothesis with certainty.",
+                answer: false,
+                explanation: "A general hypothesis adds content beyond particular observations. Deduction cannot derive that more informative general claim from those observations alone."
+            },
+            {
+                question: "Induction can introduce theoretical terms that occur nowhere in its observational premises.",
+                answer: false,
+                explanation: "Inductive generalization retains the terms of its premises while extending their scope. It cannot by itself introduce new theoretical vocabulary."
+            },
+            {
+                question: "Abduction is the main formulation method for hypotheses containing new theoretical terms.",
+                answer: true,
+                explanation: "Because abduction proposes an explanatory hypothesis rather than merely generalizing observed vocabulary, it can introduce theoretical concepts."
+            },
+            {
+                question: "Scientific refutation has the deductive form if $H$ then $e$; not-$e$; therefore, not-$H$.",
+                answer: true,
+                explanation: "This is modus tollens, the rule used to derive the negation of a hypothesis from a failed predicted consequence."
+            },
+            {
+                question: "General hypotheses can be verified because a sufficiently large set of particular observations deductively entails them.",
+                answer: false,
+                explanation: "No collection of particular observations deductively establishes the unrestricted general claim in this account. The move remains inductive rather than certain."
+            },
+            {
+                question: "Confirmation and verification are equivalent because both establish a hypothesis with certainty.",
+                answer: false,
+                explanation: "Verification would provide certainty but is impossible for general hypotheses. Confirmation supplies only inductive, non-certain support."
+            },
+            {
+                question: "The scientific method of confirmation is classified as induction because it generalizes from examined cases to the wider class.",
+                answer: true,
+                explanation: "When the hypothesis concerns all $F$ objects and the evidence concerns examined $F$ objects, accepting the hypothesis is an inductive generalization."
+            },
+            {
+                question: "Abduction is the designated confirmation method because it evaluates a hypothesis already given.",
+                answer: false,
+                explanation: "Abduction is used to find a hypothesis as the best explanation. Confirmation begins after a hypothesis has already been formulated."
+            },
+            {
+                question: "The resulting logical-empiricist picture assigns formulation mainly to abduction, refutation to deduction, and confirmation to induction.",
+                answer: true,
+                explanation: "These tools correspond respectively to explanatory discovery, certain modus-tollens refutation, and non-certain observational support."
+            },
+            {
+                question: "Popper regarded the ability to explain every possible observation as a decisive scientific advantage.",
+                answer: false,
+                explanation: "He regarded unlimited accommodation as a defect because no possible observation could then refute the theory."
+            },
+            {
+                question: "Popper rejected induction and therefore also rejected confirmation as scientifically authoritative.",
+                answer: true,
+                explanation: "Because confirmation is inductive and induction lacks certainty, Popper proposed focusing science on deductive refutation attempts."
+            },
+            {
+                question: "Under Popper's demarcation principle, a theory is scientific if and only if it is falsifiable.",
+                answer: true,
+                explanation: "Falsifiability is the specified criterion separating scientific from non-scientific theories."
+            },
+            {
+                question: "A falsifiable theory must already have been shown to be false.",
+                answer: false,
+                explanation: "Falsifiability means that possible observations could refute the theory. It does not mean that such a refuting observation has actually occurred."
+            },
+            {
+                question: "Scientists following Popper should seek risky predictions rather than only observations likely to be interpreted as confirmations.",
+                answer: true,
+                explanation: "Risky predictions expose theories to serious potential refutation and therefore provide meaningful tests."
+            },
+            {
+                question: "In the presented Popperian account, surviving many refutation attempts gives a theory greater plausibility without verifying it.",
+                answer: true,
+                explanation: "Repeated survival distinguishes a tested theory from an untested conjecture, but it does not produce deductive verification."
+            },
+            {
+                question: "A theory that explains an event and its negation while allowing no adverse observation satisfies Popper's criterion.",
+                answer: false,
+                explanation: "Such a theory is not falsifiable because neither outcome can count against it. Popper therefore classifies it as unscientific."
+            },
+            {
+                question: "General Relativity was falsifiable because failure to observe its predicted light bending could have refuted it.",
+                answer: true,
+                explanation: "The prediction exposed the theory to a possible observational failure, which is precisely what falsifiability requires."
+            },
+            {
+                question: "Eddington's 1919 expedition reported an apparent displacement of stars near the Sun.",
+                answer: true,
+                explanation: "The displacement was interpreted as evidence of starlight bending near the Sun, consistent with the prediction of General Relativity."
+            },
+            {
+                question: "Within Popper's account, fewer possible refuting observations make a theory more scientific.",
+                answer: false,
+                explanation: "The account states the reverse: greater exposure to possible refutation makes a theory more scientific."
+            },
+            {
+                question: "Popper used falsifiability to distinguish Einstein's theory from theories that interpreted both an outcome and its opposite as confirmation.",
+                answer: true,
+                explanation: "Einstein's theory risked observational failure, whereas the criticized theories were portrayed as accommodating every possible outcome."
+            }
+        ];
+
+        // --- Global State Variables ---
+        let currentCardIndex = 0;
+        let isCardFront = true;
+        let isCardAnimating = false;
+        let currentMCQIndex = 0;
+        let currentTFIndex = 0;
+        let mcqAnswers = new Array(mcqData.length).fill(null);
+        let tfAnswers = new Array(tfData.length).fill(null);
+
+        // --- DOM Element References ---
+        const flashcardContent = document.getElementById('flashcard-content');
+        const cardCounter = document.getElementById('card-counter');
+        const prevCardBtn = document.getElementById('prev-card');
+        const nextCardBtn = document.getElementById('next-card');
+        const mcqQuestion = document.getElementById('mcq-question');
+        const mcqOptions = document.getElementById('mcq-options');
+        const mcqFeedback = document.getElementById('mcq-feedback');
+        const mcqExplanation = document.getElementById('mcq-explanation');
+        const mcqCounter = document.getElementById('mcq-counter');
+        const prevMCQBtn = document.getElementById('prev-mcq');
+        const nextMCQBtn = document.getElementById('next-mcq');
+        const viewAllMCQBtn = document.getElementById('view-all-mcq');
+        const mcqSingleView = document.getElementById('mcq-single-view');
+        const mcqAllQuestionsContainer = document.getElementById('mcq-all-questions');
+        const tfQuestion = document.getElementById('tf-question');
+        const tfOptionsContainer = document.getElementById('tf-options');
+        const tfFeedback = document.getElementById('tf-feedback');
+        const tfExplanation = document.getElementById('tf-explanation');
+        const tfCounter = document.getElementById('tf-counter');
+        const prevTFBtn = document.getElementById('prev-tf');
+        const nextTFBtn = document.getElementById('next-tf');
+        const viewAllTFBtn = document.getElementById('view-all-tf');
+        const tfSingleView = document.getElementById('tf-single-view');
+        const tfAllQuestionsContainer = document.getElementById('tf-all-questions');
+
+        // --- MathJax Re-rendering Helper ---
+        function triggerMathJax() {
+            if (window.MathJax && window.MathJax.typesetPromise) {
+                window.MathJax.typesetPromise().catch((err) => console.error('MathJax error:', err.message));
+            }
+        }
+
+        function displayCard(index) {
+            if (!flashcardData || flashcardData.length === 0) return;
+            const cardData = flashcardData[index];
+            isCardFront = true;
+            flashcardContent.style.opacity = '1';
+            flashcardContent.textContent = cardData.term;
+            flashcardContent.className = 'flashcard-front-style';
+            cardCounter.textContent = `Card ${index + 1} / ${flashcardData.length}`;
+            prevCardBtn.disabled = index === 0;
+            nextCardBtn.disabled = index === flashcardData.length - 1;
+            triggerMathJax();
+        }
+
+        function flipCard() {
+            if (isCardAnimating || !flashcardData || flashcardData.length === 0) return;
+            isCardAnimating = true;
+            flashcardContent.style.opacity = '0';
+            setTimeout(() => {
+                isCardFront = !isCardFront;
+                const cardData = flashcardData[currentCardIndex];
+                if (isCardFront) {
+                    flashcardContent.textContent = cardData.term;
+                    flashcardContent.className = 'flashcard-front-style';
+                } else {
+                    flashcardContent.textContent = cardData.definition;
+                    flashcardContent.className = 'flashcard-back-style';
+                }
+                flashcardContent.style.opacity = '1';
+                isCardAnimating = false;
+                triggerMathJax();
+            }, 300);
+        }
+
+        function displayMCQuestion(index) {
+            if (!mcqData || mcqData.length === 0) return;
+            const qData = mcqData[index];
+            mcqQuestion.textContent = qData.question;
+            mcqOptions.innerHTML = '';
+            mcqFeedback.classList.add('hidden');
+            mcqExplanation.classList.add('hidden');
+            qData.options.forEach((option, i) => {
+                const button = document.createElement('button');
+                button.textContent = option;
+                button.onclick = () => handleMCQAnswer(index, i);
+                mcqOptions.appendChild(button);
+            });
+            mcqCounter.textContent = `Question ${index + 1} / ${mcqData.length}`;
+            prevMCQBtn.disabled = index === 0;
+            nextMCQBtn.disabled = index === mcqData.length - 1;
+            if (mcqAnswers[index] !== null) {
+                highlightMCQAnswer(mcqOptions, mcqFeedback, mcqExplanation, index, mcqAnswers[index].selected);
+            }
+            triggerMathJax();
+        }
+
+        function handleMCQAnswer(qIndex, selectedIndex) {
+            if (mcqAnswers[qIndex] !== null) return;
+            const isCorrect = selectedIndex === mcqData[qIndex].correctIndex;
+            mcqAnswers[qIndex] = { selected: selectedIndex, correct: isCorrect };
+            highlightMCQAnswer(mcqOptions, mcqFeedback, mcqExplanation, qIndex, selectedIndex);
+        }
+
+        function highlightMCQAnswer(optionsContainer, feedbackEl, explanationEl, qIndex, selectedIndex) {
+            const qData = mcqData[qIndex];
+            const buttons = optionsContainer.querySelectorAll('button');
+            buttons.forEach((button, i) => {
+                button.disabled = true;
+                if (i === qData.correctIndex) {
+                    button.classList.add('correct');
+                }
+                if (i === selectedIndex && i !== qData.correctIndex) {
+                    button.classList.add('incorrect');
+                }
+            });
+            feedbackEl.textContent = selectedIndex === qData.correctIndex ? "Correct!" : "Incorrect.";
+            feedbackEl.className = `feedback ${selectedIndex === qData.correctIndex ? 'correct' : 'incorrect'}`;
+            explanationEl.innerHTML = `<strong>Explanation:</strong> ${qData.explanation}`;
+            explanationEl.classList.remove('hidden');
+            triggerMathJax();
+        }
+
+        function displayAllMCQ() {
+            if (!mcqData || mcqData.length === 0) return;
+            mcqSingleView.classList.add('hidden');
+            mcqAllQuestionsContainer.innerHTML = '';
+            mcqData.forEach((qData, index) => {
+                const questionDiv = document.createElement('div');
+                questionDiv.className = 'question-container-all';
+                questionDiv.innerHTML = `
+                    <div class="question-text">${index + 1}. ${qData.question}</div>
+                    <div class="options">
+                        ${qData.options.map((option, i) => `<button data-qindex="${index}" data-oindex="${i}">${option}</button>`).join('')}
+                    </div>
+                    <div class="feedback hidden"></div>
+                    <div class="explanation hidden"></div>
+                `;
+                mcqAllQuestionsContainer.appendChild(questionDiv);
+                 const optionButtons = questionDiv.querySelectorAll('.options button');
+                 optionButtons.forEach(button => {
+                     button.onclick = () => {
+                        const qIndex = parseInt(button.dataset.qindex);
+                        const oIndex = parseInt(button.dataset.oindex);
+                        if (mcqAnswers[qIndex] === null) {
+                            const isCorrect = oIndex === mcqData[qIndex].correctIndex;
+                            mcqAnswers[qIndex] = { selected: oIndex, correct: isCorrect };
+                        }
+                        const optionsDiv = button.closest('.options');
+                        const feedbackDiv = questionDiv.querySelector('.feedback');
+                        const explanationDiv = questionDiv.querySelector('.explanation');
+                        highlightMCQAnswer(optionsDiv, feedbackDiv, explanationDiv, qIndex, mcqAnswers[qIndex].selected);
+                     };
+                 });
+                 if (mcqAnswers[index] !== null) {
+                    const optionsDiv = questionDiv.querySelector('.options');
+                    const feedbackDiv = questionDiv.querySelector('.feedback');
+                    const explanationDiv = questionDiv.querySelector('.explanation');
+                    highlightMCQAnswer(optionsDiv, feedbackDiv, explanationDiv, index, mcqAnswers[index].selected);
+                 }
+            });
+            mcqAllQuestionsContainer.classList.remove('hidden');
+            triggerMathJax();
+        }
+
+        function displayTFQuestion(index) {
+            if (!tfData || tfData.length === 0) return;
+            const qData = tfData[index];
+            tfQuestion.textContent = qData.question;
+            tfFeedback.classList.add('hidden');
+            tfExplanation.classList.add('hidden');
+             const buttons = tfOptionsContainer.querySelectorAll('button');
+             buttons.forEach(button => {
+                 button.disabled = false;
+                 button.classList.remove('correct', 'incorrect');
+                 button.onclick = () => handleTFAnswer(index, button.dataset.answer === 'true');
+             });
+            tfCounter.textContent = `Question ${index + 1} / ${tfData.length}`;
+            prevTFBtn.disabled = index === 0;
+            nextTFBtn.disabled = index === tfData.length - 1;
+            if (tfAnswers[index] !== null) {
+                highlightTFAnswer(tfOptionsContainer, tfFeedback, tfExplanation, index, tfAnswers[index].selected);
+            }
+            triggerMathJax();
+        }
+
+        function handleTFAnswer(qIndex, selectedAnswer) {
+            if (tfAnswers[qIndex] !== null) return;
+            const isCorrect = selectedAnswer === tfData[qIndex].answer;
+            tfAnswers[qIndex] = { selected: selectedAnswer, correct: isCorrect };
+            highlightTFAnswer(tfOptionsContainer, tfFeedback, tfExplanation, qIndex, selectedAnswer);
+        }
+
+        function highlightTFAnswer(optionsContainer, feedbackEl, explanationEl, qIndex, selectedAnswer) {
+             const qData = tfData[qIndex];
+             const buttons = optionsContainer.querySelectorAll('button');
+             buttons.forEach(button => {
+                 const buttonAnswer = button.dataset.answer === 'true';
+                 button.disabled = true;
+                 if (buttonAnswer === qData.answer) {
+                     button.classList.add('correct');
+                 }
+                 if (buttonAnswer === selectedAnswer && buttonAnswer !== qData.answer) {
+                     button.classList.add('incorrect');
+                 }
+             });
+             feedbackEl.textContent = selectedAnswer === qData.answer ? "Correct!" : "Incorrect.";
+             feedbackEl.className = `feedback ${selectedAnswer === qData.answer ? 'correct' : 'incorrect'}`;
+             explanationEl.innerHTML = `<strong>Explanation:</strong> ${qData.explanation}`;
+             explanationEl.classList.remove('hidden');
+             triggerMathJax();
+        }
+
+        function displayAllTF() {
+             if (!tfData || tfData.length === 0) return;
+             tfSingleView.classList.add('hidden');
+             tfAllQuestionsContainer.innerHTML = '';
+             tfData.forEach((qData, index) => {
+                 const questionDiv = document.createElement('div');
+                 questionDiv.className = 'question-container-all';
+                 questionDiv.innerHTML = `
+                     <div class="question-text">${index + 1}. ${qData.question}</div>
+                     <div class="tf-options">
+                         <button data-qindex="${index}" data-answer="true">True</button>
+                         <button data-qindex="${index}" data-answer="false">False</button>
+                     </div>
+                     <div class="feedback hidden"></div>
+                     <div class="explanation hidden"></div>
+                 `;
+                 tfAllQuestionsContainer.appendChild(questionDiv);
+                 const optionButtons = questionDiv.querySelectorAll('.tf-options button');
+                 optionButtons.forEach(button => {
+                     button.onclick = () => {
+                         const qIndex = parseInt(button.dataset.qindex);
+                         const selectedAnswer = button.dataset.answer === 'true';
+                         if (tfAnswers[qIndex] === null) {
+                             const isCorrect = selectedAnswer === tfData[qIndex].answer;
+                             tfAnswers[qIndex] = { selected: selectedAnswer, correct: isCorrect };
+                         }
+                         const optionsDiv = button.closest('.tf-options');
+                         const feedbackDiv = questionDiv.querySelector('.feedback');
+                         const explanationDiv = questionDiv.querySelector('.explanation');
+                         highlightTFAnswer(optionsDiv, feedbackDiv, explanationDiv, qIndex, tfAnswers[qIndex].selected);
+                     };
+                 });
+                 if (tfAnswers[index] !== null) {
+                    const optionsDiv = questionDiv.querySelector('.tf-options');
+                    const feedbackDiv = questionDiv.querySelector('.feedback');
+                    const explanationDiv = questionDiv.querySelector('.explanation');
+                    highlightTFAnswer(optionsDiv, feedbackDiv, explanationDiv, index, tfAnswers[index].selected);
+                 }
+             });
+             tfAllQuestionsContainer.classList.remove('hidden');
+             triggerMathJax();
+        }
+
+        function initialize() {
+            if (flashcardData.length > 0) displayCard(currentCardIndex);
+            if (mcqData.length > 0) displayMCQuestion(currentMCQIndex);
+            if (tfData.length > 0) displayTFQuestion(currentTFIndex);
+            flashcardContent.addEventListener('click', flipCard);
+            prevCardBtn.addEventListener('click', () => { if (currentCardIndex > 0) { currentCardIndex--; displayCard(currentCardIndex); } });
+            nextCardBtn.addEventListener('click', () => { if (currentCardIndex < flashcardData.length - 1) { currentCardIndex++; displayCard(currentCardIndex); } });
+            prevMCQBtn.addEventListener('click', () => { if (currentMCQIndex > 0) { currentMCQIndex--; displayMCQuestion(currentMCQIndex); } });
+            nextMCQBtn.addEventListener('click', () => { if (currentMCQIndex < mcqData.length - 1) { currentMCQIndex++; displayMCQuestion(currentMCQIndex); } });
+            viewAllMCQBtn.addEventListener('click', displayAllMCQ);
+            prevTFBtn.addEventListener('click', () => { if (currentTFIndex > 0) { currentTFIndex--; displayTFQuestion(currentTFIndex); } });
+            nextTFBtn.addEventListener('click', () => { if (currentTFIndex < tfData.length - 1) { currentTFIndex++; displayTFQuestion(currentTFIndex); } });
+            viewAllTFBtn.addEventListener('click', displayAllTF);
+
+            // Initial MathJax render for static HTML (like the Theory section)
+            triggerMathJax();
+        }
+
+        initialize();
+    });
+    </script>
+</body>
+</html>

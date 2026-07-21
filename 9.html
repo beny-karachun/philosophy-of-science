@@ -1,0 +1,1183 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Laws of Nature and Scientific Explanation</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+
+    <script>
+        window.MathJax = {
+            tex: {
+                inlineMath: [['$', '$'], ['\\(', '\\)']],
+                displayMath: [['$$', '$$'], ['\\[', '\\]']]
+            },
+            startup: {
+                typeset: false // We will trigger this manually via JS
+            }
+        };
+    </script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+    <style>
+        /* --- Root Variables for Theme --- */
+        :root {
+            --primary-bg: #0a0a0f;
+            --panel-bg: rgba(255, 255, 255, 0.03);
+            --panel-border: rgba(255, 255, 255, 0.1);
+
+            --accent-start: #6C63FF;
+            --accent-end: #A855F7;
+            --accent-gradient: linear-gradient(135deg, var(--accent-start), var(--accent-end));
+            --accent-color: #8B5CF6; /* Midpoint fallback */
+
+            --text-color: #E0E0E0;
+            --text-muted: #9ca3af;
+
+            --correct-color: rgba(16, 185, 129, 0.2);
+            --correct-border: #10b981;
+            --incorrect-color: rgba(239, 68, 68, 0.2);
+            --incorrect-border: #ef4444;
+
+            --insight-bg: rgba(168, 85, 247, 0.08);
+            --insight-border: #A855F7;
+        }
+
+        /* --- Global Styles & Glow Effects --- */
+        body {
+            background-color: var(--primary-bg);
+            background-image:
+                radial-gradient(circle at 15% 50%, rgba(108, 99, 255, 0.06), transparent 25vw),
+                radial-gradient(circle at 85% 30%, rgba(168, 85, 247, 0.06), transparent 25vw);
+            background-attachment: fixed;
+            color: var(--text-color);
+            font-family: 'Inter', sans-serif;
+            line-height: 1.6;
+            margin: 0;
+            padding: 20px;
+        }
+
+        /* --- Panel Containers (Optimized: No blur for performance) --- */
+        .container, .section, #flashcard-content, .question-container-single, .question-container-all, .explanation {
+            background: var(--panel-bg);
+            border: 1px solid var(--panel-border);
+            border-radius: 12px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+        }
+
+        .container {
+            width: 90%;
+            max-width: 1000px;
+            margin: 20px auto;
+            padding: 30px;
+        }
+
+        h1, h2 {
+            text-align: center;
+            border-bottom: 1px solid var(--panel-border);
+            padding-bottom: 15px;
+            font-weight: 700;
+            color: #fff;
+        }
+
+        .section {
+            padding: 25px;
+            margin-bottom: 30px;
+            animation: slideIn 0.5s ease-out forwards;
+        }
+
+        /* --- Theory & Key Insight Styling --- */
+        .theory-text {
+            font-size: 1.1em;
+            line-height: 1.8;
+            color: var(--text-muted);
+        }
+
+        .theory-text p, .theory-text li {
+            color: var(--text-color);
+        }
+
+        .theory-text h3 {
+            color: #fff;
+            margin-top: 25px;
+            border-bottom: none;
+            text-align: left;
+            font-size: 1.3em;
+        }
+
+        .insight-box {
+            background-color: var(--insight-bg);
+            border-left: 4px solid var(--insight-border);
+            padding: 18px;
+            margin: 25px 0;
+            border-radius: 8px;
+        }
+
+        .insight-box strong {
+            color: #fff;
+            display: block;
+            margin-bottom: 8px;
+            font-size: 1.1em;
+            text-shadow: 0 0 10px rgba(168, 85, 247, 0.4);
+        }
+
+        /* --- Study Cards Styling --- */
+        .flashcard-container {
+            height: 250px;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            perspective: 1000px;
+        }
+
+        #flashcard-content {
+            width: 100%;
+            height: 100%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            padding: 30px;
+            box-sizing: border-box;
+            transition: opacity 0.3s ease-in-out, transform 0.2s;
+        }
+
+        #flashcard-content:hover {
+            transform: translateY(-2px);
+            border-color: rgba(168, 85, 247, 0.4);
+            box-shadow: 0 10px 40px rgba(108, 99, 255, 0.15);
+        }
+
+        .flashcard-front-style {
+             font-size: 1.6em;
+             font-weight: 600;
+             font-family: 'JetBrains Mono', monospace;
+             color: var(--accent-end);
+        }
+
+        .flashcard-back-style {
+             font-size: 1.2em;
+             color: var(--text-color);
+        }
+
+        /* --- Questions Styling (MCQ & T/F) --- */
+         .question-container-single, .question-container-all {
+            margin-bottom: 20px;
+            padding: 20px;
+         }
+
+        .question-text {
+            font-weight: 600;
+            margin-bottom: 20px;
+            font-size: 1.1em;
+        }
+
+        /* Buttons & Glass Inputs */
+        .options button, .tf-options button, .nav-button, .view-all-button {
+            display: block;
+            width: 100%;
+            padding: 12px 15px;
+            margin: 8px 0;
+            background: rgba(255, 255, 255, 0.02);
+            color: var(--text-color);
+            border: 1px solid var(--panel-border);
+            border-radius: 8px;
+            cursor: pointer;
+            text-align: left;
+            font-family: 'Inter', sans-serif;
+            font-size: 1em;
+            transition: all 0.3s ease;
+        }
+
+        .nav-button, .view-all-button {
+            width: auto;
+            text-align: center;
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        .options button:hover:not(:disabled), .tf-options button:hover:not(:disabled), .nav-button:hover:not(:disabled), .view-all-button:hover {
+            background: var(--accent-gradient);
+            border-color: transparent;
+            color: #fff;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 15px rgba(108, 99, 255, 0.25);
+        }
+
+        .options button:disabled, .tf-options button:disabled, .nav-button:disabled {
+            cursor: not-allowed;
+            opacity: 0.5;
+            transform: none;
+        }
+
+        /* Correct/Incorrect States */
+        .options button.correct, .tf-options button.correct {
+            background: var(--correct-color);
+            border-color: var(--correct-border);
+            color: #fff;
+            opacity: 1;
+        }
+        .options button.incorrect, .tf-options button.incorrect {
+            background: var(--incorrect-color);
+            border-color: var(--incorrect-border);
+            color: #fff;
+            opacity: 1;
+        }
+
+        .feedback {
+            margin-top: 15px;
+            padding: 12px;
+            border-radius: 8px;
+            font-weight: 600;
+            text-align: center;
+            animation: fadeIn 0.3s ease-in;
+        }
+
+        .feedback.correct {
+            color: var(--correct-border);
+            background: var(--correct-color);
+            border: 1px solid var(--correct-border);
+        }
+
+        .feedback.incorrect {
+            color: var(--incorrect-border);
+            background: var(--incorrect-color);
+            border: 1px solid var(--incorrect-border);
+        }
+
+        .explanation {
+            margin-top: 15px;
+            font-style: italic;
+            font-size: 0.95em;
+            padding: 15px;
+            color: var(--text-muted);
+            border-left: 3px solid var(--accent-start);
+            animation: fadeIn 0.5s ease-in;
+        }
+
+        /* --- Navigation & Utility --- */
+        .navigation {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 20px;
+        }
+
+        .counter {
+            font-size: 0.9em;
+            color: var(--text-muted);
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        .view-all-container {
+            text-align: center;
+            margin-top: 25px;
+        }
+
+        .hidden { display: none !important; }
+
+        /* --- Animations --- */
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Laws of Nature and Scientific Explanation</h1>
+
+        <div class="section">
+            <h2>Theory Summary and Key Insights</h2>
+            <div id="theory-content" class="theory-text">
+                <h3>Why Laws of Nature Matter</h3>
+                <p>Reliable theories are needed to perform two central scientific tasks: <strong>prediction</strong> and <strong>explanation</strong>. A standard predictive argument combines a general law with an initial condition and deductively derives a phenomenon. For example, the law that freezing water expands, together with the condition that a lake will freeze, supports the prediction that the lake's volume will increase.</p>
+                <p>A merely true pattern is not automatically a law of nature. A team might always have won whenever a particular spectator attended, yet that accidental regularity does not justify predicting another victory. The philosophical challenge is therefore to distinguish <strong>laws of nature</strong> from <strong>accidental generalizations</strong>.</p>
+
+                <h3>Humean and Anti-Humean Accounts of Laws</h3>
+                <p>Defining a law as any true generalization is too weak because it admits accidental regularities. A first Humean refinement excludes statements limited to particular individuals or locations. This is still too weak because a statement such as every existing gold sample weighing less than ten tons can be accidentally true. It is also too strong because genuine laws may concern a single universe or apply only under local conditions, as with $x = 0.5gt^2$ at Earth's surface.</p>
+                <p>A second Humean proposal requires a law to be formulated entirely in general terms. This remains too weak because singular descriptions can be replaced artificially with general descriptions without removing their accidental character. The strongest Humean proposal identified is the Ramsey-Lewis position, but its details are not developed here.</p>
+                <p>Anti-Humeans instead propose that a law is a true generalization that is also <strong>necessary</strong>. Hume challenges this proposal in two ways:</p>
+                <ul>
+                    <li><strong>Epistemic argument:</strong> empirical experience reveals constant conjunction between types of events, not necessity itself. Strict epistemic empiricism therefore provides no justification for belief in necessity.</li>
+                    <li><strong>Metaphysical argument:</strong> Hume's fork classifies statements as either necessary and a priori or non-necessary and a posteriori. Since scientific laws are known a posteriori, the argument concludes that they are not necessary.</li>
+                </ul>
+                <p>The referential theory of language challenges Hume's fork by allowing necessary a posteriori identities. Examples include the identity between Madonna and Louise Ciccone, and the scientific identities water and $H_2O$, lightning and electrical-energy discharge, and heat and average molecular kinetic energy. These cases directly challenge the claim that every a posteriori scientific statement must be non-necessary.</p>
+                <p>The epistemic argument can also be challenged by an argument from unacceptable consequences. Science relies on entities such as electrons, forces, and fields even though they are not directly experienced. If strict epistemic empiricism ruled out belief in all such entities, much of scientific theory would have to be abandoned. Rejecting that strict premise is therefore presented as less costly.</p>
+
+                <div class="insight-box">
+                    <strong>Key Insight:</strong>
+                    A definition can fail in two independent directions. It is too weak if it includes cases that are not instances of the concept, and too strong if it excludes genuine instances. One definition can have both defects at once.
+                </div>
+
+                <h3>The Armstrong-Dretske-Tully View</h3>
+                <p>The prevailing constructive anti-Humean account presented is the Armstrong-Dretske-Tully view. Objects possess properties, and fixed relationships hold between properties. A law is necessary because of the relationship between the properties it describes. Thus, the expansion of freezing water follows from a fixed connection involving the relevant properties. By contrast, even a true association between Galileo wearing white and cloudy weather would not be a law because no corresponding connection exists between those properties.</p>
+                <p>The dispute between Humean and anti-Humean accounts remains unresolved. Consequently, no accepted criterion is available here for deciding in every case whether a prediction or explanation is scientific by virtue of being based on a genuine law.</p>
+
+                <h3>The Deductive-Nomological Model</h3>
+                <p>Logical Empiricism proposes that explanation and prediction have the same deductive structure:</p>
+                <ol>
+                    <li>A general law $L$.</li>
+                    <li>An initial condition $I$.</li>
+                    <li>A phenomenon $e$ that follows deductively from $L$ and $I$.</li>
+                </ol>
+                <p>If $e$ has already been observed, the argument is called an explanation. If $e$ has not yet been observed, it is called a prediction. As a model of explanation, this is the <strong>Deductive-Nomological model</strong>, or <strong>D-N model</strong>.</p>
+                <p>Because the D-N model defines scientific explanation, it should apply only to explanations and to all explanations. Counterexamples show that it satisfies neither requirement.</p>
+
+                <h3>Why the D-N Model Is Too Weak</h3>
+                <p>The <strong>symmetry problem</strong> arises because deduction can proceed in a direction opposite to explanation. Geometry, a shadow's length, and the Sun's angle can be used to calculate a flagpole's height. Yet the shadow does not explain why the pole has that height; rather, the pole's height helps explain its shadow. Similarly, Newton's laws and Wednesday's stellar configuration might permit calculation of Tuesday's configuration, but Wednesday's configuration does not explain Tuesday's.</p>
+                <p>An explanation of how a value was calculated must not be confused with an explanation of the phenomenon itself. Evidence or data may reveal a phenomenon without causing or explaining it.</p>
+                <p>The <strong>relevance problem</strong> supplies another counterexample. If all salt dissolves in water, then all hexed salt dissolves in water. The D-N structure could therefore cite being hexed as an initial condition in a valid deduction, although the hex is irrelevant to the dissolution. Deductive validity alone does not ensure explanatory relevance.</p>
+
+                <div class="insight-box">
+                    <strong>Key Insight:</strong>
+                    Logical derivability is not explanatory direction. A phenomenon can provide enough information to infer its cause, while still failing to explain that cause.
+                </div>
+
+                <h3>Why the D-N Model Is Too Strong</h3>
+                <p>The model also excludes acceptable causal explanations that do not deductively entail their outcomes. Untreated syphilis may cause paresis without producing it in every case. Rita's untreated syphilis can therefore explain her paresis even though the premise does not deductively imply that she would develop it. Likewise, knocking over a coffee cup can explain a carpet stain without an explicitly stated universal law.</p>
+                <p>The objection that a hidden law must underlie such explanations does not remove the problem. The explanations appear acceptable even when no law is identified, and they would remain acceptable even if an underlying law existed but could not be stated explicitly.</p>
+
+                <h3>Logical and Causal Arrows</h3>
+                <p>The criticisms reveal a fundamental difference between prediction and explanation:</p>
+                <ul>
+                    <li><strong>Prediction follows the logical arrow:</strong> $H$ predicts $e$ when $H$ logically entails $e$.</li>
+                    <li><strong>Explanation follows the causal arrow:</strong> $H$ explains $e$ when $H$ is the cause of $e$.</li>
+                </ul>
+                <p>The arrows need not point in the same direction. Earlier stellar conditions may both predict and explain later ones. Later stellar conditions may permit a prediction or reconstruction of earlier ones without explaining them. Untreated syphilis may explain paresis even when it cannot predict it deductively.</p>
+
+                <div class="insight-box">
+                    <strong>Key Insight:</strong>
+                    Prediction and explanation can separate in both directions: a premise may predict without explaining, and it may explain without predicting. The temporal status of the conclusion as observed or unobserved is therefore not the only difference.
+                </div>
+
+                <h3>Overall Assessment and the Causal Alternative</h3>
+                <p>The D-N model is too weak because it licenses non-explanatory deductions, and too strong because it excludes genuine non-deductive explanations. Either defect alone is enough to reject it as a satisfactory model of scientific explanation. Its deductive structure makes it a model of scientific prediction, not a successful model of scientific explanation.</p>
+                <p>The <strong>causal powers view</strong> proposes that $H$ explains $e$ precisely when $H$ causes $e$. This captures explanatory direction, but it creates another difficulty: there is no widely accepted definition of causality. Hume's empiricism intensifies the problem because causal relations themselves are not observed; only constant conjunction is observed. If belief in causality is unjustified, a causal model of explanation cannot be sustained.</p>
+                <div class="insight-box">
+                    <strong>Key Insight:</strong>
+                    Replacing deduction with causation identifies what the D-N model lacks, but it does not complete the theory. The proposed solution inherits the unresolved problem of defining and justifying causality itself.
+                </div>
+                <p>Other models of scientific explanation have also faced substantial criticism. The resulting conclusion is that there is no presently accepted scientific method for providing explanations.</p>
+            </div>
+        </div>
+
+        <div class="section">
+            <h2>Study Cards</h2>
+            <div class="flashcard-container">
+                <div id="flashcard-content"></div>
+            </div>
+            <div class="navigation">
+                <button class="nav-button" id="prev-card">Previous</button>
+                <span class="counter" id="card-counter"></span>
+                <button class="nav-button" id="next-card">Next</button>
+            </div>
+        </div>
+
+        <div class="section">
+            <h2>Multiple-Choice Questions</h2>
+            <div id="mcq-single-view">
+                <div class="question-container-single" id="mcq-container">
+                    <div class="question-text" id="mcq-question"></div>
+                    <div class="options" id="mcq-options"></div>
+                    <div class="feedback hidden" id="mcq-feedback"></div>
+                    <div class="explanation hidden" id="mcq-explanation"></div>
+                </div>
+                <div class="navigation">
+                    <button class="nav-button" id="prev-mcq">Previous</button>
+                    <span class="counter" id="mcq-counter"></span>
+                    <button class="nav-button" id="next-mcq">Next</button>
+                </div>
+                 <div class="view-all-container">
+                     <button class="view-all-button" id="view-all-mcq">View All Questions</button>
+                 </div>
+            </div>
+            <div id="mcq-all-questions" class="hidden">
+                </div>
+        </div>
+
+        <div class="section">
+            <h2>True or False Questions</h2>
+             <div id="tf-single-view">
+                <div class="question-container-single" id="tf-container">
+                    <div class="question-text" id="tf-question"></div>
+                    <div class="tf-options" id="tf-options">
+                        <button data-answer="true">True</button>
+                        <button data-answer="false">False</button>
+                    </div>
+                    <div class="feedback hidden" id="tf-feedback"></div>
+                    <div class="explanation hidden" id="tf-explanation"></div>
+                </div>
+                <div class="navigation">
+                    <button class="nav-button" id="prev-tf">Previous</button>
+                    <span class="counter" id="tf-counter"></span>
+                    <button class="nav-button" id="next-tf">Next</button>
+                </div>
+                 <div class="view-all-container">
+                     <button class="view-all-button" id="view-all-tf">View All Questions</button>
+                 </div>
+            </div>
+             <div id="tf-all-questions" class="hidden">
+                 </div>
+        </div>
+    </div>
+
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+
+        const flashcardData = [
+            {
+                term: "Law of nature",
+                definition: "A generalization capable of supporting scientific prediction and explanation, as distinct from an accidental regularity."
+            },
+            {
+                term: "Accidental generalization",
+                definition: "A general statement that may be true but lacks the status needed to support a justified scientific prediction."
+            },
+            {
+                term: "Hume's epistemic argument",
+                definition: "Because experience reveals constant conjunction rather than necessity, strict epistemic empiricism gives no justification for belief in natural necessity."
+            },
+            {
+                term: "Hume's fork",
+                definition: "The proposed division of statements into necessary a priori statements and non-necessary a posteriori statements."
+            },
+            {
+                term: "Necessary a posteriori proposition",
+                definition: "A proposition that is necessary even though it can be known only through empirical investigation, such as the identity of water with $H_2O$."
+            },
+            {
+                term: "Armstrong-Dretske-Tully view",
+                definition: "The anti-Humean view that laws are necessary because fixed relationships hold between the properties described by those laws."
+            },
+            {
+                term: "Deductive-Nomological model",
+                definition: "A model deriving phenomenon $e$ deductively from a general law $L$ and an initial condition $I$."
+            },
+            {
+                term: "Too weak",
+                definition: "A definition is too weak when it applies to cases that are not genuine instances of the concept being defined."
+            },
+            {
+                term: "Too strong",
+                definition: "A definition is too strong when it fails to apply to some genuine instances of the concept being defined."
+            },
+            {
+                term: "Symmetry problem",
+                definition: "The D-N model permits deductions in directions that reverse the genuine direction of explanation."
+            },
+            {
+                term: "Relevance problem",
+                definition: "The D-N model can include deductively usable but explanatorily irrelevant conditions, such as a hex in explaining salt dissolution."
+            },
+            {
+                term: "Logical arrow",
+                definition: "The direction from premises to a conclusion that they logically entail; it determines scientific prediction."
+            },
+            {
+                term: "Causal arrow",
+                definition: "The direction from a cause to its consequence; it determines scientific explanation under the causal analysis."
+            },
+            {
+                term: "Prediction",
+                definition: "A scientific prediction of $e$ from $H$ requires $e$ to follow logically from $H$."
+            },
+            {
+                term: "Explanation",
+                definition: "Under the causal analysis, $H$ scientifically explains $e$ when $H$ is the cause of $e$."
+            },
+            {
+                term: "Calculation versus explanation",
+                definition: "Information used to calculate a phenomenon need not explain why the phenomenon itself exists or occurs."
+            },
+            {
+                term: "Causal powers view",
+                definition: "The proposal that $H$ is an explanation of $e$ exactly when $H$ is the cause of $e$."
+            },
+            {
+                term: "Constant conjunction",
+                definition: "An observed regular association between types of events, distinguished by Hume from an observable necessary or causal connection."
+            }
+        ];
+
+        const mcqData = [
+            {
+                question: "A lake will freeze, and every body of water that freezes expands. What role does the statement that the lake will freeze play in the deductive argument?",
+                options: ["Predicted phenomenon", "Accidental generalization", "Initial condition", "Necessary identity"],
+                correctIndex: 2,
+                explanation: "The freezing of the lake is the initial condition combined with the general law. Together they entail the predicted increase in volume."
+            },
+            {
+                question: "Why does a team's past success whenever Lucy attended not by itself justify predicting success at her next visit?",
+                options: ["The pattern may be an accidental generalization rather than a law of nature.", "Predictions cannot use facts about individuals.", "Past observations can never support predictions.", "A prediction must concern an already observed event."],
+                correctIndex: 0,
+                explanation: "A true regularity is not necessarily a law capable of supporting scientific prediction. The problem is its accidental character, not merely its reference to an individual."
+            },
+            {
+                question: "What is wrong with defining every true generalization as a law of nature?",
+                options: ["It excludes every local scientific law.", "It assumes that laws are necessary.", "It applies only to mathematical statements.", "It includes accidental true generalizations."],
+                correctIndex: 3,
+                explanation: "The definition is too weak because accidental patterns can also be true generalizations. Truth and generality alone do not establish lawhood."
+            },
+            {
+                question: "A proposed definition applies to all genuine explanations but also to some arguments that are not explanations. How should it be classified?",
+                options: ["Too strong only", "Too weak", "Both complete and precise", "Neither too weak nor too strong"],
+                correctIndex: 1,
+                explanation: "A definition is too weak when it includes cases outside the target category. Applying to all genuine cases does not compensate for admitting false positives."
+            },
+            {
+                question: "Why is the criterion that a law must not be limited to particular individuals or locations too strong?",
+                options: ["It accepts every accidental regularity.", "Some genuine laws may concern one universe or apply at a particular location.", "It makes all scientific statements a priori.", "It denies that properties can be related."],
+                correctIndex: 1,
+                explanation: "A genuine law may concern a single universe or operate under local conditions, such as a free-fall relation at Earth's surface. Excluding all such statements removes genuine laws."
+            },
+            {
+                question: "Why does requiring a law to be formulated exclusively in general terms fail to exclude every accidental generalization?",
+                options: ["General terms are necessarily false.", "Scientific laws always contain proper names.", "Singular descriptions can be rewritten artificially as general descriptions.", "General wording prevents empirical testing."],
+                correctIndex: 2,
+                explanation: "An accidental statement about a person or team can be paraphrased using general descriptions. The change in wording does not create a genuine natural law."
+            },
+            {
+                question: "What does Hume's epistemic argument claim that experience directly presents?",
+                options: ["Constant conjunction rather than necessity", "Necessary relationships between properties", "A priori scientific laws", "The complete causal structure of nature"],
+                correctIndex: 0,
+                explanation: "The argument says experience reveals recurring conjunctions between event types, not necessity itself. Strict empiricism then withholds justification for necessity."
+            },
+            {
+                question: "Which classification expresses Hume's fork?",
+                options: ["True empirical statements and false empirical statements", "Laws and initial conditions", "Necessary a posteriori and contingent a priori", "Necessary a priori and non-necessary a posteriori"],
+                correctIndex: 3,
+                explanation: "Hume's fork divides indicative statements into necessary a priori statements and non-necessary a posteriori statements. Necessary a posteriori cases challenge this division."
+            },
+            {
+                question: "Why does the identity between Madonna and Louise Ciccone challenge Hume's fork?",
+                options: ["It is non-necessary and a priori.", "It is an accidental generalization.", "It is necessary and a posteriori.", "It is a prediction rather than an identity."],
+                correctIndex: 2,
+                explanation: "The identity is presented as necessary even though it is known a posteriori. It therefore occupies a category excluded by the original fork."
+            },
+            {
+                question: "What is the main strategy of the counterargument against strict epistemic empiricism?",
+                options: ["It argues that accepting the premise would require abandoning scientific entities such as electrons, forces, and fields.", "It demonstrates that necessity is directly visible.", "It proves that all scientific laws are a priori.", "It replaces empirical evidence with accidental generalizations."],
+                correctIndex: 0,
+                explanation: "The counterargument highlights the unacceptable scientific cost of restricting justified belief to what is directly experienced. Rejecting the strict premise is presented as less costly."
+            },
+            {
+                question: "Under the Armstrong-Dretske-Tully view, what makes a law of nature necessary?",
+                options: ["Its use of exclusively general vocabulary", "Its repeated confirmation in one location", "A fixed relationship between the properties it describes", "Its ability to refer to a particular person"],
+                correctIndex: 2,
+                explanation: "Necessity comes from a fixed relationship between properties. Repetition alone could amount only to an accidental pattern."
+            },
+            {
+                question: "Even if cloudy weather always followed Galileo wearing white, why would this not be a law under the Armstrong-Dretske-Tully view?",
+                options: ["Weather statements cannot be laws.", "There is no connection between the relevant properties.", "The statement is not grammatical.", "Every law must be known a priori."],
+                correctIndex: 1,
+                explanation: "The account requires a genuine relationship between properties. A true sequence without such a connection remains accidental."
+            },
+            {
+                question: "Which structure correctly represents the D-N model?",
+                options: ["General law plus initial condition, therefore phenomenon", "Observed phenomenon plus cause, therefore general law", "Initial condition plus accidental pattern, therefore necessity", "Cause plus effect, therefore constant conjunction"],
+                correctIndex: 0,
+                explanation: "The D-N model is a deductive argument from a general law and an initial condition to a phenomenon. Its defining feature is logical entailment."
+            },
+            {
+                question: "Within the original D-N account, what distinguishes explanation from prediction?",
+                options: ["Only explanations use laws.", "Only predictions use initial conditions.", "Explanation is causal while prediction is deductive.", "The phenomenon has already been observed in explanation but not in prediction."],
+                correctIndex: 3,
+                explanation: "The original account gives both tasks the same logical structure and distinguishes them by whether the phenomenon has been observed. Later criticism argues that this difference is inadequate."
+            },
+            {
+                question: "A definition applies only to triangles but excludes some right-angled triangles. Which defect does it have?",
+                options: ["It is too weak.", "It is too strong.", "It is an accidental generalization.", "It reverses the causal arrow."],
+                correctIndex: 1,
+                explanation: "Excluding genuine members of the target class makes a definition too strong. Applying only to triangles does not ensure that it includes all triangles."
+            },
+            {
+                question: "Why does deriving a flagpole's height from its shadow length challenge the D-N model as a theory of explanation?",
+                options: ["Geometry cannot appear in scientific arguments.", "The deduction lacks an initial condition.", "The shadow is not observable.", "The derivation is valid although the shadow does not explain the pole's height."],
+                correctIndex: 3,
+                explanation: "The case satisfies the deductive structure while reversing explanatory direction. It therefore shows that D-N admits arguments that are not genuine explanations."
+            },
+            {
+                question: "What distinction resolves the claim that a shadow explains a pole's height because it was used to determine that height?",
+                options: ["Necessary truth versus contingent truth", "General law versus initial condition", "Explaining a calculation versus explaining the phenomenon itself", "A priori knowledge versus a posteriori knowledge"],
+                correctIndex: 2,
+                explanation: "Shadow length can explain how someone calculated the height without explaining why the pole itself has that height. Epistemic access and explanation of the phenomenon are different."
+            },
+            {
+                question: "Newton's laws and Wednesday's stellar positions permit deduction of Tuesday's positions. Why is this not a satisfactory explanation of Tuesday's positions?",
+                options: ["Wednesday's positions are the later consequence rather than the earlier cause.", "Newton's laws cannot support deductions about earlier events.", "The conclusion has already been observed.", "Scientific explanations may never concern stars."],
+                correctIndex: 0,
+                explanation: "The deduction can run backward from later information, but the causal and explanatory direction runs from earlier to later. Logical derivability does not fix causal direction."
+            },
+            {
+                question: "What general defect is illustrated by the flagpole and reversed stellar examples?",
+                options: ["The relevance problem", "Hume's fork", "The symmetry problem", "The problem of local laws"],
+                correctIndex: 2,
+                explanation: "These cases show that the D-N structure is symmetrical enough to permit reverse deductions, whereas explanation is directional. This is the symmetry problem."
+            },
+            {
+                question: "Why can the statement that all hexed salt dissolves in water count as a law if all salt dissolves in water?",
+                options: ["The class of hexed salt is a subclass of salt, so the universal claim follows.", "Hexing causes dissolution.", "Only unusual conditions can be initial conditions.", "All true statements are necessary identities."],
+                correctIndex: 0,
+                explanation: "If every salt sample dissolves, then every member of the subclass of hexed salt also dissolves. The deduction is valid even though hexing is explanatorily irrelevant."
+            },
+            {
+                question: "What does the hexed-salt example demonstrate?",
+                options: ["The D-N model can include irrelevant premises while preserving deduction.", "Every accidental generalization is false.", "Causal explanation always entails prediction.", "Local laws cannot be genuine laws."],
+                correctIndex: 0,
+                explanation: "The hex can appear in a valid D-N-style argument without contributing to why the salt dissolves. This is the relevance problem."
+            },
+            {
+                question: "Untreated syphilis sometimes, but not always, produces paresis; paresis cannot occur without it. Why can untreated syphilis explain a person's paresis without predicting it deductively?",
+                options: ["The causal relation can hold although the cause does not guarantee the outcome.", "The outcome is an a priori truth.", "A hidden hex supplies logical entailment.", "The outcome causes the untreated disease."],
+                correctIndex: 0,
+                explanation: "The disease is causally explanatory but does not entail that paresis will occur in every case. Causation can therefore support explanation without deductive prediction."
+            },
+            {
+                question: "What does the paresis case show about the D-N model?",
+                options: ["It is too weak because it includes every causal explanation.", "It is too strong because it excludes a genuine non-deductive explanation.", "It is complete because every cause is a law.", "It is too weak because paresis predicts untreated syphilis."],
+                correctIndex: 1,
+                explanation: "The case is accepted as explanatory although it lacks the deductive law required by D-N. Excluding such a genuine explanation makes the model too strong."
+            },
+            {
+                question: "A person explains a carpet stain by saying that a collision knocked over a coffee cup. Why is this a challenge to D-N?",
+                options: ["It is an explanation of a calculation only.", "The collision occurred after the stain.", "The explanation appears acceptable without an explicitly stated general law.", "The stain logically entails the collision."],
+                correctIndex: 2,
+                explanation: "The causal account is intelligible even without a universal law being stated. D-N's demand for law-based deduction therefore appears overly restrictive."
+            },
+            {
+                question: "How does the response to the hidden-law objection defend ordinary causal explanations?",
+                options: ["It denies that any laws exist.", "It says every hidden law is accidental.", "It claims causes must be directly observable.", "An explanation can remain acceptable even when no underlying law can be identified explicitly."],
+                correctIndex: 3,
+                explanation: "The explanatory force of the causal account does not seem to depend on the speaker's ability to formulate a hidden law. Merely postulating such a law does not rescue D-N's explicit structure."
+            },
+            {
+                question: "What is sufficient to reject the D-N model as an adequate definition of scientific explanation?",
+                options: ["Showing that it is either too weak or too strong", "Showing both defects in every individual example", "Proving that all predictions are false", "Defining every possible causal relation"],
+                correctIndex: 0,
+                explanation: "A satisfactory definition must include all and only genuine explanations. Failure in either direction is independently enough to reject it."
+            },
+            {
+                question: "Under the later analysis, what determines whether $H$ scientifically predicts $e$?",
+                options: ["$H$ occurs earlier than $e$.", "$H$ is observable.", "$H$ logically entails $e$.", "$H$ is a necessary a priori identity."],
+                correctIndex: 2,
+                explanation: "Prediction follows the direction of logical inference. Causal direction is not the decisive condition for prediction."
+            },
+            {
+                question: "Under the causal analysis, what determines whether $H$ scientifically explains $e$?",
+                options: ["$e$ has not yet occurred.", "$H$ is the cause of $e$.", "$e$ logically entails $H$.", "$H$ contains a universal description."],
+                correctIndex: 1,
+                explanation: "Explanation follows the causal arrow from cause to consequence. Logical entailment may point in the same direction, the opposite direction, or fail."
+            },
+            {
+                question: "Suppose earlier stellar conditions both cause and logically entail later stellar conditions. What roles do the earlier conditions play?",
+                options: ["They provide both an explanation and a prediction.", "They explain but cannot predict.", "They predict but cannot explain.", "They provide neither explanation nor prediction."],
+                correctIndex: 0,
+                explanation: "Both causal and logical arrows point from the earlier conditions to the later ones. The premises therefore satisfy both roles."
+            },
+            {
+                question: "Suppose later stellar conditions logically entail earlier stellar conditions, while the earlier conditions caused the later ones. What do the later conditions provide regarding the earlier ones?",
+                options: ["An explanation but no prediction", "A prediction or reconstruction but no explanation", "Both explanation and prediction", "Neither logical nor causal information"],
+                correctIndex: 1,
+                explanation: "The logical arrow runs from later to earlier, enabling prediction or reconstruction. The causal arrow runs oppositely, so the later state does not explain the earlier state."
+            },
+            {
+                question: "Which configuration characterizes the untreated-syphilis explanation of paresis?",
+                options: ["The causal arrow runs from cause to outcome, but the cause does not logically entail the outcome.", "Both arrows run from the outcome to the cause.", "The cause entails the outcome but does not cause it.", "Neither a causal nor a logical relation exists."],
+                correctIndex: 0,
+                explanation: "Untreated syphilis causes paresis in the case but does not guarantee paresis in every case. Explanation is present without deductive prediction."
+            },
+            {
+                question: "Why is the D-N model better classified as a model of prediction than as a model of explanation?",
+                options: ["It relies exclusively on observations made after an event.", "It guarantees causal relevance.", "Its defining requirement is logical entailment from assumptions to conclusion.", "It rejects every general law."],
+                correctIndex: 2,
+                explanation: "Deductive entailment is precisely what the analysis associates with prediction. D-N does not ensure that the causal arrow points from its premises to its conclusion."
+            },
+            {
+                question: "What is the deeper conclusion drawn from the divergence of logical and causal arrows?",
+                options: ["Every explanation must also be a deduction.", "An explanatory model cannot be based fundamentally on a predictive model.", "All scientific predictions are causal explanations.", "Observed conclusions cannot be explained."],
+                correctIndex: 1,
+                explanation: "Prediction and explanation track different directional relations. A model built solely from predictive entailment cannot capture causal explanatory direction."
+            },
+            {
+                question: "In the argument using $V = RI$, $I = 5$, and $R = 2$ to obtain $V = 10$, what feature makes the argument fit D-N's predictive form?",
+                options: ["The values are known a priori.", "Voltage causes every resistance value.", "The conclusion is an accidental generalization.", "The law and initial values logically entail the conclusion."],
+                correctIndex: 3,
+                explanation: "The formula and initial values deductively determine $V = 10$. This logical entailment fits the predictive structure, regardless of the direction of causation."
+            },
+            {
+                question: "What does the causal powers view propose?",
+                options: ["$H$ explains $e$ exactly when $e$ logically entails $H$.", "$H$ explains $e$ exactly when both are observed.", "$H$ explains $e$ exactly when $H$ causes $e$.", "$H$ explains $e$ exactly when $H$ is formulated generally."],
+                correctIndex: 2,
+                explanation: "The causal powers view identifies explanation with causation from $H$ to $e$. It is intended to supply the direction missing from D-N."
+            },
+            {
+                question: "What central problem confronts the causal powers view?",
+                options: ["Causal explanations can never concern observed phenomena.", "There is no widely accepted definition of causality.", "It makes every explanation a priori.", "It cannot distinguish laws from initial conditions."],
+                correctIndex: 1,
+                explanation: "The proposal clarifies explanation by invoking causality, but causality is itself disputed and vague. The account therefore shifts rather than resolves the conceptual problem."
+            },
+            {
+                question: "How does Humean empiricism criticize reliance on causal relations?",
+                options: ["It claims causes are always known a priori.", "It claims causal relations are directly visible but laws are not.", "It claims causality is identical to geometry.", "It claims observation reveals constant conjunction, not causal connection itself."],
+                correctIndex: 3,
+                explanation: "Hume's challenge is that experience displays repeated association rather than a necessary causal link. Strict empiricism therefore withholds justification for causality."
+            },
+            {
+                question: "Which statement best captures the final status of scientific explanation?",
+                options: ["The D-N model is universally accepted.", "The causal powers view has replaced every other account.", "No accepted scientific method for providing explanations has emerged.", "Explanation has been reduced completely to calculation."],
+                correctIndex: 2,
+                explanation: "D-N fails as an explanatory model, while the causal alternative depends on an unsettled account of causality. Other proposals have also faced criticism."
+            },
+            {
+                question: "A generalization is true, uses only general terms, and was produced by replacing a person's name with a descriptive phrase. What follows?",
+                options: ["It must express a fixed relationship between properties.", "It may still be accidental despite satisfying the linguistic criterion.", "It is necessarily a priori.", "It automatically supports causal explanation."],
+                correctIndex: 1,
+                explanation: "General wording can conceal an originally singular accidental association. Linguistic reformulation does not establish lawhood."
+            },
+            {
+                question: "A valid deduction cites a condition that is unrelated to why the conclusion occurred. Which requirement is missing?",
+                options: ["Explanatory relevance", "Logical entailment", "A conclusion", "An initial condition"],
+                correctIndex: 0,
+                explanation: "Validity ensures that the conclusion follows but does not ensure that every cited condition is explanatorily relevant. The hexed-salt example isolates this defect."
+            }
+        ];
+
+        const tfData = [
+            {
+                question: "Every true generalization is a law of nature.",
+                answer: false,
+                explanation: "Accidental generalizations may be true without having the status of laws. Truth and generality are therefore insufficient."
+            },
+            {
+                question: "Scientific prediction and explanation require distinguishing laws of nature from accidental regularities.",
+                answer: true,
+                explanation: "A repeated accidental pattern does not provide the same justification as a law. A criterion of lawhood is therefore needed."
+            },
+            {
+                question: "A definition is too weak when it excludes genuine instances of the concept being defined.",
+                answer: false,
+                explanation: "Excluding genuine instances makes a definition too strong. A weak definition incorrectly includes non-instances."
+            },
+            {
+                question: "One definition can be both too weak and too strong.",
+                answer: true,
+                explanation: "It can include some non-instances while also excluding some genuine instances. The two defects are independent."
+            },
+            {
+                question: "Excluding every statement limited to a location produces an adequate definition of natural law.",
+                answer: false,
+                explanation: "Some genuine laws can apply under local conditions, such as the stated free-fall relation at Earth's surface. The criterion is therefore too strong."
+            },
+            {
+                question: "Replacing a proper name with a general description necessarily transforms an accidental generalization into a law.",
+                answer: false,
+                explanation: "A merely linguistic reformulation leaves the accidental relationship unchanged. General vocabulary alone does not establish lawhood."
+            },
+            {
+                question: "Hume's epistemic argument distinguishes observed constant conjunction from unobserved necessity.",
+                answer: true,
+                explanation: "The argument grants experience of recurring conjunctions but denies empirical experience of necessity itself."
+            },
+            {
+                question: "Hume's fork classifies every a posteriori statement as necessary.",
+                answer: false,
+                explanation: "The fork classifies a posteriori statements as non-necessary. Necessary a posteriori identities are introduced to challenge that classification."
+            },
+            {
+                question: "The identity between water and $H_2O$ is presented as a necessary a posteriori proposition.",
+                answer: true,
+                explanation: "It is used as an example of a necessary identity learned empirically, which challenges Hume's fork."
+            },
+            {
+                question: "The counterargument to strict epistemic empiricism claims that accepting it would threaten belief in electrons, forces, and fields.",
+                answer: true,
+                explanation: "These scientific entities are not directly experienced, so the strict premise would undermine much of scientific theory."
+            },
+            {
+                question: "Under the Armstrong-Dretske-Tully view, repeated conjunction alone is sufficient for lawhood.",
+                answer: false,
+                explanation: "The view requires a fixed relationship between properties. Repetition without that relationship may be accidental."
+            },
+            {
+                question: "A fixed relationship between properties is used by anti-Humeans to explain the necessity of laws.",
+                answer: true,
+                explanation: "The law is necessary by virtue of the property relationship it describes, which applies to objects possessing those properties."
+            },
+            {
+                question: "The D-N model derives a phenomenon from a general law and an initial condition.",
+                answer: true,
+                explanation: "Its structure is deductive: $L$ and $I$ logically entail phenomenon $e$."
+            },
+            {
+                question: "In the original D-N account, explanations and predictions differ because only explanations use deductive arguments.",
+                answer: false,
+                explanation: "Both use the same deductive structure. The original distinction concerns whether the phenomenon has already been observed."
+            },
+            {
+                question: "A shadow can explain how someone calculated a flagpole's height without explaining the height of the pole itself.",
+                answer: true,
+                explanation: "Evidence used in calculation need not be the cause or explanation of the phenomenon measured."
+            },
+            {
+                question: "The symmetry problem shows that every valid deduction follows the causal direction.",
+                answer: false,
+                explanation: "The problem arises precisely because deduction can proceed opposite to causal and explanatory direction."
+            },
+            {
+                question: "Later stellar positions may permit calculation of earlier positions without explaining those earlier positions.",
+                answer: true,
+                explanation: "Logical inference can run from later information to earlier information, while causation runs from earlier to later."
+            },
+            {
+                question: "If all salt dissolves in water, the statement that all hexed salt dissolves follows even when hexing is irrelevant.",
+                answer: true,
+                explanation: "Hexed salt is still salt, so the restricted universal statement follows. Its validity does not make the hex explanatory."
+            },
+            {
+                question: "The hexed-salt example shows that the D-N model is too strong.",
+                answer: false,
+                explanation: "It shows that D-N is too weak because the model admits an argument with an explanatorily irrelevant condition."
+            },
+            {
+                question: "Untreated syphilis can explain paresis even though it does not guarantee paresis in every untreated case.",
+                answer: true,
+                explanation: "The causal relation can explain an actual outcome without providing deductive entailment or certain prediction."
+            },
+            {
+                question: "The paresis case demonstrates that every explanation must contain an explicitly formulated universal law.",
+                answer: false,
+                explanation: "The case is accepted as explanatory despite lacking a universal law that entails the outcome."
+            },
+            {
+                question: "Postulating a hidden law fully answers the objection that ordinary causal explanations do not fit D-N.",
+                answer: false,
+                explanation: "The explanations appear acceptable even if no law is identified, and merely postulating one does not show that D-N captures their explanatory force."
+            },
+            {
+                question: "Either the too-weak criticism or the too-strong criticism would independently be sufficient to reject D-N as a good definition of explanation.",
+                answer: true,
+                explanation: "A good definition must include all and only genuine explanations. Failure of either requirement is decisive."
+            },
+            {
+                question: "Prediction is associated with logical entailment from $H$ to $e$.",
+                answer: true,
+                explanation: "For $H$ to predict $e$, the logical arrow must point from $H$ to $e$."
+            },
+            {
+                question: "Under the causal analysis, $H$ explains $e$ whenever $e$ logically entails $H$.",
+                answer: false,
+                explanation: "Explanation requires the causal arrow to run from $H$ to $e$. Reverse logical inference does not establish that direction."
+            },
+            {
+                question: "Logical and causal arrows always point in the same direction.",
+                answer: false,
+                explanation: "The flagpole, stellar, and paresis examples show that the arrows can diverge."
+            },
+            {
+                question: "A premise can predict a conclusion without explaining it.",
+                answer: true,
+                explanation: "This occurs when the premise logically entails the conclusion but the causal arrow points in the opposite direction."
+            },
+            {
+                question: "A premise can explain a conclusion without predicting it deductively.",
+                answer: true,
+                explanation: "A cause may produce an outcome without guaranteeing it, as illustrated by untreated syphilis and paresis."
+            },
+            {
+                question: "The causal powers view avoids every philosophical difficulty because causality has a widely accepted definition.",
+                answer: false,
+                explanation: "Its central problem is that causality lacks a widely accepted definition and is itself challenged by Humean empiricism."
+            },
+            {
+                question: "The final conclusion is that no accepted scientific method for providing explanations is currently available.",
+                answer: true,
+                explanation: "D-N functions as a predictive rather than explanatory model, while causal and other alternatives remain contested."
+            }
+        ];
+
+        // --- Global State Variables ---
+        let currentCardIndex = 0;
+        let isCardFront = true;
+        let isCardAnimating = false;
+        let currentMCQIndex = 0;
+        let currentTFIndex = 0;
+        let mcqAnswers = new Array(mcqData.length).fill(null);
+        let tfAnswers = new Array(tfData.length).fill(null);
+
+        // --- DOM Element References ---
+        const flashcardContent = document.getElementById('flashcard-content');
+        const cardCounter = document.getElementById('card-counter');
+        const prevCardBtn = document.getElementById('prev-card');
+        const nextCardBtn = document.getElementById('next-card');
+        const mcqQuestion = document.getElementById('mcq-question');
+        const mcqOptions = document.getElementById('mcq-options');
+        const mcqFeedback = document.getElementById('mcq-feedback');
+        const mcqExplanation = document.getElementById('mcq-explanation');
+        const mcqCounter = document.getElementById('mcq-counter');
+        const prevMCQBtn = document.getElementById('prev-mcq');
+        const nextMCQBtn = document.getElementById('next-mcq');
+        const viewAllMCQBtn = document.getElementById('view-all-mcq');
+        const mcqSingleView = document.getElementById('mcq-single-view');
+        const mcqAllQuestionsContainer = document.getElementById('mcq-all-questions');
+        const tfQuestion = document.getElementById('tf-question');
+        const tfOptionsContainer = document.getElementById('tf-options');
+        const tfFeedback = document.getElementById('tf-feedback');
+        const tfExplanation = document.getElementById('tf-explanation');
+        const tfCounter = document.getElementById('tf-counter');
+        const prevTFBtn = document.getElementById('prev-tf');
+        const nextTFBtn = document.getElementById('next-tf');
+        const viewAllTFBtn = document.getElementById('view-all-tf');
+        const tfSingleView = document.getElementById('tf-single-view');
+        const tfAllQuestionsContainer = document.getElementById('tf-all-questions');
+
+        // --- MathJax Re-rendering Helper ---
+        function triggerMathJax() {
+            if (window.MathJax && window.MathJax.typesetPromise) {
+                window.MathJax.typesetPromise().catch((err) => console.error('MathJax error:', err.message));
+            }
+        }
+
+        function displayCard(index) {
+            if (!flashcardData || flashcardData.length === 0) return;
+            const cardData = flashcardData[index];
+            isCardFront = true;
+            flashcardContent.style.opacity = '1';
+            flashcardContent.textContent = cardData.term;
+            flashcardContent.className = 'flashcard-front-style';
+            cardCounter.textContent = `Card ${index + 1} / ${flashcardData.length}`;
+            prevCardBtn.disabled = index === 0;
+            nextCardBtn.disabled = index === flashcardData.length - 1;
+            triggerMathJax();
+        }
+
+        function flipCard() {
+            if (isCardAnimating || !flashcardData || flashcardData.length === 0) return;
+            isCardAnimating = true;
+            flashcardContent.style.opacity = '0';
+            setTimeout(() => {
+                isCardFront = !isCardFront;
+                const cardData = flashcardData[currentCardIndex];
+                if (isCardFront) {
+                    flashcardContent.textContent = cardData.term;
+                    flashcardContent.className = 'flashcard-front-style';
+                } else {
+                    flashcardContent.textContent = cardData.definition;
+                    flashcardContent.className = 'flashcard-back-style';
+                }
+                flashcardContent.style.opacity = '1';
+                isCardAnimating = false;
+                triggerMathJax();
+            }, 300);
+        }
+
+        function displayMCQuestion(index) {
+            if (!mcqData || mcqData.length === 0) return;
+            const qData = mcqData[index];
+            mcqQuestion.textContent = qData.question;
+            mcqOptions.innerHTML = '';
+            mcqFeedback.classList.add('hidden');
+            mcqExplanation.classList.add('hidden');
+            qData.options.forEach((option, i) => {
+                const button = document.createElement('button');
+                button.textContent = option;
+                button.onclick = () => handleMCQAnswer(index, i);
+                mcqOptions.appendChild(button);
+            });
+            mcqCounter.textContent = `Question ${index + 1} / ${mcqData.length}`;
+            prevMCQBtn.disabled = index === 0;
+            nextMCQBtn.disabled = index === mcqData.length - 1;
+            if (mcqAnswers[index] !== null) {
+                highlightMCQAnswer(mcqOptions, mcqFeedback, mcqExplanation, index, mcqAnswers[index].selected);
+            }
+            triggerMathJax();
+        }
+
+        function handleMCQAnswer(qIndex, selectedIndex) {
+            if (mcqAnswers[qIndex] !== null) return;
+            const isCorrect = selectedIndex === mcqData[qIndex].correctIndex;
+            mcqAnswers[qIndex] = { selected: selectedIndex, correct: isCorrect };
+            highlightMCQAnswer(mcqOptions, mcqFeedback, mcqExplanation, qIndex, selectedIndex);
+        }
+
+        function highlightMCQAnswer(optionsContainer, feedbackEl, explanationEl, qIndex, selectedIndex) {
+            const qData = mcqData[qIndex];
+            const buttons = optionsContainer.querySelectorAll('button');
+            buttons.forEach((button, i) => {
+                button.disabled = true;
+                if (i === qData.correctIndex) {
+                    button.classList.add('correct');
+                }
+                if (i === selectedIndex && i !== qData.correctIndex) {
+                    button.classList.add('incorrect');
+                }
+            });
+            feedbackEl.textContent = selectedIndex === qData.correctIndex ? "Correct!" : "Incorrect.";
+            feedbackEl.className = `feedback ${selectedIndex === qData.correctIndex ? 'correct' : 'incorrect'}`;
+            explanationEl.innerHTML = `<strong>Explanation:</strong> ${qData.explanation}`;
+            explanationEl.classList.remove('hidden');
+            triggerMathJax();
+        }
+
+        function displayAllMCQ() {
+            if (!mcqData || mcqData.length === 0) return;
+            mcqSingleView.classList.add('hidden');
+            mcqAllQuestionsContainer.innerHTML = '';
+            mcqData.forEach((qData, index) => {
+                const questionDiv = document.createElement('div');
+                questionDiv.className = 'question-container-all';
+                questionDiv.innerHTML = `
+                    <div class="question-text">${index + 1}. ${qData.question}</div>
+                    <div class="options">
+                        ${qData.options.map((option, i) => `<button data-qindex="${index}" data-oindex="${i}">${option}</button>`).join('')}
+                    </div>
+                    <div class="feedback hidden"></div>
+                    <div class="explanation hidden"></div>
+                `;
+                mcqAllQuestionsContainer.appendChild(questionDiv);
+                 const optionButtons = questionDiv.querySelectorAll('.options button');
+                 optionButtons.forEach(button => {
+                     button.onclick = () => {
+                        const qIndex = parseInt(button.dataset.qindex);
+                        const oIndex = parseInt(button.dataset.oindex);
+                        if (mcqAnswers[qIndex] === null) {
+                            const isCorrect = oIndex === mcqData[qIndex].correctIndex;
+                            mcqAnswers[qIndex] = { selected: oIndex, correct: isCorrect };
+                        }
+                        const optionsDiv = button.closest('.options');
+                        const feedbackDiv = questionDiv.querySelector('.feedback');
+                        const explanationDiv = questionDiv.querySelector('.explanation');
+                        highlightMCQAnswer(optionsDiv, feedbackDiv, explanationDiv, qIndex, mcqAnswers[qIndex].selected);
+                     };
+                 });
+                 if (mcqAnswers[index] !== null) {
+                    const optionsDiv = questionDiv.querySelector('.options');
+                    const feedbackDiv = questionDiv.querySelector('.feedback');
+                    const explanationDiv = questionDiv.querySelector('.explanation');
+                    highlightMCQAnswer(optionsDiv, feedbackDiv, explanationDiv, index, mcqAnswers[index].selected);
+                 }
+            });
+            mcqAllQuestionsContainer.classList.remove('hidden');
+            triggerMathJax();
+        }
+
+        function displayTFQuestion(index) {
+            if (!tfData || tfData.length === 0) return;
+            const qData = tfData[index];
+            tfQuestion.textContent = qData.question;
+            tfFeedback.classList.add('hidden');
+            tfExplanation.classList.add('hidden');
+             const buttons = tfOptionsContainer.querySelectorAll('button');
+             buttons.forEach(button => {
+                 button.disabled = false;
+                 button.classList.remove('correct', 'incorrect');
+                 button.onclick = () => handleTFAnswer(index, button.dataset.answer === 'true');
+             });
+            tfCounter.textContent = `Question ${index + 1} / ${tfData.length}`;
+            prevTFBtn.disabled = index === 0;
+            nextTFBtn.disabled = index === tfData.length - 1;
+            if (tfAnswers[index] !== null) {
+                highlightTFAnswer(tfOptionsContainer, tfFeedback, tfExplanation, index, tfAnswers[index].selected);
+            }
+            triggerMathJax();
+        }
+
+        function handleTFAnswer(qIndex, selectedAnswer) {
+            if (tfAnswers[qIndex] !== null) return;
+            const isCorrect = selectedAnswer === tfData[qIndex].answer;
+            tfAnswers[qIndex] = { selected: selectedAnswer, correct: isCorrect };
+            highlightTFAnswer(tfOptionsContainer, tfFeedback, tfExplanation, qIndex, selectedAnswer);
+        }
+
+        function highlightTFAnswer(optionsContainer, feedbackEl, explanationEl, qIndex, selectedAnswer) {
+             const qData = tfData[qIndex];
+             const buttons = optionsContainer.querySelectorAll('button');
+             buttons.forEach(button => {
+                 const buttonAnswer = button.dataset.answer === 'true';
+                 button.disabled = true;
+                 if (buttonAnswer === qData.answer) {
+                     button.classList.add('correct');
+                 }
+                 if (buttonAnswer === selectedAnswer && buttonAnswer !== qData.answer) {
+                     button.classList.add('incorrect');
+                 }
+             });
+             feedbackEl.textContent = selectedAnswer === qData.answer ? "Correct!" : "Incorrect.";
+             feedbackEl.className = `feedback ${selectedAnswer === qData.answer ? 'correct' : 'incorrect'}`;
+             explanationEl.innerHTML = `<strong>Explanation:</strong> ${qData.explanation}`;
+             explanationEl.classList.remove('hidden');
+             triggerMathJax();
+        }
+
+        function displayAllTF() {
+             if (!tfData || tfData.length === 0) return;
+             tfSingleView.classList.add('hidden');
+             tfAllQuestionsContainer.innerHTML = '';
+             tfData.forEach((qData, index) => {
+                 const questionDiv = document.createElement('div');
+                 questionDiv.className = 'question-container-all';
+                 questionDiv.innerHTML = `
+                     <div class="question-text">${index + 1}. ${qData.question}</div>
+                     <div class="tf-options">
+                         <button data-qindex="${index}" data-answer="true">True</button>
+                         <button data-qindex="${index}" data-answer="false">False</button>
+                     </div>
+                     <div class="feedback hidden"></div>
+                     <div class="explanation hidden"></div>
+                 `;
+                 tfAllQuestionsContainer.appendChild(questionDiv);
+                 const optionButtons = questionDiv.querySelectorAll('.tf-options button');
+                 optionButtons.forEach(button => {
+                     button.onclick = () => {
+                         const qIndex = parseInt(button.dataset.qindex);
+                         const selectedAnswer = button.dataset.answer === 'true';
+                         if (tfAnswers[qIndex] === null) {
+                             const isCorrect = selectedAnswer === tfData[qIndex].answer;
+                             tfAnswers[qIndex] = { selected: selectedAnswer, correct: isCorrect };
+                         }
+                         const optionsDiv = button.closest('.tf-options');
+                         const feedbackDiv = questionDiv.querySelector('.feedback');
+                         const explanationDiv = questionDiv.querySelector('.explanation');
+                         highlightTFAnswer(optionsDiv, feedbackDiv, explanationDiv, qIndex, tfAnswers[qIndex].selected);
+                     };
+                 });
+                 if (tfAnswers[index] !== null) {
+                    const optionsDiv = questionDiv.querySelector('.tf-options');
+                    const feedbackDiv = questionDiv.querySelector('.feedback');
+                    const explanationDiv = questionDiv.querySelector('.explanation');
+                    highlightTFAnswer(optionsDiv, feedbackDiv, explanationDiv, index, tfAnswers[index].selected);
+                 }
+             });
+             tfAllQuestionsContainer.classList.remove('hidden');
+             triggerMathJax();
+        }
+
+        function initialize() {
+            if (flashcardData.length > 0) displayCard(currentCardIndex);
+            if (mcqData.length > 0) displayMCQuestion(currentMCQIndex);
+            if (tfData.length > 0) displayTFQuestion(currentTFIndex);
+            flashcardContent.addEventListener('click', flipCard);
+            prevCardBtn.addEventListener('click', () => { if (currentCardIndex > 0) { currentCardIndex--; displayCard(currentCardIndex); } });
+            nextCardBtn.addEventListener('click', () => { if (currentCardIndex < flashcardData.length - 1) { currentCardIndex++; displayCard(currentCardIndex); } });
+            prevMCQBtn.addEventListener('click', () => { if (currentMCQIndex > 0) { currentMCQIndex--; displayMCQuestion(currentMCQIndex); } });
+            nextMCQBtn.addEventListener('click', () => { if (currentMCQIndex < mcqData.length - 1) { currentMCQIndex++; displayMCQuestion(currentMCQIndex); } });
+            viewAllMCQBtn.addEventListener('click', displayAllMCQ);
+            prevTFBtn.addEventListener('click', () => { if (currentTFIndex > 0) { currentTFIndex--; displayTFQuestion(currentTFIndex); } });
+            nextTFBtn.addEventListener('click', () => { if (currentTFIndex < tfData.length - 1) { currentTFIndex++; displayTFQuestion(currentTFIndex); } });
+            viewAllTFBtn.addEventListener('click', displayAllTF);
+
+            // Initial MathJax render for static HTML (like the Theory section)
+            triggerMathJax();
+        }
+
+        initialize();
+    });
+    </script>
+</body>
+</html>

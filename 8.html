@@ -1,0 +1,1196 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Laws of Nature and Scientific Prediction</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+
+    <script>
+        window.MathJax = {
+            tex: {
+                inlineMath: [['$', '$'], ['\\(', '\\)']],
+                displayMath: [['$$', '$$'], ['\\[', '\\]']]
+            },
+            startup: {
+                typeset: false // We will trigger this manually via JS
+            }
+        };
+    </script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+    <style>
+        /* --- Root Variables for Theme --- */
+        :root {
+            --primary-bg: #0a0a0f;
+            --panel-bg: rgba(255, 255, 255, 0.03);
+            --panel-border: rgba(255, 255, 255, 0.1);
+
+            --accent-start: #6C63FF;
+            --accent-end: #A855F7;
+            --accent-gradient: linear-gradient(135deg, var(--accent-start), var(--accent-end));
+            --accent-color: #8B5CF6; /* Midpoint fallback */
+
+            --text-color: #E0E0E0;
+            --text-muted: #9ca3af;
+
+            --correct-color: rgba(16, 185, 129, 0.2);
+            --correct-border: #10b981;
+            --incorrect-color: rgba(239, 68, 68, 0.2);
+            --incorrect-border: #ef4444;
+
+            --insight-bg: rgba(168, 85, 247, 0.08);
+            --insight-border: #A855F7;
+        }
+
+        /* --- Global Styles & Glow Effects --- */
+        body {
+            background-color: var(--primary-bg);
+            background-image:
+                radial-gradient(circle at 15% 50%, rgba(108, 99, 255, 0.06), transparent 25vw),
+                radial-gradient(circle at 85% 30%, rgba(168, 85, 247, 0.06), transparent 25vw);
+            background-attachment: fixed;
+            color: var(--text-color);
+            font-family: 'Inter', sans-serif;
+            line-height: 1.6;
+            margin: 0;
+            padding: 20px;
+        }
+
+        /* --- Panel Containers (Optimized: No blur for performance) --- */
+        .container, .section, #flashcard-content, .question-container-single, .question-container-all, .explanation {
+            background: var(--panel-bg);
+            border: 1px solid var(--panel-border);
+            border-radius: 12px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+        }
+
+        .container {
+            width: 90%;
+            max-width: 1000px;
+            margin: 20px auto;
+            padding: 30px;
+        }
+
+        h1, h2 {
+            text-align: center;
+            border-bottom: 1px solid var(--panel-border);
+            padding-bottom: 15px;
+            font-weight: 700;
+            color: #fff;
+        }
+
+        .section {
+            padding: 25px;
+            margin-bottom: 30px;
+            animation: slideIn 0.5s ease-out forwards;
+        }
+
+        /* --- Theory & Key Insight Styling --- */
+        .theory-text {
+            font-size: 1.1em;
+            line-height: 1.8;
+            color: var(--text-muted);
+        }
+
+        .theory-text p, .theory-text li {
+            color: var(--text-color);
+        }
+
+        .theory-text h3 {
+            color: #fff;
+            margin-top: 25px;
+            border-bottom: none;
+            text-align: left;
+            font-size: 1.3em;
+        }
+
+        .insight-box {
+            background-color: var(--insight-bg);
+            border-left: 4px solid var(--insight-border);
+            padding: 18px;
+            margin: 25px 0;
+            border-radius: 8px;
+        }
+
+        .insight-box strong {
+            color: #fff;
+            display: block;
+            margin-bottom: 8px;
+            font-size: 1.1em;
+            text-shadow: 0 0 10px rgba(168, 85, 247, 0.4);
+        }
+
+        /* --- Study Cards Styling --- */
+        .flashcard-container {
+            height: 250px;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            perspective: 1000px;
+        }
+
+        #flashcard-content {
+            width: 100%;
+            height: 100%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            padding: 30px;
+            box-sizing: border-box;
+            transition: opacity 0.3s ease-in-out, transform 0.2s;
+        }
+
+        #flashcard-content:hover {
+            transform: translateY(-2px);
+            border-color: rgba(168, 85, 247, 0.4);
+            box-shadow: 0 10px 40px rgba(108, 99, 255, 0.15);
+        }
+
+        .flashcard-front-style {
+             font-size: 1.6em;
+             font-weight: 600;
+             font-family: 'JetBrains Mono', monospace;
+             color: var(--accent-end);
+        }
+
+        .flashcard-back-style {
+             font-size: 1.2em;
+             color: var(--text-color);
+        }
+
+        /* --- Questions Styling (MCQ & T/F) --- */
+         .question-container-single, .question-container-all {
+            margin-bottom: 20px;
+            padding: 20px;
+         }
+
+        .question-text {
+            font-weight: 600;
+            margin-bottom: 20px;
+            font-size: 1.1em;
+        }
+
+        /* Buttons & Glass Inputs */
+        .options button, .tf-options button, .nav-button, .view-all-button {
+            display: block;
+            width: 100%;
+            padding: 12px 15px;
+            margin: 8px 0;
+            background: rgba(255, 255, 255, 0.02);
+            color: var(--text-color);
+            border: 1px solid var(--panel-border);
+            border-radius: 8px;
+            cursor: pointer;
+            text-align: left;
+            font-family: 'Inter', sans-serif;
+            font-size: 1em;
+            transition: all 0.3s ease;
+        }
+
+        .nav-button, .view-all-button {
+            width: auto;
+            text-align: center;
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        .options button:hover:not(:disabled), .tf-options button:hover:not(:disabled), .nav-button:hover:not(:disabled), .view-all-button:hover {
+            background: var(--accent-gradient);
+            border-color: transparent;
+            color: #fff;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 15px rgba(108, 99, 255, 0.25);
+        }
+
+        .options button:disabled, .tf-options button:disabled, .nav-button:disabled {
+            cursor: not-allowed;
+            opacity: 0.5;
+            transform: none;
+        }
+
+        /* Correct/Incorrect States */
+        .options button.correct, .tf-options button.correct {
+            background: var(--correct-color);
+            border-color: var(--correct-border);
+            color: #fff;
+            opacity: 1;
+        }
+        .options button.incorrect, .tf-options button.incorrect {
+            background: var(--incorrect-color);
+            border-color: var(--incorrect-border);
+            color: #fff;
+            opacity: 1;
+        }
+
+        .feedback {
+            margin-top: 15px;
+            padding: 12px;
+            border-radius: 8px;
+            font-weight: 600;
+            text-align: center;
+            animation: fadeIn 0.3s ease-in;
+        }
+
+        .feedback.correct {
+            color: var(--correct-border);
+            background: var(--correct-color);
+            border: 1px solid var(--correct-border);
+        }
+
+        .feedback.incorrect {
+            color: var(--incorrect-border);
+            background: var(--incorrect-color);
+            border: 1px solid var(--incorrect-border);
+        }
+
+        .explanation {
+            margin-top: 15px;
+            font-style: italic;
+            font-size: 0.95em;
+            padding: 15px;
+            color: var(--text-muted);
+            border-left: 3px solid var(--accent-start);
+            animation: fadeIn 0.5s ease-in;
+        }
+
+        /* --- Navigation & Utility --- */
+        .navigation {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 20px;
+        }
+
+        .counter {
+            font-size: 0.9em;
+            color: var(--text-muted);
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        .view-all-container {
+            text-align: center;
+            margin-top: 25px;
+        }
+
+        .hidden { display: none !important; }
+
+        /* --- Animations --- */
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Laws of Nature and Scientific Prediction</h1>
+
+        <div class="section">
+            <h2>Theory Summary and Key Insights</h2>
+            <div id="theory-content" class="theory-text">
+                <h3>The Logical Tasks of the Scientific Method</h3>
+                <p>The scientific method can be represented as a set of instructions governing several different tasks. Theory formulation uses <strong>abduction</strong>: an observation is identified, a hypothesis is judged to be its best explanation, and the hypothesis is adopted. Confirmation uses <strong>induction</strong>: if a hypothesis predicts an observation and the observation occurs, the hypothesis is regarded as probably supported. Refutation uses <strong>deduction</strong>, specifically modus tollens: if a hypothesis implies an observation but the observation does not occur, the hypothesis is rejected.</p>
+                <ul>
+                    <li><strong>Formulation:</strong> observation; the best explanation is $H$; therefore, $H$.</li>
+                    <li><strong>Confirmation:</strong> if $H$, then $e$; $e$; therefore, probably $H$.</li>
+                    <li><strong>Refutation:</strong> if $H$, then $e$; not $e$; therefore, not $H$.</li>
+                    <li><strong>Prediction:</strong> a law of nature plus initial conditions deductively yields an expected observation.</li>
+                </ul>
+
+                <h3>Problems of Induction and Refutation</h3>
+                <p>Inductive formulation and confirmation face problems such as the Ravens Paradox and the new riddle of induction. The same observation can support strange predictions when it is redescribed in a logically permitted but scientifically inappropriate way. Consequently, a simple inductive instruction manual can produce absurd results, yet no satisfactory replacement procedure has been established.</p>
+                <p>The problem with refutation is different. Modus tollens itself is valid, but a hypothesis is never tested alone. It is tested together with background assumptions. If $H^*$ represents those assumptions, the actual structure is:</p>
+                <p>$$H + H^* \rightarrow e,\quad \neg e,\quad \therefore \neg(H + H^*)$$</p>
+                <p>This entails that either $H$ or some part of $H^*$ is false; it does not identify which one. The Uranus anomaly was handled by changing background assumptions through the introduction of Neptune, whereas the Mercury anomaly ultimately led to replacing Newtonian theory with relativity.</p>
+
+                <div class="insight-box">
+                    <strong>Key Insight:</strong>
+                    Induction and refutation fail in different places. Induction has a problem with the inferential procedure itself, while deductive refutation uses valid logic but cannot ordinarily be applied to an isolated hypothesis.
+                </div>
+
+                <h3>Popper and Falsifiability</h3>
+                <p>Popper proposed falsifiability as a criterion of demarcation: a theory is scientific if observations could refute it by deductive reasoning. He contrasted Einsteinian relativity with theories he regarded as pseudoscientific because they could accommodate confirmation but could not, in principle, be refuted. The Duhem–Quine problem threatens this criterion: if observations test only a theory-plus-background-assumptions package, no individual theory can be conclusively falsified. Taken strictly, Popper's criterion would then classify every theory as unscientific.</p>
+
+                <h3>Prediction and the Need for Laws of Nature</h3>
+                <p>A scientific prediction combines a law of nature with initial conditions. For example, the claim that any body of water expands when it freezes, together with the condition that a lake will freeze, yields the prediction that the lake's volume will increase. A merely true generalization is insufficient. A perfect past association between Lucy's attendance and her team's victories may be accidental and therefore does not ground a scientific prediction about the next game.</p>
+                <p>This creates a definitional problem. The proposal that a law is simply a true generalization is too weak because it includes accidental regularities. Adding necessity appears promising: a law would be a true generalization that is also necessary. The central dispute is whether such necessity exists and can be understood.</p>
+
+                <h3>Three Arguments Against Necessity</h3>
+                <ol>
+                    <li><strong>Epistemic argument:</strong> epistemic empiricism permits justified belief only in what is empirically experienced. Experience reveals constant conjunctions, not necessary connections, so belief in worldly necessity appears unjustified.</li>
+                    <li><strong>Metaphysical argument:</strong> Hume's fork divides statements into necessary and a priori, or non-necessary and a posteriori. Scientific laws are known a posteriori, so the argument classifies them as non-necessary.</li>
+                    <li><strong>Semantic argument:</strong> semantic empiricism equates meaning with empirical conditions of verification. Because necessity is not empirically experienced, statements invoking it are declared meaningless.</li>
+                </ol>
+                <p>The epistemic argument concerns justification, the metaphysical argument concerns what kinds of truths exist, and the semantic argument concerns meaning. Skepticism here targets necessary connections in the world, not mathematical or definitional necessities such as $2 + 3 = 5$.</p>
+
+                <div class="insight-box">
+                    <strong>Key Insight:</strong>
+                    Constant conjunction and necessary connection are not the same claim. Repeatedly observing one type of event after another establishes a pattern, but the anti-Humean must still explain why that pattern reflects a fixed connection rather than coincidence.
+                </div>
+
+                <h3>Humean Approaches</h3>
+                <p>Humean views reject necessity and seek another criterion for distinguishing laws from accidents. Their motivation includes the thought that a world containing exactly the same sequence of observable events but no necessary connections would be empirically indistinguishable from ours. In a sufficiently large collection of unrelated events, flexible categorization may reveal apparent order, so supposed laws might project human expectations onto phenomena.</p>
+                <p>Several simple Humean criteria fail:</p>
+                <ul>
+                    <li>Requiring a generalization not to mention specific people or places is <strong>too weak</strong>, because the accidental claim that all pieces of gold weigh less than one ton satisfies it.</li>
+                    <li>The same requirement is also <strong>too strong</strong>, because genuine laws can have restricted application, such as the free-fall relation $x = 0.5gt^2$ on Earth's surface.</li>
+                    <li>Requiring exclusively general terms is too weak because singular descriptions can be paraphrased into general-looking descriptions without removing their accidental character.</li>
+                </ul>
+                <p>The Ramsey–Lewis view is identified as the strongest Humean approach, but its details are outside the material considered here.</p>
+
+                <h3>Anti-Humean Replies</h3>
+                <p>Anti-Humeans accept necessity and define a law as a true generalization that is also necessary. Referential theory challenges Hume's fork by separating how a truth is known from whether it is true in every possible world. Proper names are rigid designators: each designates the same object in every possible world. Thus an identity between two names of the same object can be discovered a posteriori while being necessary. The identity between Madonna and Louise Ciccone is used to illustrate this category. Conversely, a statement can be contingent yet a priori.</p>
+                <p>The anti-Humean reply to epistemic empiricism is an argument by absurd consequence. Science accepts electrons, forces, fields, and molecular structures despite experiencing only their effects or traces. If belief were justified only by direct empirical experience, much of science would have to be abandoned. Constant conjunction might similarly provide indirect reason to infer necessity, although this reply risks also licensing a necessary connection in accidental cases such as Lucy's attendance and victory.</p>
+                <p>The reply to semantic empiricism is parallel. If terms lacking direct empirical verification were meaningless, claims about forces and fields would also become meaningless. Because that cost undermines central scientific theories, anti-Humeans reject the semantic premise.</p>
+
+                <div class="insight-box">
+                    <strong>Key Insight:</strong>
+                    Refuting Hume's fork only shows that necessary a posteriori truths are possible. It removes one argument against necessary laws, but it does not by itself identify which observed regularities are laws.
+                </div>
+
+                <h3>The Armstrong–Dartski–Tuli View and the Remaining Problem</h3>
+                <p>The constructive anti-Humean view associated with Armstrong, Dartski, and Tuli holds that objects have properties and that fixed relationships exist between properties. A lake expands when frozen because of a fixed relationship between being water and increasing in volume when frozen. By contrast, even if Galileo's wearing white were always followed by cloudiness, no corresponding connection between those properties would make the pattern a law.</p>
+                <p>This account explains laws through <strong>nomological necessity</strong>, the necessity belonging to laws of nature. Its central criticism is that the nature of this connection still requires explanation. Calling it nomological necessity risks naming precisely what was supposed to be explained.</p>
+
+                <div class="insight-box">
+                    <strong>Key Insight:</strong>
+                    The dispute affects the scientific method of prediction itself. Without an accepted criterion separating laws from accidental generalizations, there is no settled procedure for deciding which deductively valid predictions are genuinely scientific.
+                </div>
+            </div>
+        </div>
+
+        <div class="section">
+            <h2>Study Cards</h2>
+            <div class="flashcard-container">
+                <div id="flashcard-content"></div>
+            </div>
+            <div class="navigation">
+                <button class="nav-button" id="prev-card">Previous</button>
+                <span class="counter" id="card-counter"></span>
+                <button class="nav-button" id="next-card">Next</button>
+            </div>
+        </div>
+
+        <div class="section">
+            <h2>Multiple-Choice Questions</h2>
+            <div id="mcq-single-view">
+                <div class="question-container-single" id="mcq-container">
+                    <div class="question-text" id="mcq-question"></div>
+                    <div class="options" id="mcq-options"></div>
+                    <div class="feedback hidden" id="mcq-feedback"></div>
+                    <div class="explanation hidden" id="mcq-explanation"></div>
+                </div>
+                <div class="navigation">
+                    <button class="nav-button" id="prev-mcq">Previous</button>
+                    <span class="counter" id="mcq-counter"></span>
+                    <button class="nav-button" id="next-mcq">Next</button>
+                </div>
+                 <div class="view-all-container">
+                     <button class="view-all-button" id="view-all-mcq">View All Questions</button>
+                 </div>
+            </div>
+            <div id="mcq-all-questions" class="hidden">
+                </div>
+        </div>
+
+        <div class="section">
+            <h2>True or False Questions</h2>
+             <div id="tf-single-view">
+                <div class="question-container-single" id="tf-container">
+                    <div class="question-text" id="tf-question"></div>
+                    <div class="tf-options" id="tf-options">
+                        <button data-answer="true">True</button>
+                        <button data-answer="false">False</button>
+                    </div>
+                    <div class="feedback hidden" id="tf-feedback"></div>
+                    <div class="explanation hidden" id="tf-explanation"></div>
+                </div>
+                <div class="navigation">
+                    <button class="nav-button" id="prev-tf">Previous</button>
+                    <span class="counter" id="tf-counter"></span>
+                    <button class="nav-button" id="next-tf">Next</button>
+                </div>
+                 <div class="view-all-container">
+                     <button class="view-all-button" id="view-all-tf">View All Questions</button>
+                 </div>
+            </div>
+             <div id="tf-all-questions" class="hidden">
+                 </div>
+        </div>
+    </div>
+
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+
+        const flashcardData = [
+            {
+                term: "Abduction",
+                definition: "Inference from an observation to the hypothesis judged to be its best explanation."
+            },
+            {
+                term: "Inductive confirmation",
+                definition: "Reasoning from a hypothesis predicting an observed event to probable support for that hypothesis."
+            },
+            {
+                term: "Deductive refutation",
+                definition: "Modus tollens reasoning: if $H$ implies $e$ and not $e$ is observed, infer not $H$."
+            },
+            {
+                term: "Duhem–Quine problem",
+                definition: "Observations test a hypothesis together with background assumptions, not the hypothesis in isolation."
+            },
+            {
+                term: "Falsifiability",
+                definition: "Popper's criterion that a scientific theory must be capable of observational refutation by deduction."
+            },
+            {
+                term: "Scientific prediction",
+                definition: "A predicted observation deductively derived from a law of nature and relevant initial conditions."
+            },
+            {
+                term: "Accidental generalization",
+                definition: "A general pattern that may be true but lacks the status needed to ground scientific prediction."
+            },
+            {
+                term: "Law of nature",
+                definition: "A true generalization with some further law-making condition; the nature of that condition is disputed."
+            },
+            {
+                term: "Constant conjunction",
+                definition: "A regular succession between types of events without an observed necessary connection."
+            },
+            {
+                term: "Epistemic empiricism",
+                definition: "The principle that belief is justified only when its object is empirically experienced."
+            },
+            {
+                term: "Hume's fork",
+                definition: "The proposed division of indicative statements into necessary a priori truths and non-necessary a posteriori truths."
+            },
+            {
+                term: "Semantic empiricism",
+                definition: "The view that meaning is empirical meaning and that unverifiable statements are meaningless."
+            },
+            {
+                term: "Humean view",
+                definition: "A view that rejects worldly necessity and seeks a non-necessitarian account of laws."
+            },
+            {
+                term: "Anti-Humean view",
+                definition: "A view that accepts necessity and defines laws as true generalizations that are also necessary."
+            },
+            {
+                term: "Necessary statement",
+                definition: "A statement that is true in every possible world."
+            },
+            {
+                term: "Rigid designator",
+                definition: "A proper name that designates the same object with respect to every possible world."
+            },
+            {
+                term: "Necessary a posteriori truth",
+                definition: "A truth that must be discovered empirically but is true in every possible world."
+            },
+            {
+                term: "Armstrong–Dartski–Tuli view",
+                definition: "The view that laws derive their necessity from fixed relationships between properties."
+            },
+            {
+                term: "Nomological necessity",
+                definition: "Necessity specifically associated with laws of nature rather than logical, metaphysical, or epistemic necessity."
+            },
+            {
+                term: "Free-fall relation",
+                definition: "For the stated Earth-surface case, distance is represented by $x = 0.5gt^2$."
+            }
+        ];
+
+        const mcqData = [
+            {
+                question: "Which form of inference moves from an observation to a hypothesis judged to be the observation's best explanation?",
+                options: ["Induction", "Abduction", "Modus tollens", "Prediction"],
+                correctIndex: 1,
+                explanation: "Abduction formulates a hypothesis by selecting the best explanation of an observation. Induction instead treats an observed prediction as probable support for an already stated hypothesis."
+            },
+            {
+                question: "A hypothesis implies an event, but the event does not occur. Which inference rule supports rejecting the hypothesis when it is tested in isolation?",
+                options: ["Abduction", "Inductive generalization", "Semantic verification", "Modus tollens"],
+                correctIndex: 3,
+                explanation: "Modus tollens has the form: if $H$, then $e$; not $e$; therefore, not $H$. The complication in science is normally the inability to test $H$ without background assumptions, not a defect in this rule."
+            },
+            {
+                question: "What is the principal conclusion drawn from the Ravens Paradox and the new riddle of induction?",
+                options: ["A simple inductive instruction manual can support absurd results and requires revision.", "Every inductive conclusion is deductively false.", "Observations cannot be described in more than one way.", "Scientists have stopped using induction to formulate hypotheses."],
+                correctIndex: 0,
+                explanation: "The paradoxes show that unrestricted inductive rules can treat scientifically inappropriate descriptions as confirmatory. They do not show that every inductive conclusion is false, and scientists continue to use induction."
+            },
+            {
+                question: "Suppose $H$ and background assumptions $H^*$ jointly imply $e$, but not $e$ is observed. What follows deductively?",
+                options: ["Only $H$ is false.", "Only $H^*$ is false.", "Either $H$ is false or at least part of $H^*$ is false.", "Both $H$ and every part of $H^*$ are false."],
+                correctIndex: 2,
+                explanation: "The observation refutes the conjunction of the hypothesis and background assumptions. It does not determine whether the failure lies in $H$, in $H^*$, or in both."
+            },
+            {
+                question: "Why did the Uranus anomaly not result in the rejection of Newtonian theory?",
+                options: ["The anomalous orbit was ignored as unobservable.", "The contradiction was reconciled by introducing Neptune as part of the background account.", "Modus tollens was shown to be invalid.", "Einsteinian relativity predicted Uranus before Newtonian theory did."],
+                correctIndex: 1,
+                explanation: "The Uranus case was resolved by revising the auxiliary account through the introduction of Neptune. This illustrates how a core theory can be preserved by changing background assumptions."
+            },
+            {
+                question: "How did the treatment of Mercury's anomalous orbit differ from the treatment of Uranus?",
+                options: ["Newtonian theory was ultimately replaced by relativity in the Mercury case.", "A new planet preserved Newtonian theory in the Mercury case.", "Mercury was treated as an accidental generalization.", "No observation conflicted with Newtonian predictions for Mercury."],
+                correctIndex: 0,
+                explanation: "The Mercury anomaly ultimately contributed to the replacement of Newtonian theory by Einsteinian relativity. In the Uranus case, revising the background account preserved Newtonian theory."
+            },
+            {
+                question: "Which comparison between induction and deductive refutation is most accurate?",
+                options: ["Both fail because their formal inference rules are invalid.", "Induction has only an application problem, while refutation has only a logical problem.", "Neither has any logical or practical difficulty.", "Induction is criticized at the inferential level, whereas refutation is limited by its application to theory-plus-background-assumptions."],
+                correctIndex: 3,
+                explanation: "Inductive generalization can generate absurd support relations, which challenges the procedure itself. Modus tollens remains valid, but scientific testing applies it to a conjunction rather than to an isolated hypothesis."
+            },
+            {
+                question: "What was Popper trying to achieve with his principle of demarcation?",
+                options: ["A method for proving every true theory", "A definition of empirical meaning", "A criterion distinguishing scientific theories from pseudoscientific theories", "A rule for selecting background assumptions"],
+                correctIndex: 2,
+                explanation: "Popper sought a clear boundary between scientific and non-scientific theories. His proposed boundary was falsifiability, not verification or certainty."
+            },
+            {
+                question: "Under Popper's criterion, when is a theory scientific?",
+                options: ["When it is falsifiable by observationally based deductive reasoning", "When every observation confirms it", "When it contains only general terms", "When it is known a priori"],
+                correctIndex: 0,
+                explanation: "For Popper, scientific status requires that possible observations could refute the theory deductively. Mere accumulation of confirmations does not satisfy this criterion."
+            },
+            {
+                question: "Why does the Duhem–Quine analysis threaten a strict Popperian demarcation criterion?",
+                options: ["It makes all scientific statements a priori.", "It proves that observations are never real.", "It turns every theory into a law of nature.", "It prevents an individual theory from being conclusively falsified apart from its background assumptions."],
+                correctIndex: 3,
+                explanation: "If only a theory-plus-assumptions package meets observation, no observation uniquely falsifies the theory itself. A strict requirement of individual falsifiability could therefore classify all theories as unscientific."
+            },
+            {
+                question: "Which pair supplies the standard deductive basis for a scientific prediction?",
+                options: ["An accidental generalization and a failed observation", "A law of nature and initial conditions", "A proper name and a definite description", "An observation and an abductive conclusion"],
+                correctIndex: 1,
+                explanation: "The prediction model combines a law with initial conditions to derive an expected phenomenon. A merely accidental past regularity does not provide the required law-like premise."
+            },
+            {
+                question: "Why does the true claim that everyone currently in a room has a name beginning with A fail to function as a law of nature?",
+                options: ["It is not grammatically general.", "It is necessarily false.", "It expresses a restricted accidental pattern rather than a law-grounded regularity.", "It cannot be checked by observation."],
+                correctIndex: 2,
+                explanation: "Truth and general form are insufficient for lawhood. The claim records a local accidental arrangement and therefore does not support scientific prediction in the way a law does."
+            },
+            {
+                question: "What does the example involving Lucy's attendance and her team's victories establish about defining laws?",
+                options: ["Every observed correlation is necessary.", "Predictions require only a true initial condition.", "Specific people cannot appear in any true statement.", "Defining a law as any true generalization is too weak."],
+                correctIndex: 3,
+                explanation: "The Lucy claim may be a true generalization while remaining accidental. It therefore shows that truth and generality alone admit too many statements as laws."
+            },
+            {
+                question: "What is the most intuitive additional condition proposed to distinguish laws from accidental generalizations?",
+                options: ["The generalization is necessary.", "The generalization mentions a place.", "The generalization has never been tested.", "The generalization is formulated abductively."],
+                correctIndex: 0,
+                explanation: "The proposed anti-Humean definition adds necessity to truth and generality. Humean arguments then challenge whether worldly necessity is justified, real, or meaningful."
+            },
+            {
+                question: "Which statement best expresses the epistemic argument against necessary connections in nature?",
+                options: ["Necessary connections are logically contradictory.", "Scientific laws are all known a priori.", "Experience gives constant conjunction but not necessity, so epistemic empiricism withholds justification for belief in necessity.", "Any statement containing a theoretical term is false."],
+                correctIndex: 2,
+                explanation: "The epistemic argument concerns justification: if justified belief is restricted to what is empirically experienced, unexperienced necessity is unjustified. It does not claim that necessity is logically contradictory."
+            },
+            {
+                question: "What subject matter makes the argument against necessity epistemic rather than semantic?",
+                options: ["Whether necessity exists in every possible world", "Whether belief in necessity is justified", "Whether necessary statements are grammatical", "Whether laws mention specific individuals"],
+                correctIndex: 1,
+                explanation: "Epistemology concerns the justification of beliefs. The semantic argument, by contrast, concerns whether statements about necessity possess meaning."
+            },
+            {
+                question: "Which necessity is explicitly not targeted by skepticism about necessary connections in the world?",
+                options: ["The necessity of $2 + 3 = 5$", "The connection between Lucy's attendance and victory", "The link between every observed succession of events", "The necessity attributed to natural causal connections"],
+                correctIndex: 0,
+                explanation: "The skepticism is directed at necessary connections in the empirical world. Mathematical and definitional necessities are not the target."
+            },
+            {
+                question: "According to Hume's fork, how are indicative statements divided?",
+                options: ["Observable or unobservable", "General or singular", "Scientific or pseudoscientific", "Necessary and a priori, or non-necessary and a posteriori"],
+                correctIndex: 3,
+                explanation: "Hume's fork links necessity with a priori knowability and contingency with a posteriori knowledge. Referential theory challenges the exhaustiveness of this division."
+            },
+            {
+                question: "How does Hume's metaphysical argument classify scientific laws?",
+                options: ["Necessary because they are general", "Non-necessary because they are known a posteriori", "Meaningless because they predict observations", "A priori because they use mathematics"],
+                correctIndex: 1,
+                explanation: "The argument places scientific claims in the a posteriori branch of Hume's fork and therefore labels them non-necessary. The anti-Humean response rejects the fork itself."
+            },
+            {
+                question: "What premise does semantic empiricism use to declare the necessity-based definition of law meaningless?",
+                options: ["All true claims are laws.", "Only necessary statements are meaningful.", "A statement without empirical conditions of verification is meaningless.", "Every meaningful statement must be known a priori."],
+                correctIndex: 2,
+                explanation: "Semantic empiricism equates meaning with empirical verifiability. Because necessity is not directly experienced, it concludes that necessity-based claims lack meaning."
+            },
+            {
+                question: "What does the thought experiment involving an event-for-event duplicate world without necessary connections suggest?",
+                options: ["Necessary connections are visually obvious.", "Every pattern is a scientific law.", "Possible worlds must contain different events.", "Observable order may not reveal whether necessary connections exist."],
+                correctIndex: 3,
+                explanation: "If the duplicate has exactly the same events in the same order, observation cannot distinguish it from the actual world. This motivates doubt that observed order establishes necessity."
+            },
+            {
+                question: "Why might a very large random collection of independent phenomena appear orderly?",
+                options: ["Independent events cannot be categorized.", "Some way of sorting many events may reveal regular succession between selected categories.", "Random collections always contain genuine necessity.", "Scientific research prevents observers from finding patterns."],
+                correctIndex: 1,
+                explanation: "With many events and many possible categorizations, some categories may display regular succession. An observer might then project necessity onto a pattern that arose without necessary connections."
+            },
+            {
+                question: "Why must Humeans seek a condition other than necessity for lawhood?",
+                options: ["They reject the existence of necessity.", "They deny that laws are general.", "They believe every accidental pattern is false.", "They accept only proper names as meaningful."],
+                correctIndex: 0,
+                explanation: "Humean accounts are committed to a worldview without necessary connections. They therefore cannot use necessity as the feature separating laws from accidental generalizations."
+            },
+            {
+                question: "The proposal that laws are true generalizations not limited to specific individuals or places is too weak because it includes which claim?",
+                options: ["Any body of water expands when frozen.", "The free-fall relation on Earth's surface", "All pieces of gold weigh less than one ton.", "Whenever Lucy attends, her team wins."],
+                correctIndex: 2,
+                explanation: "The gold-weight claim is unrestricted in the relevant linguistic sense but is presented as not being a law. Thus removing references to particular people and places does not exclude every accident."
+            },
+            {
+                question: "Why is the same non-limitation criterion also too strong?",
+                options: ["Some genuine laws have restricted domains, including the stated free-fall law on Earth's surface.", "No accidental generalization refers to a place.", "Every unrestricted statement is a law.", "A true generalization cannot contain a formula."],
+                correctIndex: 0,
+                explanation: "A genuine law can apply under restricted conditions or at a particular location. The relation $x = 0.5gt^2$ is presented as a law for free fall on Earth's surface despite that limitation."
+            },
+            {
+                question: "Why does requiring a law to be expressed exclusively in general terms fail?",
+                options: ["Scientific statements must contain proper names.", "General terms cannot describe properties.", "Every law must mention a location.", "Singular expressions in accidental claims can be replaced by general descriptions without changing their accidental character."],
+                correctIndex: 3,
+                explanation: "A linguistic paraphrase can hide references to particular individuals behind descriptions such as the smartest woman on the street. The underlying accident remains, so the criterion is too weak."
+            },
+            {
+                question: "What distinguishes the anti-Humean position from the Humean position?",
+                options: ["It rejects all true generalizations.", "It treats every correlation as a law.", "It accepts necessity as part of the account of laws.", "It denies that prediction uses deduction."],
+                correctIndex: 2,
+                explanation: "Anti-Humeans accept necessary connections and use them to explain law-governed order. Humeans reject necessity and must seek a different law-making condition."
+            },
+            {
+                question: "In the possible-world account, what makes a statement necessary?",
+                options: ["It is true in every possible world.", "It has been observed many times.", "It contains only mathematical symbols.", "It is meaningful to every observer."],
+                correctIndex: 0,
+                explanation: "Necessity is defined modally as truth in every possible world. This is distinct from how a person comes to know the statement."
+            },
+            {
+                question: "Why is the identity between Madonna and Louise Ciccone used against Hume's fork?",
+                options: ["It is false but known a priori.", "It is a scientific prediction.", "It is contingent because names change referents.", "It is necessary due to rigid designation but knowable only a posteriori."],
+                correctIndex: 3,
+                explanation: "The identity must be discovered, making it a posteriori, but both proper names rigidly designate the same person, making it necessary. This supplies a category excluded by Hume's fork."
+            },
+            {
+                question: "What is a rigid designator in the account used to challenge Hume's fork?",
+                options: ["A phrase that describes whoever performs a role", "A name that designates the same object with respect to every possible world", "A term that is empirically meaningless", "A generalization restricted to one location"],
+                correctIndex: 1,
+                explanation: "A rigid designator keeps the same referent across possible worlds. A role-description such as the singer of a particular song need not designate that same person in every world."
+            },
+            {
+                question: "Which example is presented as a necessary a posteriori scientific identity?",
+                options: ["Everyone in the room has a name beginning with A.", "Lucy attends whenever her team wins.", "Water is $H_2O$.", "The number of planets is nine."],
+                correctIndex: 2,
+                explanation: "Water's identity with $H_2O$ is presented as both empirically discovered and necessary. The number of planets is contingent, while the other claims are accidental patterns."
+            },
+            {
+                question: "What follows directly from the existence of necessary a posteriori truths?",
+                options: ["Hume's fork is false, so its metaphysical conclusion is not forced.", "Every a posteriori statement is necessary.", "All laws of nature have been conclusively identified.", "Semantic empiricism is automatically true."],
+                correctIndex: 0,
+                explanation: "A necessary a posteriori truth falls outside Hume's proposed two categories. This makes the fork false and renders the argument based on it unsound, though it does not settle every question about laws."
+            },
+            {
+                question: "Why is the statement identifying the actual singer of a song with the singer of that song treated as contingent a priori?",
+                options: ["It can be known without further experience, yet the actual singer might not have performed the song in another possible world.", "It is discovered empirically and true in every possible world.", "It is false in the actual world.", "It refers to no actual person."],
+                correctIndex: 0,
+                explanation: "The statement's actual-world truth follows from its construction, so it is knowable a priori. It remains contingent because the person who actually sang the song might not have done so."
+            },
+            {
+                question: "How does the anti-Humean argument by absurd consequence challenge epistemic empiricism?",
+                options: ["It shows that observations never justify beliefs.", "It proves electrons can be directly seen.", "It claims every unobservable entity is necessary.", "It notes that the premise would eliminate justified belief in electrons, forces, fields, and much of science."],
+                correctIndex: 3,
+                explanation: "Science relies on entities known through their effects rather than direct experience. A premise allowing belief only in directly experienced objects would therefore impose an unacceptable cost on scientific theory."
+            },
+            {
+                question: "What unresolved difficulty arises if constant conjunction is treated as good indirect evidence for necessity?",
+                options: ["It prevents belief in molecular structures.", "It may also justify necessity in accidental cases such as Lucy's attendance and victory.", "It makes every theoretical entity directly observable.", "It proves Hume's fork correct."],
+                correctIndex: 1,
+                explanation: "The inference from stable patterns to necessity does not yet discriminate laws from accidents. The Lucy pattern could receive the same treatment, returning the argument to its original problem."
+            },
+            {
+                question: "How does the anti-Humean response to semantic empiricism parallel the response to epistemic empiricism?",
+                options: ["Both responses accept that direct observation is the only standard.", "Both deny the existence of fields.", "Both argue that the empiricist premise would undermine central scientific claims involving unobservable entities.", "Both prove every meaningful term denotes a rigid designator."],
+                correctIndex: 2,
+                explanation: "The semantic premise would render claims about forces and fields meaningless, just as the epistemic premise would make belief in them unjustified. Their high scientific cost motivates rejection of the premises."
+            },
+            {
+                question: "According to the Armstrong–Dartski–Tuli view, what grounds the law that water expands when frozen?",
+                options: ["A fixed relationship between the relevant properties", "The wording of the generalization", "The fact that only one lake was observed", "A decision to treat every regularity as necessary"],
+                correctIndex: 0,
+                explanation: "The view locates lawhood in fixed relationships between properties, such as being water and increasing in volume when frozen. Individual cases instantiate that relationship."
+            },
+            {
+                question: "Why is the claim that cloudiness follows Galileo's wearing white not a law, even if it is true?",
+                options: ["It is not expressed as a conditional.", "Cloudiness cannot be observed.", "Galileo is a rigid designator.", "There is no fixed connection between the property of wearing white and the property of cloudiness."],
+                correctIndex: 3,
+                explanation: "Truth and repetition do not suffice on this account. The accidental sequence lacks the property-level relationship that would make it necessary and law-like."
+            },
+            {
+                question: "What does the term nomological necessity mean in the constructive anti-Humean account?",
+                options: ["A necessity of mathematical definitions", "A necessity specifically applying to laws of nature", "A belief known independently of experience", "An accidental sequence described generally"],
+                correctIndex: 1,
+                explanation: "Nomological necessity is necessity associated with natural laws. It is distinguished from logical, metaphysical, and epistemic forms of necessity."
+            },
+            {
+                question: "What is the central criticism of invoking nomological necessity to explain laws?",
+                options: ["It makes laws too easy to observe.", "It denies that objects have properties.", "It may merely rename the necessary connection whose nature required explanation.", "It proves accidental generalizations are false."],
+                correctIndex: 2,
+                explanation: "Calling the connection nomological does not yet explain what the connection is or how it produces its law-making role. The account risks assuming the very feature it set out to explain."
+            },
+            {
+                question: "What is the final methodological consequence of lacking an accepted definition of a law of nature?",
+                options: ["No settled criterion determines which predictions and explanations are scientific rather than accident-based.", "Deductive arguments become formally invalid.", "All generalizations become false.", "Initial conditions are no longer needed for predictions."],
+                correctIndex: 0,
+                explanation: "Scientific prediction and explanation require laws rather than accidental generalizations. Because both Humean and anti-Humean definitions face problems, the desired criterion remains unsettled."
+            }
+        ];
+
+        const tfData = [
+            {
+                question: "Abduction formulates a hypothesis by treating it as the best explanation of an observation.",
+                answer: true,
+                explanation: "Abduction begins with an observation and moves to the hypothesis judged to explain it best."
+            },
+            {
+                question: "Inductive confirmation concludes that a hypothesis is deductively certain whenever its predicted observation occurs.",
+                answer: false,
+                explanation: "The inductive conclusion is only probable support for the hypothesis, not deductive certainty."
+            },
+            {
+                question: "The logical validity of modus tollens is the principal defect identified in scientific refutation.",
+                answer: false,
+                explanation: "Modus tollens is valid. The practical defect is that hypotheses cannot normally be isolated from background assumptions."
+            },
+            {
+                question: "A failed prediction directly refutes the conjunction of a hypothesis and its background assumptions.",
+                answer: true,
+                explanation: "If the conjunction implied the failed prediction, the conjunction is false, although the observation does not identify which component failed."
+            },
+            {
+                question: "The Uranus and Mercury anomalies demonstrate that every conflict with observation must be resolved by abandoning the central theory.",
+                answer: false,
+                explanation: "The Uranus case preserved Newtonian theory by revising the background account, whereas the Mercury case led to theory replacement."
+            },
+            {
+                question: "Popper's demarcation principle classifies a theory as scientific when it is falsifiable.",
+                answer: true,
+                explanation: "Popper required a scientific theory to be capable, in principle, of deductive refutation by observations."
+            },
+            {
+                question: "If the Duhem–Quine problem is accepted strictly, Popper's criterion risks classifying all theories as unscientific.",
+                answer: true,
+                explanation: "No individual theory can be conclusively falsified when observations test only a theory-plus-assumptions package."
+            },
+            {
+                question: "A true generalization automatically provides a scientific law suitable for prediction.",
+                answer: false,
+                explanation: "Accidental generalizations may be true without being laws, so truth and generality are insufficient."
+            },
+            {
+                question: "The prediction that a freezing lake will increase in volume combines a law-like premise with an initial condition.",
+                answer: true,
+                explanation: "The expansion rule supplies the law, while the lake's freezing supplies the initial condition."
+            },
+            {
+                question: "The Lucy example is intended to show that every repeated association between two events is false.",
+                answer: false,
+                explanation: "The association may be true; the point is that it can remain accidental and fail to support scientific prediction."
+            },
+            {
+                question: "The epistemic argument against necessity concerns whether belief in worldly necessary connections is justified.",
+                answer: true,
+                explanation: "It applies epistemic empiricism to the fact that experience reveals conjunctions but not necessity."
+            },
+            {
+                question: "Skepticism about necessary connections in nature also denies the necessity of mathematical truths such as $2 + 3 = 5$.",
+                answer: false,
+                explanation: "The skepticism is limited to necessary connections in the world, not mathematical or definitional necessity."
+            },
+            {
+                question: "Hume's fork permits necessary a posteriori truths as one of its original two categories.",
+                answer: false,
+                explanation: "The fork allows necessary a priori and non-necessary a posteriori statements; necessary a posteriori truths challenge it."
+            },
+            {
+                question: "Semantic empiricism treats a statement without empirical verification conditions as meaningless.",
+                answer: true,
+                explanation: "This principle is the key premise used by the semantic argument against necessity-based definitions of law."
+            },
+            {
+                question: "A world containing the same observable sequence as ours but no necessary connections would be distinguishable through those observations alone.",
+                answer: false,
+                explanation: "Because the event sequences are identical, observation alone would not distinguish the two worlds."
+            },
+            {
+                question: "A sufficiently large set of unrelated phenomena may appear orderly when observers can categorize it in many ways.",
+                answer: true,
+                explanation: "Some categorization may reveal regular succession, encouraging an observer to infer a connection that is not necessary."
+            },
+            {
+                question: "Humeans can use necessity as their preferred criterion for distinguishing laws from accidents.",
+                answer: false,
+                explanation: "Humeans reject worldly necessity and therefore must seek a different law-making condition."
+            },
+            {
+                question: "Excluding references to specific people and places is sufficient to separate every law from every accidental generalization.",
+                answer: false,
+                explanation: "The criterion is too weak because unrestricted accidental claims remain, and too strong because some genuine laws have restricted domains."
+            },
+            {
+                question: "The stated relation $x = 0.5gt^2$ illustrates that a genuine law may have location-specific application.",
+                answer: true,
+                explanation: "It is presented as a law applying to free fall on Earth's surface, so restriction does not by itself prevent lawhood."
+            },
+            {
+                question: "Rephrasing singular terms as general descriptions necessarily converts an accidental generalization into a law.",
+                answer: false,
+                explanation: "Linguistic reformulation can conceal specificity without changing the accidental nature of the pattern."
+            },
+            {
+                question: "Anti-Humeans define laws by adding necessity to truth and generality.",
+                answer: true,
+                explanation: "Their proposed form is that a law is a true generalization that is also necessary."
+            },
+            {
+                question: "A necessary statement is true in every possible world.",
+                answer: true,
+                explanation: "This possible-world condition is the definition of necessity used in the anti-Humean reply."
+            },
+            {
+                question: "A rigid designator changes its referent whenever a different possible world is considered.",
+                answer: false,
+                explanation: "A rigid designator refers to the same object with respect to every possible world."
+            },
+            {
+                question: "The identity between two rigid names of the same person can be necessary even when it must be discovered empirically.",
+                answer: true,
+                explanation: "Such an identity is necessary a posteriori: discovery concerns knowledge, while rigid designation establishes necessity."
+            },
+            {
+                question: "Refuting Hume's fork by itself supplies a complete criterion for distinguishing laws from accidental generalizations.",
+                answer: false,
+                explanation: "It removes one argument against necessary laws but does not identify which observed patterns involve necessity."
+            },
+            {
+                question: "The anti-Humean critique of epistemic empiricism notes that science accepts entities through their effects even when they are not directly experienced.",
+                answer: true,
+                explanation: "Electrons, forces, fields, and molecular structures are used to show the excessive cost of requiring direct experience."
+            },
+            {
+                question: "Inferring necessity from constant conjunction immediately solves the Lucy problem.",
+                answer: false,
+                explanation: "The same inference could incorrectly assign necessity to Lucy's accidental association with victory."
+            },
+            {
+                question: "The anti-Humean response to semantic empiricism argues that its verification requirement would render many claims about forces and fields meaningless.",
+                answer: true,
+                explanation: "Because only the effects of such entities are observed, strict semantic empiricism would undermine central scientific claims."
+            },
+            {
+                question: "The Armstrong–Dartski–Tuli view explains individual law-governed events through fixed relationships between properties.",
+                answer: true,
+                explanation: "An object's behavior follows from the relevant fixed property relationship, such as the relationship involving water and expansion upon freezing."
+            },
+            {
+                question: "Calling the connection between law-related properties nomological necessity fully resolves the demand to explain its nature.",
+                answer: false,
+                explanation: "The label identifies a law-related necessity but may simply restate the connection that still needs explanation."
+            }
+        ];
+
+        // --- Global State Variables ---
+        let currentCardIndex = 0;
+        let isCardFront = true;
+        let isCardAnimating = false;
+        let currentMCQIndex = 0;
+        let currentTFIndex = 0;
+        let mcqAnswers = new Array(mcqData.length).fill(null);
+        let tfAnswers = new Array(tfData.length).fill(null);
+
+        // --- DOM Element References ---
+        const flashcardContent = document.getElementById('flashcard-content');
+        const cardCounter = document.getElementById('card-counter');
+        const prevCardBtn = document.getElementById('prev-card');
+        const nextCardBtn = document.getElementById('next-card');
+        const mcqQuestion = document.getElementById('mcq-question');
+        const mcqOptions = document.getElementById('mcq-options');
+        const mcqFeedback = document.getElementById('mcq-feedback');
+        const mcqExplanation = document.getElementById('mcq-explanation');
+        const mcqCounter = document.getElementById('mcq-counter');
+        const prevMCQBtn = document.getElementById('prev-mcq');
+        const nextMCQBtn = document.getElementById('next-mcq');
+        const viewAllMCQBtn = document.getElementById('view-all-mcq');
+        const mcqSingleView = document.getElementById('mcq-single-view');
+        const mcqAllQuestionsContainer = document.getElementById('mcq-all-questions');
+        const tfQuestion = document.getElementById('tf-question');
+        const tfOptionsContainer = document.getElementById('tf-options');
+        const tfFeedback = document.getElementById('tf-feedback');
+        const tfExplanation = document.getElementById('tf-explanation');
+        const tfCounter = document.getElementById('tf-counter');
+        const prevTFBtn = document.getElementById('prev-tf');
+        const nextTFBtn = document.getElementById('next-tf');
+        const viewAllTFBtn = document.getElementById('view-all-tf');
+        const tfSingleView = document.getElementById('tf-single-view');
+        const tfAllQuestionsContainer = document.getElementById('tf-all-questions');
+
+        // --- MathJax Re-rendering Helper ---
+        function triggerMathJax() {
+            if (window.MathJax && window.MathJax.typesetPromise) {
+                window.MathJax.typesetPromise().catch((err) => console.error('MathJax error:', err.message));
+            }
+        }
+
+        function displayCard(index) {
+            if (!flashcardData || flashcardData.length === 0) return;
+            const cardData = flashcardData[index];
+            isCardFront = true;
+            flashcardContent.style.opacity = '1';
+            flashcardContent.textContent = cardData.term;
+            flashcardContent.className = 'flashcard-front-style';
+            cardCounter.textContent = `Card ${index + 1} / ${flashcardData.length}`;
+            prevCardBtn.disabled = index === 0;
+            nextCardBtn.disabled = index === flashcardData.length - 1;
+            triggerMathJax();
+        }
+
+        function flipCard() {
+            if (isCardAnimating || !flashcardData || flashcardData.length === 0) return;
+            isCardAnimating = true;
+            flashcardContent.style.opacity = '0';
+            setTimeout(() => {
+                isCardFront = !isCardFront;
+                const cardData = flashcardData[currentCardIndex];
+                if (isCardFront) {
+                    flashcardContent.textContent = cardData.term;
+                    flashcardContent.className = 'flashcard-front-style';
+                } else {
+                    flashcardContent.textContent = cardData.definition;
+                    flashcardContent.className = 'flashcard-back-style';
+                }
+                flashcardContent.style.opacity = '1';
+                isCardAnimating = false;
+                triggerMathJax();
+            }, 300);
+        }
+
+        function displayMCQuestion(index) {
+            if (!mcqData || mcqData.length === 0) return;
+            const qData = mcqData[index];
+            mcqQuestion.textContent = qData.question;
+            mcqOptions.innerHTML = '';
+            mcqFeedback.classList.add('hidden');
+            mcqExplanation.classList.add('hidden');
+            qData.options.forEach((option, i) => {
+                const button = document.createElement('button');
+                button.textContent = option;
+                button.onclick = () => handleMCQAnswer(index, i);
+                mcqOptions.appendChild(button);
+            });
+            mcqCounter.textContent = `Question ${index + 1} / ${mcqData.length}`;
+            prevMCQBtn.disabled = index === 0;
+            nextMCQBtn.disabled = index === mcqData.length - 1;
+            if (mcqAnswers[index] !== null) {
+                highlightMCQAnswer(mcqOptions, mcqFeedback, mcqExplanation, index, mcqAnswers[index].selected);
+            }
+            triggerMathJax();
+        }
+
+        function handleMCQAnswer(qIndex, selectedIndex) {
+            if (mcqAnswers[qIndex] !== null) return;
+            const isCorrect = selectedIndex === mcqData[qIndex].correctIndex;
+            mcqAnswers[qIndex] = { selected: selectedIndex, correct: isCorrect };
+            highlightMCQAnswer(mcqOptions, mcqFeedback, mcqExplanation, qIndex, selectedIndex);
+        }
+
+        function highlightMCQAnswer(optionsContainer, feedbackEl, explanationEl, qIndex, selectedIndex) {
+            const qData = mcqData[qIndex];
+            const buttons = optionsContainer.querySelectorAll('button');
+            buttons.forEach((button, i) => {
+                button.disabled = true;
+                if (i === qData.correctIndex) {
+                    button.classList.add('correct');
+                }
+                if (i === selectedIndex && i !== qData.correctIndex) {
+                    button.classList.add('incorrect');
+                }
+            });
+            feedbackEl.textContent = selectedIndex === qData.correctIndex ? "Correct!" : "Incorrect.";
+            feedbackEl.className = `feedback ${selectedIndex === qData.correctIndex ? 'correct' : 'incorrect'}`;
+            explanationEl.innerHTML = `<strong>Explanation:</strong> ${qData.explanation}`;
+            explanationEl.classList.remove('hidden');
+            triggerMathJax();
+        }
+
+        function displayAllMCQ() {
+            if (!mcqData || mcqData.length === 0) return;
+            mcqSingleView.classList.add('hidden');
+            mcqAllQuestionsContainer.innerHTML = '';
+            mcqData.forEach((qData, index) => {
+                const questionDiv = document.createElement('div');
+                questionDiv.className = 'question-container-all';
+                questionDiv.innerHTML = `
+                    <div class="question-text">${index + 1}. ${qData.question}</div>
+                    <div class="options">
+                        ${qData.options.map((option, i) => `<button data-qindex="${index}" data-oindex="${i}">${option}</button>`).join('')}
+                    </div>
+                    <div class="feedback hidden"></div>
+                    <div class="explanation hidden"></div>
+                `;
+                mcqAllQuestionsContainer.appendChild(questionDiv);
+                 const optionButtons = questionDiv.querySelectorAll('.options button');
+                 optionButtons.forEach(button => {
+                     button.onclick = () => {
+                        const qIndex = parseInt(button.dataset.qindex);
+                        const oIndex = parseInt(button.dataset.oindex);
+                        if (mcqAnswers[qIndex] === null) {
+                            const isCorrect = oIndex === mcqData[qIndex].correctIndex;
+                            mcqAnswers[qIndex] = { selected: oIndex, correct: isCorrect };
+                        }
+                        const optionsDiv = button.closest('.options');
+                        const feedbackDiv = questionDiv.querySelector('.feedback');
+                        const explanationDiv = questionDiv.querySelector('.explanation');
+                        highlightMCQAnswer(optionsDiv, feedbackDiv, explanationDiv, qIndex, mcqAnswers[qIndex].selected);
+                     };
+                 });
+                 if (mcqAnswers[index] !== null) {
+                    const optionsDiv = questionDiv.querySelector('.options');
+                    const feedbackDiv = questionDiv.querySelector('.feedback');
+                    const explanationDiv = questionDiv.querySelector('.explanation');
+                    highlightMCQAnswer(optionsDiv, feedbackDiv, explanationDiv, index, mcqAnswers[index].selected);
+                 }
+            });
+            mcqAllQuestionsContainer.classList.remove('hidden');
+            triggerMathJax();
+        }
+
+        function displayTFQuestion(index) {
+            if (!tfData || tfData.length === 0) return;
+            const qData = tfData[index];
+            tfQuestion.textContent = qData.question;
+            tfFeedback.classList.add('hidden');
+            tfExplanation.classList.add('hidden');
+             const buttons = tfOptionsContainer.querySelectorAll('button');
+             buttons.forEach(button => {
+                 button.disabled = false;
+                 button.classList.remove('correct', 'incorrect');
+                 button.onclick = () => handleTFAnswer(index, button.dataset.answer === 'true');
+             });
+            tfCounter.textContent = `Question ${index + 1} / ${tfData.length}`;
+            prevTFBtn.disabled = index === 0;
+            nextTFBtn.disabled = index === tfData.length - 1;
+            if (tfAnswers[index] !== null) {
+                highlightTFAnswer(tfOptionsContainer, tfFeedback, tfExplanation, index, tfAnswers[index].selected);
+            }
+            triggerMathJax();
+        }
+
+        function handleTFAnswer(qIndex, selectedAnswer) {
+            if (tfAnswers[qIndex] !== null) return;
+            const isCorrect = selectedAnswer === tfData[qIndex].answer;
+            tfAnswers[qIndex] = { selected: selectedAnswer, correct: isCorrect };
+            highlightTFAnswer(tfOptionsContainer, tfFeedback, tfExplanation, qIndex, selectedAnswer);
+        }
+
+        function highlightTFAnswer(optionsContainer, feedbackEl, explanationEl, qIndex, selectedAnswer) {
+             const qData = tfData[qIndex];
+             const buttons = optionsContainer.querySelectorAll('button');
+             buttons.forEach(button => {
+                 const buttonAnswer = button.dataset.answer === 'true';
+                 button.disabled = true;
+                 if (buttonAnswer === qData.answer) {
+                     button.classList.add('correct');
+                 }
+                 if (buttonAnswer === selectedAnswer && buttonAnswer !== qData.answer) {
+                     button.classList.add('incorrect');
+                 }
+             });
+             feedbackEl.textContent = selectedAnswer === qData.answer ? "Correct!" : "Incorrect.";
+             feedbackEl.className = `feedback ${selectedAnswer === qData.answer ? 'correct' : 'incorrect'}`;
+             explanationEl.innerHTML = `<strong>Explanation:</strong> ${qData.explanation}`;
+             explanationEl.classList.remove('hidden');
+             triggerMathJax();
+        }
+
+        function displayAllTF() {
+             if (!tfData || tfData.length === 0) return;
+             tfSingleView.classList.add('hidden');
+             tfAllQuestionsContainer.innerHTML = '';
+             tfData.forEach((qData, index) => {
+                 const questionDiv = document.createElement('div');
+                 questionDiv.className = 'question-container-all';
+                 questionDiv.innerHTML = `
+                     <div class="question-text">${index + 1}. ${qData.question}</div>
+                     <div class="tf-options">
+                         <button data-qindex="${index}" data-answer="true">True</button>
+                         <button data-qindex="${index}" data-answer="false">False</button>
+                     </div>
+                     <div class="feedback hidden"></div>
+                     <div class="explanation hidden"></div>
+                 `;
+                 tfAllQuestionsContainer.appendChild(questionDiv);
+                 const optionButtons = questionDiv.querySelectorAll('.tf-options button');
+                 optionButtons.forEach(button => {
+                     button.onclick = () => {
+                         const qIndex = parseInt(button.dataset.qindex);
+                         const selectedAnswer = button.dataset.answer === 'true';
+                         if (tfAnswers[qIndex] === null) {
+                             const isCorrect = selectedAnswer === tfData[qIndex].answer;
+                             tfAnswers[qIndex] = { selected: selectedAnswer, correct: isCorrect };
+                         }
+                         const optionsDiv = button.closest('.tf-options');
+                         const feedbackDiv = questionDiv.querySelector('.feedback');
+                         const explanationDiv = questionDiv.querySelector('.explanation');
+                         highlightTFAnswer(optionsDiv, feedbackDiv, explanationDiv, qIndex, tfAnswers[qIndex].selected);
+                     };
+                 });
+                 if (tfAnswers[index] !== null) {
+                    const optionsDiv = questionDiv.querySelector('.tf-options');
+                    const feedbackDiv = questionDiv.querySelector('.feedback');
+                    const explanationDiv = questionDiv.querySelector('.explanation');
+                    highlightTFAnswer(optionsDiv, feedbackDiv, explanationDiv, index, tfAnswers[index].selected);
+                 }
+             });
+             tfAllQuestionsContainer.classList.remove('hidden');
+             triggerMathJax();
+        }
+
+        function initialize() {
+            if (flashcardData.length > 0) displayCard(currentCardIndex);
+            if (mcqData.length > 0) displayMCQuestion(currentMCQIndex);
+            if (tfData.length > 0) displayTFQuestion(currentTFIndex);
+            flashcardContent.addEventListener('click', flipCard);
+            prevCardBtn.addEventListener('click', () => { if (currentCardIndex > 0) { currentCardIndex--; displayCard(currentCardIndex); } });
+            nextCardBtn.addEventListener('click', () => { if (currentCardIndex < flashcardData.length - 1) { currentCardIndex++; displayCard(currentCardIndex); } });
+            prevMCQBtn.addEventListener('click', () => { if (currentMCQIndex > 0) { currentMCQIndex--; displayMCQuestion(currentMCQIndex); } });
+            nextMCQBtn.addEventListener('click', () => { if (currentMCQIndex < mcqData.length - 1) { currentMCQIndex++; displayMCQuestion(currentMCQIndex); } });
+            viewAllMCQBtn.addEventListener('click', displayAllMCQ);
+            prevTFBtn.addEventListener('click', () => { if (currentTFIndex > 0) { currentTFIndex--; displayTFQuestion(currentTFIndex); } });
+            nextTFBtn.addEventListener('click', () => { if (currentTFIndex < tfData.length - 1) { currentTFIndex++; displayTFQuestion(currentTFIndex); } });
+            viewAllTFBtn.addEventListener('click', displayAllTF);
+
+            // Initial MathJax render for static HTML (like the Theory section)
+            triggerMathJax();
+        }
+
+        initialize();
+    });
+    </script>
+</body>
+</html>

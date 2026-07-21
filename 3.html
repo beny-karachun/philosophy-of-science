@@ -1,0 +1,1198 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Logic and Scientific Reasoning</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+
+    <script>
+        window.MathJax = {
+            tex: {
+                inlineMath: [['$', '$'], ['\\(', '\\)']],
+                displayMath: [['$$', '$$'], ['\\[', '\\]']]
+            },
+            startup: {
+                typeset: false // We will trigger this manually via JS
+            }
+        };
+    </script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+    <style>
+        /* --- Root Variables for Theme --- */
+        :root {
+            --primary-bg: #0a0a0f;
+            --panel-bg: rgba(255, 255, 255, 0.03);
+            --panel-border: rgba(255, 255, 255, 0.1);
+
+            --accent-start: #6C63FF;
+            --accent-end: #A855F7;
+            --accent-gradient: linear-gradient(135deg, var(--accent-start), var(--accent-end));
+            --accent-color: #8B5CF6; /* Midpoint fallback */
+
+            --text-color: #E0E0E0;
+            --text-muted: #9ca3af;
+
+            --correct-color: rgba(16, 185, 129, 0.2);
+            --correct-border: #10b981;
+            --incorrect-color: rgba(239, 68, 68, 0.2);
+            --incorrect-border: #ef4444;
+
+            --insight-bg: rgba(168, 85, 247, 0.08);
+            --insight-border: #A855F7;
+        }
+
+        /* --- Global Styles & Glow Effects --- */
+        body {
+            background-color: var(--primary-bg);
+            background-image:
+                radial-gradient(circle at 15% 50%, rgba(108, 99, 255, 0.06), transparent 25vw),
+                radial-gradient(circle at 85% 30%, rgba(168, 85, 247, 0.06), transparent 25vw);
+            background-attachment: fixed;
+            color: var(--text-color);
+            font-family: 'Inter', sans-serif;
+            line-height: 1.6;
+            margin: 0;
+            padding: 20px;
+        }
+
+        /* --- Panel Containers (Optimized: No blur for performance) --- */
+        .container, .section, #flashcard-content, .question-container-single, .question-container-all, .explanation {
+            background: var(--panel-bg);
+            border: 1px solid var(--panel-border);
+            border-radius: 12px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+        }
+
+        .container {
+            width: 90%;
+            max-width: 1000px;
+            margin: 20px auto;
+            padding: 30px;
+        }
+
+        h1, h2 {
+            text-align: center;
+            border-bottom: 1px solid var(--panel-border);
+            padding-bottom: 15px;
+            font-weight: 700;
+            color: #fff;
+        }
+
+        .section {
+            padding: 25px;
+            margin-bottom: 30px;
+            animation: slideIn 0.5s ease-out forwards;
+        }
+
+        /* --- Theory & Key Insight Styling --- */
+        .theory-text {
+            font-size: 1.1em;
+            line-height: 1.8;
+            color: var(--text-muted);
+        }
+
+        .theory-text p, .theory-text li {
+            color: var(--text-color);
+        }
+
+        .theory-text h3 {
+            color: #fff;
+            margin-top: 25px;
+            border-bottom: none;
+            text-align: left;
+            font-size: 1.3em;
+        }
+
+        .insight-box {
+            background-color: var(--insight-bg);
+            border-left: 4px solid var(--insight-border);
+            padding: 18px;
+            margin: 25px 0;
+            border-radius: 8px;
+        }
+
+        .insight-box strong {
+            color: #fff;
+            display: block;
+            margin-bottom: 8px;
+            font-size: 1.1em;
+            text-shadow: 0 0 10px rgba(168, 85, 247, 0.4);
+        }
+
+        /* --- Study Cards Styling --- */
+        .flashcard-container {
+            height: 250px;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            perspective: 1000px;
+        }
+
+        #flashcard-content {
+            width: 100%;
+            height: 100%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            padding: 30px;
+            box-sizing: border-box;
+            transition: opacity 0.3s ease-in-out, transform 0.2s;
+        }
+
+        #flashcard-content:hover {
+            transform: translateY(-2px);
+            border-color: rgba(168, 85, 247, 0.4);
+            box-shadow: 0 10px 40px rgba(108, 99, 255, 0.15);
+        }
+
+        .flashcard-front-style {
+             font-size: 1.6em;
+             font-weight: 600;
+             font-family: 'JetBrains Mono', monospace;
+             color: var(--accent-end);
+        }
+
+        .flashcard-back-style {
+             font-size: 1.2em;
+             color: var(--text-color);
+        }
+
+        /* --- Questions Styling (MCQ & T/F) --- */
+         .question-container-single, .question-container-all {
+            margin-bottom: 20px;
+            padding: 20px;
+         }
+
+        .question-text {
+            font-weight: 600;
+            margin-bottom: 20px;
+            font-size: 1.1em;
+        }
+
+        /* Buttons & Glass Inputs */
+        .options button, .tf-options button, .nav-button, .view-all-button {
+            display: block;
+            width: 100%;
+            padding: 12px 15px;
+            margin: 8px 0;
+            background: rgba(255, 255, 255, 0.02);
+            color: var(--text-color);
+            border: 1px solid var(--panel-border);
+            border-radius: 8px;
+            cursor: pointer;
+            text-align: left;
+            font-family: 'Inter', sans-serif;
+            font-size: 1em;
+            transition: all 0.3s ease;
+        }
+
+        .nav-button, .view-all-button {
+            width: auto;
+            text-align: center;
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        .options button:hover:not(:disabled), .tf-options button:hover:not(:disabled), .nav-button:hover:not(:disabled), .view-all-button:hover {
+            background: var(--accent-gradient);
+            border-color: transparent;
+            color: #fff;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 15px rgba(108, 99, 255, 0.25);
+        }
+
+        .options button:disabled, .tf-options button:disabled, .nav-button:disabled {
+            cursor: not-allowed;
+            opacity: 0.5;
+            transform: none;
+        }
+
+        /* Correct/Incorrect States */
+        .options button.correct, .tf-options button.correct {
+            background: var(--correct-color);
+            border-color: var(--correct-border);
+            color: #fff;
+            opacity: 1;
+        }
+        .options button.incorrect, .tf-options button.incorrect {
+            background: var(--incorrect-color);
+            border-color: var(--incorrect-border);
+            color: #fff;
+            opacity: 1;
+        }
+
+        .feedback {
+            margin-top: 15px;
+            padding: 12px;
+            border-radius: 8px;
+            font-weight: 600;
+            text-align: center;
+            animation: fadeIn 0.3s ease-in;
+        }
+
+        .feedback.correct {
+            color: var(--correct-border);
+            background: var(--correct-color);
+            border: 1px solid var(--correct-border);
+        }
+
+        .feedback.incorrect {
+            color: var(--incorrect-border);
+            background: var(--incorrect-color);
+            border: 1px solid var(--incorrect-border);
+        }
+
+        .explanation {
+            margin-top: 15px;
+            font-style: italic;
+            font-size: 0.95em;
+            padding: 15px;
+            color: var(--text-muted);
+            border-left: 3px solid var(--accent-start);
+            animation: fadeIn 0.5s ease-in;
+        }
+
+        /* --- Navigation & Utility --- */
+        .navigation {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 20px;
+        }
+
+        .counter {
+            font-size: 0.9em;
+            color: var(--text-muted);
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        .view-all-container {
+            text-align: center;
+            margin-top: 25px;
+        }
+
+        .hidden { display: none !important; }
+
+        /* --- Animations --- */
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Logic and Scientific Reasoning</h1>
+
+        <div class="section">
+            <h2>Theory Summary and Key Insights</h2>
+            <div id="theory-content" class="theory-text">
+                <h3>Scientific Method and Logical Empiricism</h3>
+                <p>The scientific method is a set of guidelines for producing reliable theories and using them to explain and predict natural phenomena. A comprehensive method must address theory formation, confirmation and refutation, explanation and prediction, relations among theories, and the role of values in science.</p>
+                <p>Logical empiricism, associated with the Vienna Circle, treats <strong>empirical observation</strong> and <strong>logic</strong> as the two tools on which scientific practice should rely. Observations and theories are expressed through propositions, while logic connects those propositions. The central question is whether these two resources can successfully perform all the main tasks of science.</p>
+                <ul>
+                    <li><strong>Formation:</strong> Find a theory $T$ from which an observation $E$ can be logically derived.</li>
+                    <li><strong>Confirmation:</strong> If $T$ entails $E$ and $E$ occurs, the proposed method regards $E$ as confirming $T$.</li>
+                    <li><strong>Refutation:</strong> If $T$ entails $E$ but $E$ does not occur, the method regards $T$ as refuted.</li>
+                    <li><strong>Prediction:</strong> $T$ predicts $E$ when $T$ entails $E$ and $E$ has not yet been observed.</li>
+                    <li><strong>Explanation:</strong> $T$ explains $E$ when $T$ entails an already observed $E$ and would have permitted its prediction beforehand.</li>
+                </ul>
+                <p>A test is especially meaningful when its prediction is <strong>risky</strong>: the predicted event would be unlikely to occur unless the theory were true. Once a theory passes risky tests, it is treated as reliable enough to generate further predictions.</p>
+
+                <div class="insight-box">
+                    <strong>Key Insight:</strong>
+                    Prediction and explanation share the same logical relation: the theory entails the observation. Their difference is temporal. A prediction concerns an event not yet observed, whereas an explanation concerns an event already observed that the theory could have predicted beforehand.
+                </div>
+
+                <h3>Relations among Scientific Theories</h3>
+                <p><strong>Synchronic</strong> relations concern theories in different disciplines at the same time. The Unity of Science Ideal arranges disciplines hierarchically so that the axioms of a higher-level science become theorems derivable from a lower-level science.</p>
+                <p><strong>Diachronic</strong> relations concern older and newer theories within a discipline. An old theory may be discarded after refutation, or it may be reduced to a special case of a newer, broader theory. This second pattern supports the Cumulative Science Ideal. Both synchronic unification and diachronic reduction involve one theory explaining another.</p>
+
+                <h3>Arguments, Validity, and Strength</h3>
+                <p>Logic concerns the substantiation of claims. An <strong>argument</strong> consists of one or more premises offered in support of a conclusion. Arguments divide into two main kinds:</p>
+                <ul>
+                    <li>A <strong>deductive argument</strong> claims that its premises necessitate its conclusion. It is <strong>valid</strong> when the conclusion follows necessarily and <strong>invalid</strong> otherwise.</li>
+                    <li>A <strong>non-deductive argument</strong> claims only that its premises support the conclusion or raise its plausibility. It is <strong>strong</strong> when the premises make the conclusion more likely true than false, represented as $P(c) > 0.5$, and <strong>weak</strong> otherwise.</li>
+                </ul>
+                <p>Validity is not a matter of degree, whereas strength is. Adding premises cannot change a valid deductive argument into an invalid one, but additional information may change the strength of a non-deductive argument.</p>
+                <p>A deductive argument is <strong>sound</strong> when it is valid and its premises are true. A non-deductive argument is <strong>reliable</strong> when it is strong and its premises are true. Truth and falsity apply to sentences or premises; validity, strength, soundness, and reliability apply to arguments.</p>
+
+                <div class="insight-box">
+                    <strong>Key Insight:</strong>
+                    A valid argument need not be sound. Validity evaluates whether the conclusion follows from the premises, while soundness additionally requires the premises to be true. Thus, an argument may have flawless deductive form but fail to establish a true conclusion because a premise is false.
+                </div>
+
+                <h3>Deductive Rules for Conditionals</h3>
+                <p>Natural deduction proves validity by deriving a conclusion through accepted rules of inference. For conditional propositions, the principal rules are:</p>
+                <ul>
+                    <li><strong>Modus Ponens:</strong> From if $P$ then $Q$, and $P$, infer $Q$.</li>
+                    <li><strong>Modus Tollens:</strong> From if $P$ then $Q$, and not $Q$, infer not $P$.</li>
+                    <li><strong>Hypothetical Syllogism:</strong> From if $P$ then $Q$, and if $Q$ then $R$, infer if $P$ then $R$.</li>
+                    <li><strong>Transposition:</strong> If $P$ then $Q$ is equivalent to if not $Q$ then not $P$.</li>
+                    <li><strong>Implementation:</strong> If $P$ then $Q$ is equivalent to not $P$ or $Q$.</li>
+                    <li><strong>Negation of Conditional:</strong> Not if $P$ then $Q$ is equivalent to $P$ and not $Q$.</li>
+                </ul>
+                <p>Transposition, implementation, and negation of conditional are bidirectional conversions. They restate the same logical content, so either form may be converted into the other.</p>
+
+                <h3>Rules for Conjunctions and Disjunctions</h3>
+                <ul>
+                    <li><strong>Disjunctive Syllogism:</strong> From $P$ or $Q$, and not $P$, infer $Q$.</li>
+                    <li><strong>Constructive Dilemma:</strong> From if $P$ then $R$, if $Q$ then $S$, and $P$ or $Q$, infer $R$ or $S$.</li>
+                    <li><strong>Destructive Dilemma:</strong> From the same paired conditionals and not $R$ or not $S$, infer not $P$ or not $Q$.</li>
+                    <li><strong>Addition:</strong> From $P$, infer $P$ or $Q$.</li>
+                    <li><strong>Simplification:</strong> From $P$ and $Q$, infer $P$.</li>
+                    <li><strong>De Morgan conversion:</strong> Not ($P$ or $Q$) is equivalent to not $P$ and not $Q$; not ($P$ and $Q$) is equivalent to not $P$ or not $Q$.</li>
+                </ul>
+
+                <div class="insight-box">
+                    <strong>Key Insight:</strong>
+                    Validity proofs often require several individually simple steps. A disjunction may first be produced by Addition, a conditional may then be applied by Modus Ponens, and one part of the resulting conjunction may finally be extracted by Simplification.
+                </div>
+
+                <h3>Inductive Reasoning</h3>
+                <p>Inductive arguments are non-deductive and commonly move between samples, target groups, and individual cases. Their conclusions are supported rather than necessitated.</p>
+                <ul>
+                    <li><strong>Inductive generalization:</strong> If most examined members of a representative sample of $F$ are $G$, infer that most $F$ are $G$.</li>
+                    <li><strong>Statistical syllogism:</strong> If most $F$ are $G$ and $x$ is an $F$, infer that $x$ is $G$.</li>
+                    <li><strong>Integrated inductive generalization:</strong> Combine representative sample evidence with the fact that $x$ belongs to the target group to infer that $x$ has the observed property.</li>
+                    <li><strong>Analogical syllogism:</strong> If most of what is true of $x$ is also true of $y$, and $x$ has property $F$, infer that $y$ has property $F$.</li>
+                </ul>
+                <p>Representativeness is essential to inductive generalization because it connects the examined sample to the target group. Even a strong inductive conclusion remains less than deductively guaranteed; later premises may strengthen or weaken it.</p>
+
+                <div class="insight-box">
+                    <strong>Key Insight:</strong>
+                    Inductive generalization and statistical syllogism move in opposite directions. Generalization moves from a representative sample to a population-level claim, while statistical syllogism applies a population-level claim to a particular member.
+                </div>
+                </div>
+        </div>
+
+        <div class="section">
+            <h2>Study Cards</h2>
+            <div class="flashcard-container">
+                <div id="flashcard-content"></div>
+            </div>
+            <div class="navigation">
+                <button class="nav-button" id="prev-card">Previous</button>
+                <span class="counter" id="card-counter"></span>
+                <button class="nav-button" id="next-card">Next</button>
+            </div>
+        </div>
+
+        <div class="section">
+            <h2>Multiple-Choice Questions</h2>
+            <div id="mcq-single-view">
+                <div class="question-container-single" id="mcq-container">
+                    <div class="question-text" id="mcq-question"></div>
+                    <div class="options" id="mcq-options"></div>
+                    <div class="feedback hidden" id="mcq-feedback"></div>
+                    <div class="explanation hidden" id="mcq-explanation"></div>
+                </div>
+                <div class="navigation">
+                    <button class="nav-button" id="prev-mcq">Previous</button>
+                    <span class="counter" id="mcq-counter"></span>
+                    <button class="nav-button" id="next-mcq">Next</button>
+                </div>
+                 <div class="view-all-container">
+                     <button class="view-all-button" id="view-all-mcq">View All Questions</button>
+                 </div>
+            </div>
+            <div id="mcq-all-questions" class="hidden">
+                </div>
+        </div>
+
+        <div class="section">
+            <h2>True or False Questions</h2>
+             <div id="tf-single-view">
+                <div class="question-container-single" id="tf-container">
+                    <div class="question-text" id="tf-question"></div>
+                    <div class="tf-options" id="tf-options">
+                        <button data-answer="true">True</button>
+                        <button data-answer="false">False</button>
+                    </div>
+                    <div class="feedback hidden" id="tf-feedback"></div>
+                    <div class="explanation hidden" id="tf-explanation"></div>
+                </div>
+                <div class="navigation">
+                    <button class="nav-button" id="prev-tf">Previous</button>
+                    <span class="counter" id="tf-counter"></span>
+                    <button class="nav-button" id="next-tf">Next</button>
+                </div>
+                 <div class="view-all-container">
+                     <button class="view-all-button" id="view-all-tf">View All Questions</button>
+                 </div>
+            </div>
+             <div id="tf-all-questions" class="hidden">
+                 </div>
+        </div>
+    </div>
+
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+
+        const flashcardData = [
+            {
+                term: "Logical Empiricism",
+                definition: "A scientific approach that relies solely on empirical observation and logic to perform the main tasks of science."
+            },
+            {
+                term: "Argument",
+                definition: "One or more premises offered as logical support for a conclusion."
+            },
+            {
+                term: "Deductive Argument",
+                definition: "An argument in which the premises are intended to necessitate the conclusion."
+            },
+            {
+                term: "Non-Deductive Argument",
+                definition: "An argument whose premises support the conclusion or raise its plausibility without necessitating it."
+            },
+            {
+                term: "Validity",
+                definition: "The property of a deductive argument in which the conclusion necessarily follows from the premises."
+            },
+            {
+                term: "Soundness",
+                definition: "The property of a deductive argument that is both valid and based on true premises."
+            },
+            {
+                term: "Strength",
+                definition: "A non-deductive argument is strong when its premises make its conclusion more likely true than false, so $P(c) > 0.5$."
+            },
+            {
+                term: "Reliability",
+                definition: "The property of a non-deductive argument that is both strong and based on true premises."
+            },
+            {
+                term: "Modus Ponens",
+                definition: "From if $P$ then $Q$, together with $P$, infer $Q$."
+            },
+            {
+                term: "Modus Tollens",
+                definition: "From if $P$ then $Q$, together with not $Q$, infer not $P$."
+            },
+            {
+                term: "Hypothetical Syllogism",
+                definition: "From if $P$ then $Q$ and if $Q$ then $R$, infer if $P$ then $R$."
+            },
+            {
+                term: "Transposition",
+                definition: "The bidirectional conversion between if $P$ then $Q$ and if not $Q$ then not $P$."
+            },
+            {
+                term: "Implementation",
+                definition: "The bidirectional conversion between if $P$ then $Q$ and not $P$ or $Q$."
+            },
+            {
+                term: "Negation of Conditional",
+                definition: "The bidirectional conversion between not if $P$ then $Q$ and $P$ and not $Q$."
+            },
+            {
+                term: "Disjunctive Syllogism",
+                definition: "From $P$ or $Q$ and not $P$, infer $Q$."
+            },
+            {
+                term: "De Morgan Conversion",
+                definition: "Not ($P$ or $Q$) converts to not $P$ and not $Q$; not ($P$ and $Q$) converts to not $P$ or not $Q$."
+            },
+            {
+                term: "Inductive Generalization",
+                definition: "An inference from a representative sample in which most examined $F$ are $G$ to the conclusion that most $F$ are $G$."
+            },
+            {
+                term: "Statistical Syllogism",
+                definition: "From most $F$ are $G$ and $x$ is an $F$, infer that $x$ is $G$."
+            },
+            {
+                term: "Analogical Syllogism",
+                definition: "From broad similarity between $x$ and $y$, and the fact that $x$ is $F$, infer that $y$ is $F$."
+            },
+            {
+                term: "Unity of Science Ideal",
+                definition: "The ideal of arranging sciences hierarchically so that higher-level axioms are derivable as theorems from lower-level sciences."
+            }
+        ];
+
+        const mcqData = [
+            {
+                question: "Which pair of resources forms the exclusive basis of the scientific method proposed by logical empiricism?",
+                options: ["Observation and logic", "Logic and values", "Observation and authority", "Prediction and explanation"],
+                correctIndex: 0,
+                explanation: "Logical empiricism relies on empirical observations and logic. Prediction and explanation are scientific tasks performed with those resources, not additional foundational resources."
+            },
+            {
+                question: "A theory entails an event that has not yet been observed. What is that event relative to the theory?",
+                options: ["A reduction", "A prediction", "A premise", "A synchronic relation"],
+                correctIndex: 1,
+                explanation: "An unobserved event logically entailed by a theory is a prediction. If the entailed event had already been observed, the corresponding application would be explanation."
+            },
+            {
+                question: "A theory entails an already observed event and would have permitted scientists to anticipate it beforehand. What role does the theory play?",
+                options: ["It disposes of the event", "It forms a representative sample", "It explains the event", "It weakens the event"],
+                correctIndex: 2,
+                explanation: "A scientific explanation entails an already observed event and could have predicted it before it occurred. The decisive difference from prediction is whether the event has already been observed."
+            },
+            {
+                question: "Why is a risky prediction especially useful when testing a theory?",
+                options: ["It is guaranteed by every competing theory", "It eliminates the need for observation", "It converts a weak argument into a valid one", "It is unlikely to occur unless the tested theory is true"],
+                correctIndex: 3,
+                explanation: "A risky prediction is unlikely to occur unless the theory is true, so its occurrence provides a demanding test. A prediction shared automatically by every theory would be less discriminating."
+            },
+            {
+                question: "Which task belongs specifically to the theory-evaluation stage?",
+                options: ["Determining whether an implied observation occurs", "Arranging disciplines into a hierarchy", "Defining the relationship between science and values", "Forming a sample-to-population inference"],
+                correctIndex: 0,
+                explanation: "Evaluation compares observations logically implied by a theory with what actually occurs. Hierarchical arrangement concerns inter-theoretic relations rather than direct evaluation."
+            },
+            {
+                question: "An old theory is shown to be a special case of a newer and more general theory. Which relationship is present?",
+                options: ["Disposal", "Explanation or reduction", "Refutation by definition", "Inductive generalization"],
+                correctIndex: 1,
+                explanation: "Reduction occurs when a newer, broader theory explains an older theory as a special case. Disposal instead completely replaces a refuted theory."
+            },
+            {
+                question: "What distinguishes synchronic from diachronic inter-theoretic relations?",
+                options: ["Synchronic relations are deductive, while diachronic relations are always inductive", "Synchronic relations concern observations, while diachronic relations concern values", "Synchronic relations connect disciplines, while diachronic relations connect older and newer theories", "Synchronic relations refute theories, while diachronic relations confirm them"],
+                correctIndex: 2,
+                explanation: "Synchronic relations concern theories from different disciplines, whereas diachronic relations concern theories across time within a discipline. Both may involve explanation by one theory of another."
+            },
+            {
+                question: "Which statement best expresses the Unity of Science Ideal?",
+                options: ["Every old theory must be completely discarded", "Every discipline must use only inductive arguments", "Each theory must make the same predictions", "Higher-level scientific axioms should be derivable from lower-level sciences"],
+                correctIndex: 3,
+                explanation: "The ideal organizes the sciences hierarchically, with higher-level axioms becoming theorems of lower-level sciences. It does not require all theories to make identical predictions."
+            },
+            {
+                question: "Which description correctly identifies an argument?",
+                options: ["Premises offered to substantiate a conclusion", "A single sentence that must be true", "Any collection of unrelated observations", "A conclusion with no supporting claims"],
+                correctIndex: 0,
+                explanation: "An argument consists of premises offered in support of a conclusion. A sentence alone may be a premise or conclusion, but is not necessarily an argument."
+            },
+            {
+                question: "If the premises of an argument necessitate its conclusion, what kind of argument is intended?",
+                options: ["Analogical", "Deductive", "Statistical", "Abductive"],
+                correctIndex: 1,
+                explanation: "Deductive arguments claim necessity between premises and conclusion. Non-deductive arguments merely increase plausibility."
+            },
+            {
+                question: "Which property applies to a deductive argument whose conclusion necessarily follows from its premises?",
+                options: ["Reliable", "Representative", "Valid", "Risky"],
+                correctIndex: 2,
+                explanation: "A deductive argument with necessary support is valid. Reliability is the corresponding assessment for a strong non-deductive argument with true premises."
+            },
+            {
+                question: "A deductive argument is valid, but one of its premises is false. Which assessment is warranted?",
+                options: ["It is sound because its form is valid", "It is invalid because a premise is false", "It is reliable but not strong", "It is valid but not sound"],
+                correctIndex: 3,
+                explanation: "Validity concerns the inferential relation and can coexist with a false premise. Soundness requires both validity and true premises, so the argument is not sound."
+            },
+            {
+                question: "All students are happy. Alice is a student. Therefore, Alice is happy. If the first premise is false, how should the argument be classified?",
+                options: ["Valid but unsound", "Invalid and therefore sound", "Strong and reliable", "Weak because the conclusion is impossible"],
+                correctIndex: 0,
+                explanation: "The conclusion follows deductively from the two premises, so the argument is valid. A false first premise prevents it from being sound."
+            },
+            {
+                question: "If all students are over one year old and David is over one year old, concluding that David is a student commits which error?",
+                options: ["The conclusion denies the consequent", "The conclusion reverses the conditional relationship", "The argument uses a representative sample", "The argument applies Simplification"],
+                correctIndex: 1,
+                explanation: "Being a student is sufficient for being over one year old in the premise, but being over one year old does not establish that someone is a student. The inference improperly reverses the relationship."
+            },
+            {
+                question: "Which labels correctly apply to individual premises rather than to whole arguments?",
+                options: ["Valid and invalid", "Strong and weak", "True and false", "Sound and reliable"],
+                correctIndex: 2,
+                explanation: "Premises and other sentences are true or false. Validity, strength, soundness, and reliability classify arguments rather than individual sentences."
+            },
+            {
+                question: "A non-deductive argument is strong and all its premises are true. What is it called?",
+                options: ["Sound", "Valid", "Cumulative", "Reliable"],
+                correctIndex: 3,
+                explanation: "A non-deductive argument that is strong and has true premises is reliable. Soundness is reserved here for valid deductive arguments with true premises."
+            },
+            {
+                question: "Which feature distinguishes strength from deductive validity?",
+                options: ["Strength is a matter of degree", "Strength requires a false premise", "Strength guarantees the conclusion", "Strength cannot be affected by information"],
+                correctIndex: 0,
+                explanation: "Strength varies according to how much the premises raise the conclusion's probability. Validity is not graded: a deductive argument is either valid or invalid."
+            },
+            {
+                question: "A non-deductive argument makes its conclusion more likely true than false. Which condition represents this?",
+                options: ["$P(c) = 0$", "$P(c) > 0.5$", "$P(c) < 0.5$", "$P(c) = 0.5$"],
+                correctIndex: 1,
+                explanation: "The stated criterion for strength is that the conclusion's probability in light of the premises exceeds $0.5$. Equality at $0.5$ does not make it more likely true than false."
+            },
+            {
+                question: "What can happen when a new premise is added to a non-deductive argument?",
+                options: ["Its deductive form must become invalid", "Its conclusion must become false", "Its strength may change", "It must become sound"],
+                correctIndex: 2,
+                explanation: "Additional information may increase or decrease non-deductive strength. By contrast, adding premises cannot change the validity of an already valid deductive argument."
+            },
+            {
+                question: "If $P$ implies $Q$ and $P$ is true, which rule yields $Q$?",
+                options: ["Modus Tollens", "Transposition", "Disjunctive Syllogism", "Modus Ponens"],
+                correctIndex: 3,
+                explanation: "Modus Ponens applies the antecedent of a conditional to derive its consequent. Modus Tollens instead begins with the negation of the consequent."
+            },
+            {
+                question: "If $P$ implies $Q$ and $Q$ is false, what follows by Modus Tollens?",
+                options: ["Not $P$", "$P$", "$Q$", "$P$ or $Q$"],
+                correctIndex: 0,
+                explanation: "Modus Tollens infers not $P$ from if $P$ then $Q$ and not $Q$. It does not infer the antecedent by reversing the conditional."
+            },
+            {
+                question: "If $P$ implies $Q$ and $Q$ implies $R$, what follows by Hypothetical Syllogism?",
+                options: ["If $R$ then $P$", "If $P$ then $R$", "Not $P$ or $R$", "$P$ and $R$"],
+                correctIndex: 1,
+                explanation: "Hypothetical Syllogism links the two conditionals into if $P$ then $R$. Reversing the chain to if $R$ then $P$ is not licensed."
+            },
+            {
+                question: "Which proposition is equivalent by Transposition to if $P$ then $Q$?",
+                options: ["If $Q$ then $P$", "If not $P$ then not $Q$", "If not $Q$ then not $P$", "$P$ and not $Q$"],
+                correctIndex: 2,
+                explanation: "Transposition converts if $P$ then $Q$ into its contrapositive, if not $Q$ then not $P$. It does not merely reverse the antecedent and consequent."
+            },
+            {
+                question: "Which disjunction is equivalent by Implementation to if $P$ then $Q$?",
+                options: ["$P$ or not $Q$", "$P$ or $Q$", "Not $P$ or not $Q$", "Not $P$ or $Q$"],
+                correctIndex: 3,
+                explanation: "Implementation converts a conditional into not $P$ or $Q$. The conditional fails only when $P$ is true and $Q$ is false."
+            },
+            {
+                question: "What is equivalent to the negation of if $P$ then $Q$?",
+                options: ["$P$ and not $Q$", "Not $P$ and $Q$", "Not $P$ or $Q$", "$P$ or not $Q$"],
+                correctIndex: 0,
+                explanation: "Negating a conditional asserts precisely its failure condition: the antecedent holds and the consequent does not. Not $P$ or $Q$ is equivalent to the unnegated conditional."
+            },
+            {
+                question: "Given $P$ or $Q$ and not $P$, which conclusion follows?",
+                options: ["Not $Q$", "$Q$", "$P$", "$P$ and $Q$"],
+                correctIndex: 1,
+                explanation: "Disjunctive Syllogism eliminates the denied disjunct and derives the remaining one. It does not establish both disjuncts."
+            },
+            {
+                question: "Given if $P$ then $R$, if $Q$ then $S$, and $P$ or $Q$, what follows by Constructive Dilemma?",
+                options: ["Not $P$ or not $Q$", "$P$ and $Q$", "$R$ or $S$", "Not $R$ or not $S$"],
+                correctIndex: 2,
+                explanation: "Whichever antecedent in $P$ or $Q$ holds leads to its paired consequent, yielding $R$ or $S$. A destructive dilemma reasons from negated consequents instead."
+            },
+            {
+                question: "Given if $P$ then $R$, if $Q$ then $S$, and not $R$ or not $S$, what follows by Destructive Dilemma?",
+                options: ["$R$ and $S$", "$P$ or $Q$", "$P$ and not $Q$", "Not $P$ or not $Q$"],
+                correctIndex: 3,
+                explanation: "Each negated consequent supports denial of its corresponding antecedent, producing not $P$ or not $Q$. Constructive Dilemma instead produces a disjunction of consequents."
+            },
+            {
+                question: "Which inference illustrates Addition?",
+                options: ["From $P$, infer $P$ or $Q$", "From $P$ and $Q$, infer $P$", "From $P$ or $Q$ and not $P$, infer $Q$", "From not ($P$ or $Q$), infer not $P$"],
+                correctIndex: 0,
+                explanation: "Addition permits any true proposition $P$ to be expanded into the disjunction $P$ or $Q$. Extracting $P$ from a conjunction is Simplification."
+            },
+            {
+                question: "Which inference illustrates Simplification?",
+                options: ["From $P$, infer $P$ or $Q$", "From $P$ and $Q$, infer $P$", "From not $P$, infer not $P$ and not $Q$", "From if $P$ then $Q$, infer $P$"],
+                correctIndex: 1,
+                explanation: "Simplification extracts a conjunct from $P$ and $Q$. Addition moves in a different direction by introducing a disjunction."
+            },
+            {
+                question: "Which expression is equivalent by De Morgan conversion to not ($P$ or $Q$)?",
+                options: ["Not $P$ or not $Q$", "$P$ and $Q$", "Not $P$ and not $Q$", "$P$ or $Q$"],
+                correctIndex: 2,
+                explanation: "Negating a disjunction requires denying both disjuncts, giving not $P$ and not $Q$. A disjunction of negations corresponds to negating a conjunction."
+            },
+            {
+                question: "Which expression is equivalent by De Morgan conversion to not ($P$ and $Q$)?",
+                options: ["Not $P$ and not $Q$", "$P$ or $Q$", "$P$ and not $Q$", "Not $P$ or not $Q$"],
+                correctIndex: 3,
+                explanation: "A conjunction fails when at least one conjunct fails, so not ($P$ and $Q$) converts to not $P$ or not $Q$. Denying both conjuncts would be stronger than required."
+            },
+            {
+                question: "If France implies Paris, the person is not in Paris, not-France implies Madrid or Casablanca, and the person is not in Madrid, which destination follows?",
+                options: ["Casablanca", "France", "Paris", "No destination follows"],
+                correctIndex: 0,
+                explanation: "Modus Tollens yields not-France. Modus Ponens then yields Madrid or Casablanca, and Disjunctive Syllogism with not-Madrid yields Casablanca."
+            },
+            {
+                question: "If George or Herbert winning implies that Jack and Kenneth lose, and George won, which sequence proves that Jack lost?",
+                options: ["Simplification, Modus Tollens, Addition", "Addition, Modus Ponens, Simplification", "Modus Ponens, De Morgan, Transposition", "Disjunctive Syllogism, Addition, Modus Tollens"],
+                correctIndex: 1,
+                explanation: "Addition changes George won into George or Herbert won. Modus Ponens derives Jack and Kenneth lost, and Simplification extracts Jack lost."
+            },
+            {
+                question: "Most examined $F$ are $G$, and a representative amount of $F$ was examined. Which conclusion follows by inductive generalization?",
+                options: ["Every $F$ is $G$", "No $F$ is $G$", "Most $F$ are $G$", "A particular $x$ is necessarily $G$"],
+                correctIndex: 2,
+                explanation: "Inductive generalization extends a representative sample result to the population-level conclusion that most $F$ are $G$. It does not establish a universal claim."
+            },
+            {
+                question: "Most $F$ are $G$, and $x$ is an $F$. Which inference pattern supports the conclusion that $x$ is $G$?",
+                options: ["Hypothetical Syllogism", "Inductive generalization", "Destructive Dilemma", "Statistical syllogism"],
+                correctIndex: 3,
+                explanation: "A statistical syllogism applies a population-level majority claim to a particular member. Inductive generalization moves from a sample to the population instead."
+            },
+            {
+                question: "Which additional premise is crucial when moving from most examined $F$ being $G$ to most $F$ being $G$?",
+                options: ["A representative amount of $F$ was examined", "Every unexamined $F$ is known to be $G$", "The conclusion is deductively valid", "$x$ is not an $F$"],
+                correctIndex: 0,
+                explanation: "Representativeness connects the examined sample to the target population. Requiring knowledge about every unexamined member would eliminate the need for induction."
+            },
+            {
+                question: "Most examined wheat seeds germinated, a representative amount was tested, and this object is a wheat seed. What kind of inference directly supports the prediction that this seed will germinate?",
+                options: ["Destructive dilemma", "Integrated inductive generalization", "Modus Tollens", "Transposition"],
+                correctIndex: 1,
+                explanation: "The inference combines representative sample evidence with membership of the particular seed in the target group. It integrates generalization and application to an individual."
+            },
+            {
+                question: "Most properties true of wheat are also true of barley, and uncovered wheat is eaten by ants. Inferring that uncovered barley is eaten by ants exemplifies what?",
+                options: ["Statistical syllogism", "Deductive reduction", "Analogical syllogism", "Negation of conditional"],
+                correctIndex: 2,
+                explanation: "The conclusion transfers a property from wheat to barley on the basis of broad similarity. This is analogical rather than sample-to-population reasoning."
+            },
+            {
+                question: "Why does a strong inductive conclusion remain less than deductively guaranteed?",
+                options: ["Its premises must be false", "It cannot concern observations", "It has no inferential support", "Its premises raise probability rather than necessitate the conclusion"],
+                correctIndex: 3,
+                explanation: "Inductive support makes a conclusion more plausible but does not make it unavoidable. Deductive validity, by contrast, involves necessity."
+            }
+        ];
+
+        const tfData = [
+            {
+                question: "Logical empiricism treats empirical observation and logic as reliable resources for scientific practice.",
+                answer: true,
+                explanation: "The approach explicitly relies on these two resources to formulate, evaluate, explain, and apply theories."
+            },
+            {
+                question: "A comprehensive scientific method needs to address theory formation and evaluation, but not relations among theories.",
+                answer: false,
+                explanation: "Inter-theoretic relations are among the required tasks, including both synchronic and diachronic relations."
+            },
+            {
+                question: "If a theory entails an observation that has not yet been observed, the observation functions as a prediction.",
+                answer: true,
+                explanation: "Prediction is entailment of an event that remains unobserved; explanation concerns an already observed event."
+            },
+            {
+                question: "An observation is a risky prediction when it would probably occur regardless of whether the tested theory is true.",
+                answer: false,
+                explanation: "A risky prediction is unlikely to occur unless the theory is true, which makes the test more meaningful."
+            },
+            {
+                question: "Under the presented positivist method, failure of a logically implied observation counts as refutation.",
+                answer: true,
+                explanation: "When a theory entails an observation and that observation does not occur, the method classifies the theory as refuted."
+            },
+            {
+                question: "Prediction and explanation require different logical relations between a theory and an observation.",
+                answer: false,
+                explanation: "Both involve logical entailment. They differ according to whether the observation has already occurred."
+            },
+            {
+                question: "The Unity of Science Ideal concerns hierarchical relations among different scientific disciplines.",
+                answer: true,
+                explanation: "It seeks a unified hierarchy in which higher-level axioms are derivable from lower-level sciences."
+            },
+            {
+                question: "Reduction means that an old theory is refuted and completely discarded rather than retained as a special case.",
+                answer: false,
+                explanation: "Complete replacement is disposal. Reduction treats the old theory as a special case explained by a broader theory."
+            },
+            {
+                question: "Both synchronic unification and diachronic reduction can be understood as one theory explaining another.",
+                answer: true,
+                explanation: "The two relations differ in what they connect, but both involve inter-theoretic explanation."
+            },
+            {
+                question: "A deductive argument is defined by premises that merely make its conclusion more plausible.",
+                answer: false,
+                explanation: "Deductive premises are intended to necessitate the conclusion. Mere support characterizes non-deductive arguments."
+            },
+            {
+                question: "A valid deductive argument can contain a false premise.",
+                answer: true,
+                explanation: "Validity concerns whether the conclusion follows, not whether the premises are true. False premises prevent soundness."
+            },
+            {
+                question: "An invalid argument becomes valid whenever its conclusion happens to be true.",
+                answer: false,
+                explanation: "The truth of the conclusion does not repair a defective inferential relationship between premises and conclusion."
+            },
+            {
+                question: "Soundness requires both deductive validity and true premises.",
+                answer: true,
+                explanation: "Neither validity alone nor true premises alone are sufficient for soundness."
+            },
+            {
+                question: "A reliable non-deductive argument may be weak as long as all of its premises are true.",
+                answer: false,
+                explanation: "Reliability requires both true premises and a strong non-deductive inference."
+            },
+            {
+                question: "Truth and falsity properly classify sentences, while validity and invalidity properly classify arguments.",
+                answer: true,
+                explanation: "These categories must not be exchanged: individual premises are true or false, whereas arguments are valid or invalid."
+            },
+            {
+                question: "Non-deductive strength is not a matter of degree.",
+                answer: false,
+                explanation: "Strength varies with the probability that the premises confer on the conclusion, unlike all-or-nothing validity."
+            },
+            {
+                question: "Adding premises may change the strength of a non-deductive argument.",
+                answer: true,
+                explanation: "New information can increase or decrease the support supplied to a non-deductive conclusion."
+            },
+            {
+                question: "From if $P$ then $Q$ and $Q$, Modus Ponens permits the inference to $P$.",
+                answer: false,
+                explanation: "Modus Ponens requires $P$ and concludes $Q$. Inferring $P$ from $Q$ reverses the conditional."
+            },
+            {
+                question: "From if $P$ then $Q$ and not $Q$, Modus Tollens permits the inference to not $P$.",
+                answer: true,
+                explanation: "Denial of the consequent rules out the antecedent under the stated conditional."
+            },
+            {
+                question: "Transposition converts if $P$ then $Q$ into if not $P$ then not $Q$.",
+                answer: false,
+                explanation: "The correct transposition is if not $Q$ then not $P$. Negating both parts without reversing them is not equivalent."
+            },
+            {
+                question: "Implementation treats if $P$ then $Q$ as equivalent to not $P$ or $Q$.",
+                answer: true,
+                explanation: "The conditional and this disjunction are bidirectionally convertible."
+            },
+            {
+                question: "The negation of if $P$ then $Q$ is equivalent to not $P$ and $Q$.",
+                answer: false,
+                explanation: "A conditional is false precisely when $P$ holds and $Q$ does not, so the correct form is $P$ and not $Q$."
+            },
+            {
+                question: "From $P$ or $Q$ and not $P$, Disjunctive Syllogism yields $Q$.",
+                answer: true,
+                explanation: "Eliminating the denied disjunct leaves the other disjunct."
+            },
+            {
+                question: "Addition permits the inference from $P$ or $Q$ to $P$.",
+                answer: false,
+                explanation: "Addition moves from $P$ to $P$ or $Q$. A disjunction alone does not establish either particular disjunct."
+            },
+            {
+                question: "Simplification permits the inference from $P$ and $Q$ to $P$.",
+                answer: true,
+                explanation: "A true conjunction entails each of its conjuncts."
+            },
+            {
+                question: "By De Morgan conversion, not ($P$ or $Q$) is equivalent to not $P$ or not $Q$.",
+                answer: false,
+                explanation: "Negation of a disjunction requires both not $P$ and not $Q$. The disjunctive form applies to negation of a conjunction."
+            },
+            {
+                question: "An inductive generalization moves from a representative sample toward a claim about the target group.",
+                answer: true,
+                explanation: "It extends the pattern found in a representative sample to the wider population."
+            },
+            {
+                question: "A statistical syllogism infers a population-wide majority claim from observations of a representative sample.",
+                answer: false,
+                explanation: "That is inductive generalization. A statistical syllogism applies an existing majority claim to an individual member."
+            },
+            {
+                question: "An integrated inductive generalization combines representative sample evidence with an individual's membership in the target group.",
+                answer: true,
+                explanation: "It supports a conclusion about the individual by combining sample information and group membership."
+            },
+            {
+                question: "An analogical syllogism deductively guarantees that every property of one object is shared by a similar object.",
+                answer: false,
+                explanation: "Analogical inference is non-deductive and transfers a property on the basis of broad similarity without guaranteeing it."
+            }
+        ];
+
+        // --- Global State Variables ---
+        let currentCardIndex = 0;
+        let isCardFront = true;
+        let isCardAnimating = false;
+        let currentMCQIndex = 0;
+        let currentTFIndex = 0;
+        let mcqAnswers = new Array(mcqData.length).fill(null);
+        let tfAnswers = new Array(tfData.length).fill(null);
+
+        // --- DOM Element References ---
+        const flashcardContent = document.getElementById('flashcard-content');
+        const cardCounter = document.getElementById('card-counter');
+        const prevCardBtn = document.getElementById('prev-card');
+        const nextCardBtn = document.getElementById('next-card');
+        const mcqQuestion = document.getElementById('mcq-question');
+        const mcqOptions = document.getElementById('mcq-options');
+        const mcqFeedback = document.getElementById('mcq-feedback');
+        const mcqExplanation = document.getElementById('mcq-explanation');
+        const mcqCounter = document.getElementById('mcq-counter');
+        const prevMCQBtn = document.getElementById('prev-mcq');
+        const nextMCQBtn = document.getElementById('next-mcq');
+        const viewAllMCQBtn = document.getElementById('view-all-mcq');
+        const mcqSingleView = document.getElementById('mcq-single-view');
+        const mcqAllQuestionsContainer = document.getElementById('mcq-all-questions');
+        const tfQuestion = document.getElementById('tf-question');
+        const tfOptionsContainer = document.getElementById('tf-options');
+        const tfFeedback = document.getElementById('tf-feedback');
+        const tfExplanation = document.getElementById('tf-explanation');
+        const tfCounter = document.getElementById('tf-counter');
+        const prevTFBtn = document.getElementById('prev-tf');
+        const nextTFBtn = document.getElementById('next-tf');
+        const viewAllTFBtn = document.getElementById('view-all-tf');
+        const tfSingleView = document.getElementById('tf-single-view');
+        const tfAllQuestionsContainer = document.getElementById('tf-all-questions');
+
+        // --- MathJax Re-rendering Helper ---
+        function triggerMathJax() {
+            if (window.MathJax && window.MathJax.typesetPromise) {
+                window.MathJax.typesetPromise().catch((err) => console.error('MathJax error:', err.message));
+            }
+        }
+
+        function displayCard(index) {
+            if (!flashcardData || flashcardData.length === 0) return;
+            const cardData = flashcardData[index];
+            isCardFront = true;
+            flashcardContent.style.opacity = '1';
+            flashcardContent.textContent = cardData.term;
+            flashcardContent.className = 'flashcard-front-style';
+            cardCounter.textContent = `Card ${index + 1} / ${flashcardData.length}`;
+            prevCardBtn.disabled = index === 0;
+            nextCardBtn.disabled = index === flashcardData.length - 1;
+            triggerMathJax();
+        }
+
+        function flipCard() {
+            if (isCardAnimating || !flashcardData || flashcardData.length === 0) return;
+            isCardAnimating = true;
+            flashcardContent.style.opacity = '0';
+            setTimeout(() => {
+                isCardFront = !isCardFront;
+                const cardData = flashcardData[currentCardIndex];
+                if (isCardFront) {
+                    flashcardContent.textContent = cardData.term;
+                    flashcardContent.className = 'flashcard-front-style';
+                } else {
+                    flashcardContent.textContent = cardData.definition;
+                    flashcardContent.className = 'flashcard-back-style';
+                }
+                flashcardContent.style.opacity = '1';
+                isCardAnimating = false;
+                triggerMathJax();
+            }, 300);
+        }
+
+        function displayMCQuestion(index) {
+            if (!mcqData || mcqData.length === 0) return;
+            const qData = mcqData[index];
+            mcqQuestion.textContent = qData.question;
+            mcqOptions.innerHTML = '';
+            mcqFeedback.classList.add('hidden');
+            mcqExplanation.classList.add('hidden');
+            qData.options.forEach((option, i) => {
+                const button = document.createElement('button');
+                button.textContent = option;
+                button.onclick = () => handleMCQAnswer(index, i);
+                mcqOptions.appendChild(button);
+            });
+            mcqCounter.textContent = `Question ${index + 1} / ${mcqData.length}`;
+            prevMCQBtn.disabled = index === 0;
+            nextMCQBtn.disabled = index === mcqData.length - 1;
+            if (mcqAnswers[index] !== null) {
+                highlightMCQAnswer(mcqOptions, mcqFeedback, mcqExplanation, index, mcqAnswers[index].selected);
+            }
+            triggerMathJax();
+        }
+
+        function handleMCQAnswer(qIndex, selectedIndex) {
+            if (mcqAnswers[qIndex] !== null) return;
+            const isCorrect = selectedIndex === mcqData[qIndex].correctIndex;
+            mcqAnswers[qIndex] = { selected: selectedIndex, correct: isCorrect };
+            highlightMCQAnswer(mcqOptions, mcqFeedback, mcqExplanation, qIndex, selectedIndex);
+        }
+
+        function highlightMCQAnswer(optionsContainer, feedbackEl, explanationEl, qIndex, selectedIndex) {
+            const qData = mcqData[qIndex];
+            const buttons = optionsContainer.querySelectorAll('button');
+            buttons.forEach((button, i) => {
+                button.disabled = true;
+                if (i === qData.correctIndex) {
+                    button.classList.add('correct');
+                }
+                if (i === selectedIndex && i !== qData.correctIndex) {
+                    button.classList.add('incorrect');
+                }
+            });
+            feedbackEl.textContent = selectedIndex === qData.correctIndex ? "Correct!" : "Incorrect.";
+            feedbackEl.className = `feedback ${selectedIndex === qData.correctIndex ? 'correct' : 'incorrect'}`;
+            explanationEl.innerHTML = `<strong>Explanation:</strong> ${qData.explanation}`;
+            explanationEl.classList.remove('hidden');
+            triggerMathJax();
+        }
+
+        function displayAllMCQ() {
+            if (!mcqData || mcqData.length === 0) return;
+            mcqSingleView.classList.add('hidden');
+            mcqAllQuestionsContainer.innerHTML = '';
+            mcqData.forEach((qData, index) => {
+                const questionDiv = document.createElement('div');
+                questionDiv.className = 'question-container-all';
+                questionDiv.innerHTML = `
+                    <div class="question-text">${index + 1}. ${qData.question}</div>
+                    <div class="options">
+                        ${qData.options.map((option, i) => `<button data-qindex="${index}" data-oindex="${i}">${option}</button>`).join('')}
+                    </div>
+                    <div class="feedback hidden"></div>
+                    <div class="explanation hidden"></div>
+                `;
+                mcqAllQuestionsContainer.appendChild(questionDiv);
+                 const optionButtons = questionDiv.querySelectorAll('.options button');
+                 optionButtons.forEach(button => {
+                     button.onclick = () => {
+                        const qIndex = parseInt(button.dataset.qindex);
+                        const oIndex = parseInt(button.dataset.oindex);
+                        if (mcqAnswers[qIndex] === null) {
+                            const isCorrect = oIndex === mcqData[qIndex].correctIndex;
+                            mcqAnswers[qIndex] = { selected: oIndex, correct: isCorrect };
+                        }
+                        const optionsDiv = button.closest('.options');
+                        const feedbackDiv = questionDiv.querySelector('.feedback');
+                        const explanationDiv = questionDiv.querySelector('.explanation');
+                        highlightMCQAnswer(optionsDiv, feedbackDiv, explanationDiv, qIndex, mcqAnswers[qIndex].selected);
+                     };
+                 });
+                 if (mcqAnswers[index] !== null) {
+                    const optionsDiv = questionDiv.querySelector('.options');
+                    const feedbackDiv = questionDiv.querySelector('.feedback');
+                    const explanationDiv = questionDiv.querySelector('.explanation');
+                    highlightMCQAnswer(optionsDiv, feedbackDiv, explanationDiv, index, mcqAnswers[index].selected);
+                 }
+            });
+            mcqAllQuestionsContainer.classList.remove('hidden');
+            triggerMathJax();
+        }
+
+        function displayTFQuestion(index) {
+            if (!tfData || tfData.length === 0) return;
+            const qData = tfData[index];
+            tfQuestion.textContent = qData.question;
+            tfFeedback.classList.add('hidden');
+            tfExplanation.classList.add('hidden');
+             const buttons = tfOptionsContainer.querySelectorAll('button');
+             buttons.forEach(button => {
+                 button.disabled = false;
+                 button.classList.remove('correct', 'incorrect');
+                 button.onclick = () => handleTFAnswer(index, button.dataset.answer === 'true');
+             });
+            tfCounter.textContent = `Question ${index + 1} / ${tfData.length}`;
+            prevTFBtn.disabled = index === 0;
+            nextTFBtn.disabled = index === tfData.length - 1;
+            if (tfAnswers[index] !== null) {
+                highlightTFAnswer(tfOptionsContainer, tfFeedback, tfExplanation, index, tfAnswers[index].selected);
+            }
+            triggerMathJax();
+        }
+
+        function handleTFAnswer(qIndex, selectedAnswer) {
+            if (tfAnswers[qIndex] !== null) return;
+            const isCorrect = selectedAnswer === tfData[qIndex].answer;
+            tfAnswers[qIndex] = { selected: selectedAnswer, correct: isCorrect };
+            highlightTFAnswer(tfOptionsContainer, tfFeedback, tfExplanation, qIndex, selectedAnswer);
+        }
+
+        function highlightTFAnswer(optionsContainer, feedbackEl, explanationEl, qIndex, selectedAnswer) {
+             const qData = tfData[qIndex];
+             const buttons = optionsContainer.querySelectorAll('button');
+             buttons.forEach(button => {
+                 const buttonAnswer = button.dataset.answer === 'true';
+                 button.disabled = true;
+                 if (buttonAnswer === qData.answer) {
+                     button.classList.add('correct');
+                 }
+                 if (buttonAnswer === selectedAnswer && buttonAnswer !== qData.answer) {
+                     button.classList.add('incorrect');
+                 }
+             });
+             feedbackEl.textContent = selectedAnswer === qData.answer ? "Correct!" : "Incorrect.";
+             feedbackEl.className = `feedback ${selectedAnswer === qData.answer ? 'correct' : 'incorrect'}`;
+             explanationEl.innerHTML = `<strong>Explanation:</strong> ${qData.explanation}`;
+             explanationEl.classList.remove('hidden');
+             triggerMathJax();
+        }
+
+        function displayAllTF() {
+             if (!tfData || tfData.length === 0) return;
+             tfSingleView.classList.add('hidden');
+             tfAllQuestionsContainer.innerHTML = '';
+             tfData.forEach((qData, index) => {
+                 const questionDiv = document.createElement('div');
+                 questionDiv.className = 'question-container-all';
+                 questionDiv.innerHTML = `
+                     <div class="question-text">${index + 1}. ${qData.question}</div>
+                     <div class="tf-options">
+                         <button data-qindex="${index}" data-answer="true">True</button>
+                         <button data-qindex="${index}" data-answer="false">False</button>
+                     </div>
+                     <div class="feedback hidden"></div>
+                     <div class="explanation hidden"></div>
+                 `;
+                 tfAllQuestionsContainer.appendChild(questionDiv);
+                 const optionButtons = questionDiv.querySelectorAll('.tf-options button');
+                 optionButtons.forEach(button => {
+                     button.onclick = () => {
+                         const qIndex = parseInt(button.dataset.qindex);
+                         const selectedAnswer = button.dataset.answer === 'true';
+                         if (tfAnswers[qIndex] === null) {
+                             const isCorrect = selectedAnswer === tfData[qIndex].answer;
+                             tfAnswers[qIndex] = { selected: selectedAnswer, correct: isCorrect };
+                         }
+                         const optionsDiv = button.closest('.tf-options');
+                         const feedbackDiv = questionDiv.querySelector('.feedback');
+                         const explanationDiv = questionDiv.querySelector('.explanation');
+                         highlightTFAnswer(optionsDiv, feedbackDiv, explanationDiv, qIndex, tfAnswers[qIndex].selected);
+                     };
+                 });
+                 if (tfAnswers[index] !== null) {
+                    const optionsDiv = questionDiv.querySelector('.tf-options');
+                    const feedbackDiv = questionDiv.querySelector('.feedback');
+                    const explanationDiv = questionDiv.querySelector('.explanation');
+                    highlightTFAnswer(optionsDiv, feedbackDiv, explanationDiv, index, tfAnswers[index].selected);
+                 }
+             });
+             tfAllQuestionsContainer.classList.remove('hidden');
+             triggerMathJax();
+        }
+
+        function initialize() {
+            if (flashcardData.length > 0) displayCard(currentCardIndex);
+            if (mcqData.length > 0) displayMCQuestion(currentMCQIndex);
+            if (tfData.length > 0) displayTFQuestion(currentTFIndex);
+            flashcardContent.addEventListener('click', flipCard);
+            prevCardBtn.addEventListener('click', () => { if (currentCardIndex > 0) { currentCardIndex--; displayCard(currentCardIndex); } });
+            nextCardBtn.addEventListener('click', () => { if (currentCardIndex < flashcardData.length - 1) { currentCardIndex++; displayCard(currentCardIndex); } });
+            prevMCQBtn.addEventListener('click', () => { if (currentMCQIndex > 0) { currentMCQIndex--; displayMCQuestion(currentMCQIndex); } });
+            nextMCQBtn.addEventListener('click', () => { if (currentMCQIndex < mcqData.length - 1) { currentMCQIndex++; displayMCQuestion(currentMCQIndex); } });
+            viewAllMCQBtn.addEventListener('click', displayAllMCQ);
+            prevTFBtn.addEventListener('click', () => { if (currentTFIndex > 0) { currentTFIndex--; displayTFQuestion(currentTFIndex); } });
+            nextTFBtn.addEventListener('click', () => { if (currentTFIndex < tfData.length - 1) { currentTFIndex++; displayTFQuestion(currentTFIndex); } });
+            viewAllTFBtn.addEventListener('click', displayAllTF);
+
+            // Initial MathJax render for static HTML (like the Theory section)
+            triggerMathJax();
+        }
+
+        initialize();
+    });
+    </script>
+</body>
+</html>

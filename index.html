@@ -1,0 +1,473 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Study hub for Selected Issues in History and Philosophy of Science.">
+    <title>History &amp; Philosophy of Science — Course Hub</title>
+    <style>
+        :root {
+            --ink: #18201e;
+            --muted: #65706d;
+            --paper: #f5f1e8;
+            --card: rgba(255, 253, 248, 0.82);
+            --green: #174f43;
+            --green-light: #dbe8df;
+            --gold: #b47b38;
+            --line: rgba(24, 32, 30, 0.12);
+            --shadow: 0 18px 55px rgba(38, 50, 46, 0.09), 0 2px 8px rgba(38, 50, 46, 0.05);
+        }
+
+        * { box-sizing: border-box; }
+
+        html {
+            scroll-behavior: smooth;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        body {
+            margin: 0;
+            color: var(--ink);
+            background:
+                radial-gradient(circle at 10% 5%, rgba(180, 123, 56, 0.13), transparent 28rem),
+                radial-gradient(circle at 88% 19%, rgba(23, 79, 67, 0.10), transparent 30rem),
+                var(--paper);
+            font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+            line-height: 1.6;
+        }
+
+        a { color: inherit; }
+
+        .page-shell {
+            width: min(1180px, calc(100% - 40px));
+            margin: 0 auto;
+        }
+
+        .site-header {
+            min-height: 74px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 24px;
+            border-bottom: 1px solid var(--line);
+        }
+
+        .brand {
+            display: inline-flex;
+            align-items: center;
+            gap: 11px;
+            font-size: 0.77rem;
+            font-weight: 800;
+            letter-spacing: 0.13em;
+            text-decoration: none;
+            text-transform: uppercase;
+        }
+
+        .brand-mark {
+            width: 31px;
+            height: 31px;
+            display: grid;
+            place-items: center;
+            color: #fffdf8;
+            background: var(--green);
+            border-radius: 50%;
+            font-family: Georgia, serif;
+            font-size: 1rem;
+            font-weight: 400;
+        }
+
+        .header-nav { display: flex; gap: 8px; }
+
+        .header-nav a {
+            min-height: 40px;
+            display: inline-flex;
+            align-items: center;
+            padding: 0 13px;
+            color: var(--muted);
+            border-radius: 10px;
+            font-size: 0.88rem;
+            font-weight: 650;
+            text-decoration: none;
+            transition-property: color, background-color, transform;
+            transition-duration: 180ms;
+        }
+
+        .header-nav a:hover { color: var(--green); background: rgba(255, 255, 255, 0.55); }
+        .header-nav a:active { transform: scale(0.96); }
+
+        .hero {
+            display: grid;
+            grid-template-columns: minmax(0, 1.45fr) minmax(260px, 0.55fr);
+            gap: clamp(48px, 9vw, 110px);
+            align-items: end;
+            padding: clamp(72px, 11vw, 132px) 0 clamp(72px, 10vw, 112px);
+        }
+
+        .eyebrow {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin: 0 0 20px;
+            color: var(--green);
+            font-size: 0.75rem;
+            font-weight: 800;
+            letter-spacing: 0.16em;
+            text-transform: uppercase;
+        }
+
+        .eyebrow::before { content: ""; width: 32px; height: 2px; background: var(--gold); }
+
+        h1, h2, h3 { text-wrap: balance; }
+
+        h1 {
+            max-width: 800px;
+            margin: 0;
+            font-family: Georgia, "Times New Roman", serif;
+            font-size: clamp(3.25rem, 7.6vw, 6.8rem);
+            font-weight: 400;
+            letter-spacing: -0.055em;
+            line-height: 0.93;
+        }
+
+        h1 em { color: var(--green); font-weight: 400; }
+
+        .hero-copy {
+            padding: 0 0 9px;
+        }
+
+        .hero-copy p {
+            margin: 0 0 27px;
+            color: var(--muted);
+            font-size: clamp(1rem, 1.5vw, 1.12rem);
+            text-wrap: pretty;
+        }
+
+        .primary-link {
+            min-height: 46px;
+            display: inline-flex;
+            align-items: center;
+            gap: 12px;
+            padding: 0 17px;
+            color: #fffdf8;
+            background: var(--green);
+            border-radius: 12px;
+            box-shadow: 0 10px 24px rgba(23, 79, 67, 0.18);
+            font-size: 0.9rem;
+            font-weight: 750;
+            text-decoration: none;
+            transition-property: background-color, transform, box-shadow;
+            transition-duration: 180ms;
+        }
+
+        .primary-link:hover { background: #0f4137; box-shadow: 0 13px 28px rgba(23, 79, 67, 0.24); }
+        .primary-link:active { transform: scale(0.96); }
+        .primary-link svg { width: 17px; height: 17px; }
+
+        .section { padding: 80px 0; }
+        .section + .section { border-top: 1px solid var(--line); }
+
+        .section-heading {
+            display: grid;
+            grid-template-columns: 1fr minmax(260px, 0.65fr);
+            gap: 40px;
+            align-items: end;
+            margin-bottom: 38px;
+        }
+
+        .section-heading h2 {
+            margin: 0;
+            font-family: Georgia, "Times New Roman", serif;
+            font-size: clamp(2.35rem, 4.5vw, 4rem);
+            font-weight: 400;
+            letter-spacing: -0.035em;
+            line-height: 1;
+        }
+
+        .section-heading p {
+            margin: 0 0 3px;
+            color: var(--muted);
+            text-wrap: pretty;
+        }
+
+        .lesson-grid {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 14px;
+            counter-reset: lesson;
+        }
+
+        .lesson-card {
+            counter-increment: lesson;
+            min-height: 134px;
+            display: grid;
+            grid-template-columns: 55px 1fr 42px;
+            gap: 18px;
+            align-items: center;
+            padding: 24px;
+            background: var(--card);
+            border-radius: 20px;
+            box-shadow: inset 0 0 0 1px var(--line), 0 2px 7px rgba(38, 50, 46, 0.025);
+            text-decoration: none;
+            transition-property: transform, box-shadow, background-color;
+            transition-duration: 200ms;
+        }
+
+        .lesson-card:hover {
+            transform: translateY(-3px);
+            background: rgba(255, 254, 251, 0.96);
+            box-shadow: var(--shadow);
+        }
+
+        .lesson-card:active { transform: scale(0.96); }
+
+        .lesson-number {
+            align-self: start;
+            color: var(--gold);
+            font-family: Georgia, serif;
+            font-size: 1.18rem;
+            font-variant-numeric: tabular-nums;
+        }
+
+        .lesson-number::before { content: counter(lesson, decimal-leading-zero); }
+
+        .lesson-card h3 {
+            margin: 0 0 7px;
+            font-size: 1.05rem;
+            line-height: 1.3;
+        }
+
+        .lesson-card p { margin: 0; color: var(--muted); font-size: 0.88rem; line-height: 1.5; text-wrap: pretty; }
+
+        .arrow {
+            width: 40px;
+            height: 40px;
+            display: grid;
+            place-items: center;
+            color: var(--green);
+            background: var(--green-light);
+            border-radius: 50%;
+            transition-property: color, background-color, transform;
+            transition-duration: 180ms;
+        }
+
+        .lesson-card:hover .arrow { color: #fff; background: var(--green); transform: translateX(2px); }
+        .arrow svg { width: 17px; height: 17px; }
+
+        .materials {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 18px;
+        }
+
+        .material-card {
+            min-height: 230px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            padding: 30px;
+            overflow: hidden;
+            position: relative;
+            background: var(--green);
+            border-radius: 24px;
+            box-shadow: 0 16px 38px rgba(23, 79, 67, 0.16);
+            color: #fffdf8;
+            text-decoration: none;
+            transition-property: transform, box-shadow;
+            transition-duration: 200ms;
+        }
+
+        .material-card:nth-child(2) { background: #ded0b8; color: var(--ink); box-shadow: 0 16px 38px rgba(81, 60, 34, 0.11); }
+        .material-card:hover { transform: translateY(-4px); box-shadow: 0 22px 48px rgba(23, 79, 67, 0.22); }
+        .material-card:nth-child(2):hover { box-shadow: 0 22px 48px rgba(81, 60, 34, 0.17); }
+        .material-card:active { transform: scale(0.96); }
+
+        .material-card::after {
+            content: "PDF";
+            position: absolute;
+            top: -25px;
+            right: 4px;
+            color: rgba(255, 255, 255, 0.055);
+            font-family: Georgia, serif;
+            font-size: 9rem;
+            line-height: 1;
+        }
+
+        .material-card:nth-child(2)::after { color: rgba(24, 32, 30, 0.055); }
+
+        .file-type {
+            width: fit-content;
+            padding: 5px 9px;
+            border-radius: 7px;
+            background: rgba(255, 255, 255, 0.12);
+            font-size: 0.68rem;
+            font-weight: 800;
+            letter-spacing: 0.13em;
+            text-transform: uppercase;
+        }
+
+        .material-card:nth-child(2) .file-type { background: rgba(24, 32, 30, 0.08); }
+
+        .material-card h3 { max-width: 390px; margin: 42px 0 7px; font-family: Georgia, serif; font-size: 1.65rem; font-weight: 400; }
+        .material-card p { max-width: 440px; margin: 0; opacity: 0.75; font-size: 0.88rem; text-wrap: pretty; }
+        .material-action { display: flex; justify-content: space-between; align-items: center; margin-top: 24px; font-size: 0.8rem; font-weight: 750; }
+        .material-action svg { width: 18px; height: 18px; }
+
+        footer {
+            display: flex;
+            justify-content: space-between;
+            gap: 20px;
+            padding: 27px 0 38px;
+            color: var(--muted);
+            border-top: 1px solid var(--line);
+            font-size: 0.78rem;
+        }
+
+        :focus-visible { outline: 3px solid rgba(180, 123, 56, 0.55); outline-offset: 4px; }
+
+        @media (max-width: 800px) {
+            .hero, .section-heading { grid-template-columns: 1fr; }
+            .hero { align-items: start; gap: 34px; }
+            .hero-copy { max-width: 570px; }
+            .lesson-grid, .materials { grid-template-columns: 1fr; }
+        }
+
+        @media (max-width: 540px) {
+            .page-shell { width: min(100% - 28px, 1180px); }
+            .header-nav a:first-child { display: none; }
+            .site-header { min-height: 66px; }
+            .hero { padding: 64px 0 72px; }
+            h1 { font-size: clamp(3rem, 15vw, 4.3rem); }
+            .section { padding: 62px 0; }
+            .lesson-card { grid-template-columns: 40px 1fr; gap: 12px; padding: 20px; border-radius: 18px; }
+            .lesson-card .arrow { display: none; }
+            .material-card { min-height: 220px; padding: 25px; border-radius: 22px; }
+            footer { flex-direction: column; gap: 4px; }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            html { scroll-behavior: auto; }
+            *, *::before, *::after { transition-duration: 0.01ms !important; }
+        }
+    </style>
+</head>
+<body>
+    <div class="page-shell">
+        <header class="site-header">
+            <a class="brand" href="index.html" aria-label="Course home">
+                <span class="brand-mark">φ</span>
+                <span>Course 3240305</span>
+            </a>
+            <nav class="header-nav" aria-label="Page navigation">
+                <a href="#lessons">Lessons</a>
+                <a href="#materials">Materials</a>
+            </nav>
+        </header>
+
+        <main>
+            <section class="hero" aria-labelledby="course-title">
+                <div>
+                    <p class="eyebrow">Spring 2026 · Study Hub</p>
+                    <h1 id="course-title">How does science <em>know?</em></h1>
+                </div>
+                <div class="hero-copy">
+                    <p>An introduction to the history and philosophy of science through its central questions: what makes a theory scientific, how evidence supports claims, and where the methods of explanation, prediction, and falsification reach their limits.</p>
+                    <a class="primary-link" href="#lessons">
+                        Begin with lesson 01
+                        <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+                    </a>
+                </div>
+            </section>
+
+            <section class="section" id="lessons" aria-labelledby="lessons-title">
+                <div class="section-heading">
+                    <h2 id="lessons-title">Course lessons</h2>
+                    <p>Move from the ideal scientific method to the philosophical problems that test it. Each lesson includes a summary, study cards, and practice questions.</p>
+                </div>
+
+                <div class="lesson-grid">
+                    <a class="lesson-card" href="1.html">
+                        <span class="lesson-number" aria-label="Lesson 1"></span>
+                        <div><h3>Scientific Method &amp; Logical Positivism</h3><p>The ideal of scientific knowledge and its foundations.</p></div>
+                        <span class="arrow" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span>
+                    </a>
+                    <a class="lesson-card" href="2.html">
+                        <span class="lesson-number" aria-label="Lesson 2"></span>
+                        <div><h3>Theory &amp; Observation</h3><p>How observation relates to theories and scientific meaning.</p></div>
+                        <span class="arrow" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span>
+                    </a>
+                    <a class="lesson-card" href="3.html">
+                        <span class="lesson-number" aria-label="Lesson 3"></span>
+                        <div><h3>Logic &amp; Scientific Reasoning</h3><p>Deductive, inductive, and abductive arguments.</p></div>
+                        <span class="arrow" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span>
+                    </a>
+                    <a class="lesson-card" href="4.html">
+                        <span class="lesson-number" aria-label="Lesson 4"></span>
+                        <div><h3>Inquiry &amp; Falsifiability</h3><p>From observations to theories, confirmation, and refutation.</p></div>
+                        <span class="arrow" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span>
+                    </a>
+                    <a class="lesson-card" href="5.html">
+                        <span class="lesson-number" aria-label="Lesson 5"></span>
+                        <div><h3>Explanation &amp; Theory Change</h3><p>Prediction, explanation, and relations between theories.</p></div>
+                        <span class="arrow" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span>
+                    </a>
+                    <a class="lesson-card" href="6.html">
+                        <span class="lesson-number" aria-label="Lesson 6"></span>
+                        <div><h3>The Problem of Induction</h3><p>Hume, confirmation, ravens, and the new riddle.</p></div>
+                        <span class="arrow" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span>
+                    </a>
+                    <a class="lesson-card" href="7.html">
+                        <span class="lesson-number" aria-label="Lesson 7"></span>
+                        <div><h3>Refutation &amp; Its Limits</h3><p>Popper, Duhem–Quine, and challenges to falsification.</p></div>
+                        <span class="arrow" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span>
+                    </a>
+                    <a class="lesson-card" href="8.html">
+                        <span class="lesson-number" aria-label="Lesson 8"></span>
+                        <div><h3>Laws of Nature &amp; Prediction</h3><p>What scientific laws claim and how they support predictions.</p></div>
+                        <span class="arrow" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span>
+                    </a>
+                    <a class="lesson-card" href="9.html">
+                        <span class="lesson-number" aria-label="Lesson 9"></span>
+                        <div><h3>Scientific Explanation</h3><p>The deductive-nomological model and its challenges.</p></div>
+                        <span class="arrow" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span>
+                    </a>
+                    <a class="lesson-card" href="10.html">
+                        <span class="lesson-number" aria-label="Lesson 10"></span>
+                        <div><h3>Explanation &amp; Unity of Science</h3><p>Reduction, inter-theoretic explanation, and scientific unity.</p></div>
+                        <span class="arrow" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span>
+                    </a>
+                </div>
+            </section>
+
+            <section class="section" id="materials" aria-labelledby="materials-title">
+                <div class="section-heading">
+                    <h2 id="materials-title">Course materials</h2>
+                    <p>Keep the official course outline nearby as you study, then use the sample exam to check your understanding across topics.</p>
+                </div>
+                <div class="materials">
+                    <a class="material-card" href="Pelman History 3240305.pdf" target="_blank" rel="noopener">
+                        <span class="file-type">Course PDF</span>
+                        <div>
+                            <h3>Course outline &amp; reading list</h3>
+                            <p>Objectives, schedule, assessment structure, policies, and assigned readings for the course.</p>
+                            <span class="material-action">Open course document <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M7 17 17 7M8 7h9v9"/></svg></span>
+                        </div>
+                    </a>
+                    <a class="material-card" href="Sample exam 2026.pdf" target="_blank" rel="noopener">
+                        <span class="file-type">Practice PDF</span>
+                        <div>
+                            <h3>Sample exam 2026</h3>
+                            <p>Multiple-choice practice covering the core arguments, concepts, and philosophical challenges.</p>
+                            <span class="material-action">Open sample exam <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M7 17 17 7M8 7h9v9"/></svg></span>
+                        </div>
+                    </a>
+                </div>
+            </section>
+        </main>
+
+        <footer>
+            <span>Selected Issues in History &amp; Philosophy of Science</span>
+            <span>Course 3240305 · Spring 2026</span>
+        </footer>
+    </div>
+</body>
+</html>

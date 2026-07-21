@@ -1,0 +1,1190 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Logic, Explanation, and Theory Change in Science</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+
+    <script>
+        window.MathJax = {
+            tex: {
+                inlineMath: [['$', '$'], ['\\(', '\\)']],
+                displayMath: [['$$', '$$'], ['\\[', '\\]']]
+            },
+            startup: {
+                typeset: false // We will trigger this manually via JS
+            }
+        };
+    </script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+    <style>
+        /* --- Root Variables for Theme --- */
+        :root {
+            --primary-bg: #0a0a0f;
+            --panel-bg: rgba(255, 255, 255, 0.03);
+            --panel-border: rgba(255, 255, 255, 0.1);
+
+            --accent-start: #6C63FF;
+            --accent-end: #A855F7;
+            --accent-gradient: linear-gradient(135deg, var(--accent-start), var(--accent-end));
+            --accent-color: #8B5CF6; /* Midpoint fallback */
+
+            --text-color: #E0E0E0;
+            --text-muted: #9ca3af;
+
+            --correct-color: rgba(16, 185, 129, 0.2);
+            --correct-border: #10b981;
+            --incorrect-color: rgba(239, 68, 68, 0.2);
+            --incorrect-border: #ef4444;
+
+            --insight-bg: rgba(168, 85, 247, 0.08);
+            --insight-border: #A855F7;
+        }
+
+        /* --- Global Styles & Glow Effects --- */
+        body {
+            background-color: var(--primary-bg);
+            background-image:
+                radial-gradient(circle at 15% 50%, rgba(108, 99, 255, 0.06), transparent 25vw),
+                radial-gradient(circle at 85% 30%, rgba(168, 85, 247, 0.06), transparent 25vw);
+            background-attachment: fixed;
+            color: var(--text-color);
+            font-family: 'Inter', sans-serif;
+            line-height: 1.6;
+            margin: 0;
+            padding: 20px;
+        }
+
+        /* --- Panel Containers (Optimized: No blur for performance) --- */
+        .container, .section, #flashcard-content, .question-container-single, .question-container-all, .explanation {
+            background: var(--panel-bg);
+            border: 1px solid var(--panel-border);
+            border-radius: 12px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+        }
+
+        .container {
+            width: 90%;
+            max-width: 1000px;
+            margin: 20px auto;
+            padding: 30px;
+        }
+
+        h1, h2 {
+            text-align: center;
+            border-bottom: 1px solid var(--panel-border);
+            padding-bottom: 15px;
+            font-weight: 700;
+            color: #fff;
+        }
+
+        .section {
+            padding: 25px;
+            margin-bottom: 30px;
+            animation: slideIn 0.5s ease-out forwards;
+        }
+
+        /* --- Theory & Key Insight Styling --- */
+        .theory-text {
+            font-size: 1.1em;
+            line-height: 1.8;
+            color: var(--text-muted);
+        }
+
+        .theory-text p, .theory-text li {
+            color: var(--text-color);
+        }
+
+        .theory-text h3 {
+            color: #fff;
+            margin-top: 25px;
+            border-bottom: none;
+            text-align: left;
+            font-size: 1.3em;
+        }
+
+        .insight-box {
+            background-color: var(--insight-bg);
+            border-left: 4px solid var(--insight-border);
+            padding: 18px;
+            margin: 25px 0;
+            border-radius: 8px;
+        }
+
+        .insight-box strong {
+            color: #fff;
+            display: block;
+            margin-bottom: 8px;
+            font-size: 1.1em;
+            text-shadow: 0 0 10px rgba(168, 85, 247, 0.4);
+        }
+
+        /* --- Study Cards Styling --- */
+        .flashcard-container {
+            height: 250px;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            perspective: 1000px;
+        }
+
+        #flashcard-content {
+            width: 100%;
+            height: 100%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            padding: 30px;
+            box-sizing: border-box;
+            transition: opacity 0.3s ease-in-out, transform 0.2s;
+        }
+
+        #flashcard-content:hover {
+            transform: translateY(-2px);
+            border-color: rgba(168, 85, 247, 0.4);
+            box-shadow: 0 10px 40px rgba(108, 99, 255, 0.15);
+        }
+
+        .flashcard-front-style {
+             font-size: 1.6em;
+             font-weight: 600;
+             font-family: 'JetBrains Mono', monospace;
+             color: var(--accent-end);
+        }
+
+        .flashcard-back-style {
+             font-size: 1.2em;
+             color: var(--text-color);
+        }
+
+        /* --- Questions Styling (MCQ & T/F) --- */
+         .question-container-single, .question-container-all {
+            margin-bottom: 20px;
+            padding: 20px;
+         }
+
+        .question-text {
+            font-weight: 600;
+            margin-bottom: 20px;
+            font-size: 1.1em;
+        }
+
+        /* Buttons & Glass Inputs */
+        .options button, .tf-options button, .nav-button, .view-all-button {
+            display: block;
+            width: 100%;
+            padding: 12px 15px;
+            margin: 8px 0;
+            background: rgba(255, 255, 255, 0.02);
+            color: var(--text-color);
+            border: 1px solid var(--panel-border);
+            border-radius: 8px;
+            cursor: pointer;
+            text-align: left;
+            font-family: 'Inter', sans-serif;
+            font-size: 1em;
+            transition: all 0.3s ease;
+        }
+
+        .nav-button, .view-all-button {
+            width: auto;
+            text-align: center;
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        .options button:hover:not(:disabled), .tf-options button:hover:not(:disabled), .nav-button:hover:not(:disabled), .view-all-button:hover {
+            background: var(--accent-gradient);
+            border-color: transparent;
+            color: #fff;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 15px rgba(108, 99, 255, 0.25);
+        }
+
+        .options button:disabled, .tf-options button:disabled, .nav-button:disabled {
+            cursor: not-allowed;
+            opacity: 0.5;
+            transform: none;
+        }
+
+        /* Correct/Incorrect States */
+        .options button.correct, .tf-options button.correct {
+            background: var(--correct-color);
+            border-color: var(--correct-border);
+            color: #fff;
+            opacity: 1;
+        }
+        .options button.incorrect, .tf-options button.incorrect {
+            background: var(--incorrect-color);
+            border-color: var(--incorrect-border);
+            color: #fff;
+            opacity: 1;
+        }
+
+        .feedback {
+            margin-top: 15px;
+            padding: 12px;
+            border-radius: 8px;
+            font-weight: 600;
+            text-align: center;
+            animation: fadeIn 0.3s ease-in;
+        }
+
+        .feedback.correct {
+            color: var(--correct-border);
+            background: var(--correct-color);
+            border: 1px solid var(--correct-border);
+        }
+
+        .feedback.incorrect {
+            color: var(--incorrect-border);
+            background: var(--incorrect-color);
+            border: 1px solid var(--incorrect-border);
+        }
+
+        .explanation {
+            margin-top: 15px;
+            font-style: italic;
+            font-size: 0.95em;
+            padding: 15px;
+            color: var(--text-muted);
+            border-left: 3px solid var(--accent-start);
+            animation: fadeIn 0.5s ease-in;
+        }
+
+        /* --- Navigation & Utility --- */
+        .navigation {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 20px;
+        }
+
+        .counter {
+            font-size: 0.9em;
+            color: var(--text-muted);
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        .view-all-container {
+            text-align: center;
+            margin-top: 25px;
+        }
+
+        .hidden { display: none !important; }
+
+        /* --- Animations --- */
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Logic, Explanation, and Theory Change in Science</h1>
+
+        <div class="section">
+            <h2>Theory Summary and Key Insights</h2>
+            <div id="theory-content" class="theory-text">
+                <h3>Logical Positivism and the Tasks of Science</h3>
+                <p>Logical positivism treats <strong>observation</strong> and <strong>logic</strong> as the only reliable sources of scientific knowledge. Its ambition is to provide clear procedures for the major tasks of science: formulating, confirming, and refuting theories; explaining and predicting observations; and explaining relationships between theories.</p>
+                <p>The scientific method can be divided into four broad stages:</p>
+                <ol>
+                    <li><strong>Theory formulation:</strong> a theory is formulated from observations in the discovery context.</li>
+                    <li><strong>Theory evaluation:</strong> further observations test the theory in the justification context, producing confirmation or refutation.</li>
+                    <li><strong>Theory application:</strong> a reliable theory explains observed phenomena and predicts unobserved phenomena.</li>
+                    <li><strong>Inter-theoretic relations:</strong> theories are related either across disciplines at the same time or across time within one discipline.</li>
+                </ol>
+
+                <h3>Three Forms of Inference</h3>
+                <p>Each early stage of scientific inquiry is associated with a different logical tool:</p>
+                <ul>
+                    <li><strong>Abduction</strong> formulates a hypothesis: phenomenon $e$ is observed; $H$ is judged the best explanation of $e$; therefore, $H$ is proposed.</li>
+                    <li><strong>Induction</strong> confirms a hypothesis: if $H$, then $e$; $e$ occurs; therefore, probably $H$.</li>
+                    <li><strong>Deduction</strong> refutes a hypothesis: if $H$, then $e$; not-$e$; therefore, not-$H$.</li>
+                </ul>
+                <p>Confirmation is inductive rather than deductively conclusive. If $H$ says that all members of a class $F$ are $G$, while $e$ says that all examined members of $F$ are $G$, moving from examined cases to all cases is an inductive generalization. Confirmation therefore supports a theory only probabilistically.</p>
+
+                <div class="insight-box">
+                    <strong>Key Insight:</strong>
+                    Confirmation and refutation have different logical strengths. An observed implication can make a hypothesis more credible without proving it, whereas the failure of a required implication supports the deductive conclusion that the hypothesis is false.
+                </div>
+
+                <h3>The Deductive-Nomological Model</h3>
+                <p>Carl Hempel connected scientific explanation to prediction. An explanation of phenomenon $E$ is scientific if the same reasoning could have predicted $E$ before it occurred. The general structure is:</p>
+                <ol>
+                    <li>A general law $L$.</li>
+                    <li>An initial condition $I$.</li>
+                    <li>Therefore, phenomenon $E$.</li>
+                </ol>
+                <p>This is the <strong>deductive-nomological model</strong>, or D-N model. It is deductive because $E$ follows necessarily from the premises, and nomological because at least one premise is a general law. If $E$ has already been observed, the argument explains it. If $E$ has not yet been observed, the same argument predicts it.</p>
+                <p>A valid D-N explanation requires more than any deductive argument. Its conclusion must be the phenomenon at issue, and its premises must include a law of nature and an initial condition. Definitions cannot substitute for laws or initial conditions, and an imperative such as an instruction to take an umbrella is not an initial condition or a logical proposition.</p>
+
+                <div class="insight-box">
+                    <strong>Key Insight:</strong>
+                    In Hempel's model, explanation and prediction differ in temporal position rather than logical form. The same law-and-condition argument is a prediction before the phenomenon is observed and an explanation afterward.
+                </div>
+
+                <h3>Synchronous and Diachronic Relations</h3>
+                <p>A <strong>synchronous relationship</strong> connects theories from different scientific disciplines at the same time. A <strong>diachronic relationship</strong> connects an old and a new theory within the same discipline. Logical positivism interprets one theory as explaining another when the explained theory can be logically derived from the explaining theory.</p>
+                <p>Diachronic reduction is illustrated by Einstein's relative-velocity formula:</p>
+                <p>$$V = \frac{v_1+v_2}{1+\frac{v_1v_2}{c^2}}.$$</p>
+                <p>When $v_1$ and $v_2$ are very small relative to $c$, this yields the Newtonian approximation $V \approx v_1+v_2$. The newer theory therefore explains both the domain in which Newton's theory succeeded and the domain in which it failed.</p>
+                <p>When a theory is directly refuted, a new theory may be abductively proposed without a derivational relationship to the old one. When two theories compete, a decisive experiment seeks different implications: if $H_1$ predicts $e_1$ and $H_2$ predicts $e_2$, observing $e_1$ and not-$e_2$ deductively refutes $H_2$ while only inductively supporting $H_1$.</p>
+
+                <h3>Nagel's Reduction and Bridge Laws</h3>
+                <p>Synchronous reduction faces a vocabulary problem: theories in different disciplines use different terms. Ernst Nagel proposed a translation scheme using <strong>bridge laws</strong>. These statements translate terms in the theory being explained into terms belonging to the explaining theory, after which deduction becomes possible.</p>
+                <p>For example, increased temperature is translated as increased kinetic motion of molecules, while increased gas pressure is translated as an increased rate and intensity of molecular collisions with container walls. Statistical mechanics plus these bridge laws can then yield the gas law relating increased temperature to increased pressure.</p>
+                <p>Other bridge-law examples include identifying heat with kinetic molecular motion, lightning with discharge of electric charge, water with $H_2O$, and the gene with DNA. Such translations support the <strong>unity of science ideal</strong>: higher-level theories are explained through more basic theories. Diachronic derivation similarly supports the <strong>cumulative science ideal</strong>, in which a better theory explains an older theory as a limited case.</p>
+
+                <div class="insight-box">
+                    <strong>Key Insight:</strong>
+                    Bridge laws are not optional decorations. When two theories use different vocabularies, translation is the decisive step that makes deductive reduction possible.
+                </div>
+
+                <h3>The Copernican Revolution as Theory Change</h3>
+                <p>The development from geocentric to heliocentric astronomy illustrates repeated model revision. The intuitive two-sphere model contained Earth and a sphere of stars moving from east to west. The slow eastward motion of the Sun, Moon, and five other apparent stars motivated a third sphere for the planets. Their different rates then motivated a separate sphere for each planet in a seven-sphere model.</p>
+                <p>Retrograde motion required combinations of axes, while the observation that planets glow more strongly during recession helped motivate Ptolemy's mathematical epicycle model, which departed from Aristotle's realistic sphere model. Further corrections included the eccentric for the unequal lengths of winter and summer and the equant for changes in planetary speed.</p>
+                <p>Ptolemy's model nevertheless remained inaccurate and required continuing correction. It also failed to explain why Venus stays near the Sun and why retrograde motion occurs when a planet is far from the Sun. The Copernican model explained these patterns as well as planetary brightness. Its importance therefore involved explanatory integration, not merely another isolated adjustment.</p>
+
+                <div class="insight-box">
+                    <strong>Key Insight:</strong>
+                    Adding devices can preserve a model's descriptive fit without explaining why several patterns occur together. The Copernican alternative was powerful because one framework connected brightness, the position of Venus, and retrograde motion.
+                </div>
+
+                <h3>Scope and Limitation of the Positivist Program</h3>
+                <p>The positivist method is attractive because it is simple, clear, sensible, and apparently based only on logic and observation. It resembles an algorithm: observations and theories enter specified forms of inference, producing scientific conclusions. However, serious problems were eventually identified in every component of this method, beginning with the use of induction. The framework should therefore be understood as an elegant proposed method rather than an unproblematic final account of science.</p>
+            </div>
+        </div>
+
+        <div class="section">
+            <h2>Study Cards</h2>
+            <div class="flashcard-container">
+                <div id="flashcard-content"></div>
+            </div>
+            <div class="navigation">
+                <button class="nav-button" id="prev-card">Previous</button>
+                <span class="counter" id="card-counter"></span>
+                <button class="nav-button" id="next-card">Next</button>
+            </div>
+        </div>
+
+        <div class="section">
+            <h2>Multiple-Choice Questions</h2>
+            <div id="mcq-single-view">
+                <div class="question-container-single" id="mcq-container">
+                    <div class="question-text" id="mcq-question"></div>
+                    <div class="options" id="mcq-options"></div>
+                    <div class="feedback hidden" id="mcq-feedback"></div>
+                    <div class="explanation hidden" id="mcq-explanation"></div>
+                </div>
+                <div class="navigation">
+                    <button class="nav-button" id="prev-mcq">Previous</button>
+                    <span class="counter" id="mcq-counter"></span>
+                    <button class="nav-button" id="next-mcq">Next</button>
+                </div>
+                 <div class="view-all-container">
+                     <button class="view-all-button" id="view-all-mcq">View All Questions</button>
+                 </div>
+            </div>
+            <div id="mcq-all-questions" class="hidden">
+                </div>
+        </div>
+
+        <div class="section">
+            <h2>True or False Questions</h2>
+             <div id="tf-single-view">
+                <div class="question-container-single" id="tf-container">
+                    <div class="question-text" id="tf-question"></div>
+                    <div class="tf-options" id="tf-options">
+                        <button data-answer="true">True</button>
+                        <button data-answer="false">False</button>
+                    </div>
+                    <div class="feedback hidden" id="tf-feedback"></div>
+                    <div class="explanation hidden" id="tf-explanation"></div>
+                </div>
+                <div class="navigation">
+                    <button class="nav-button" id="prev-tf">Previous</button>
+                    <span class="counter" id="tf-counter"></span>
+                    <button class="nav-button" id="next-tf">Next</button>
+                </div>
+                 <div class="view-all-container">
+                     <button class="view-all-button" id="view-all-tf">View All Questions</button>
+                 </div>
+            </div>
+             <div id="tf-all-questions" class="hidden">
+                 </div>
+        </div>
+    </div>
+
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+
+        const flashcardData = [
+            {
+                term: "Logical positivism",
+                definition: "A proposed scientific method that treats observation and logic as the only reliable sources of knowledge."
+            },
+            {
+                term: "Discovery context",
+                definition: "The theory-formulation stage in which observations are used to develop a hypothesis."
+            },
+            {
+                term: "Justification context",
+                definition: "The theory-evaluation stage in which additional observations confirm or refute a hypothesis."
+            },
+            {
+                term: "Abduction",
+                definition: "Inference from an observed phenomenon to the hypothesis judged to be its best explanation."
+            },
+            {
+                term: "Inductive confirmation",
+                definition: "Reasoning from observed implications or examined cases to probable support for a broader hypothesis."
+            },
+            {
+                term: "Deductive refutation",
+                definition: "If a hypothesis requires an implication that does not occur, the hypothesis is concluded to be false."
+            },
+            {
+                term: "Deductive-nomological model",
+                definition: "A model in which a phenomenon follows deductively from a general law and initial conditions."
+            },
+            {
+                term: "General law",
+                definition: "The law-of-nature premise required in a deductive-nomological explanation or prediction."
+            },
+            {
+                term: "Initial condition",
+                definition: "An empirical circumstance that combines with a general law to derive a particular phenomenon."
+            },
+            {
+                term: "Explanation-prediction symmetry",
+                definition: "The same deductive argument explains an observed event and predicts an event not yet observed."
+            },
+            {
+                term: "Synchronous relation",
+                definition: "A relationship between theories from different scientific disciplines at the same time."
+            },
+            {
+                term: "Diachronic relation",
+                definition: "A relationship between an old and a new theory in the same scientific discipline."
+            },
+            {
+                term: "Bridge law",
+                definition: "A translation statement connecting terms in an explained theory to terms in an explaining theory."
+            },
+            {
+                term: "Nagelian reduction",
+                definition: "Derivation of one theory from another after bridge laws translate their different vocabularies."
+            },
+            {
+                term: "Unity of science ideal",
+                definition: "The ideal of explaining higher-level theories through more basic theories across disciplines."
+            },
+            {
+                term: "Cumulative science ideal",
+                definition: "The ideal in which a newer theory deductively explains an older theory as a limited case."
+            },
+            {
+                term: "Decisive experiment",
+                definition: "A test of competing theories using their different observational implications to refute one and support the other."
+            },
+            {
+                term: "Copernican Revolution",
+                definition: "The transition from a geocentric worldview to a heliocentric framework that unified several astronomical patterns."
+            },
+            {
+                term: "Epicycle",
+                definition: "A mathematical device in Ptolemy's model used to represent planetary motion, including retrograde motion and brightness changes."
+            },
+            {
+                term: "Retrograde motion",
+                definition: "The apparent recession or reversal in a planet's motion that challenged simpler geocentric sphere models."
+            }
+        ];
+
+        const mcqData = [
+            {
+                question: "Which pairing correctly matches a scientific task with its logical method in the positivist framework?",
+                options: ["Theory formulation with abduction", "Theory confirmation with deduction", "Theory refutation with induction", "Observation prediction with abduction"],
+                correctIndex: 0,
+                explanation: "Abduction proposes the hypothesis judged to best explain an observation. Confirmation is associated with induction, while refutation and prediction use deduction."
+            },
+            {
+                question: "A researcher observes phenomenon e, judges H to be its best explanation, and proposes H. What form of reasoning is being used?",
+                options: ["Deductive refutation", "Abduction", "Inductive generalization", "Deductive-nomological explanation"],
+                correctIndex: 1,
+                explanation: "Abduction moves from an observation to the hypothesis regarded as its best explanation. It formulates a candidate theory rather than deductively proving it."
+            },
+            {
+                question: "Which description best distinguishes the discovery context from the justification context?",
+                options: ["Discovery predicts observations, while justification explains them", "Discovery relates disciplines, while justification relates historical theories", "Discovery formulates a theory, while justification tests it using further observations", "Discovery is deductive, while justification is always abductive"],
+                correctIndex: 2,
+                explanation: "The discovery context concerns theory formulation from observations. The justification context concerns evaluation through confirmation or refutation."
+            },
+            {
+                question: "Which argument has the logical form used for deductive refutation?",
+                options: ["e; H best explains e; therefore H", "If H then e; e; therefore probably H", "H; initial condition I; therefore e", "If H then e; not-e; therefore not-H"],
+                correctIndex: 3,
+                explanation: "Refutation uses the form if H then e, not-e, therefore not-H. The occurrence of e would support H only inductively, not refute it."
+            },
+            {
+                question: "Why is scientific confirmation treated as induction when H states that all F objects are G and e states that all examined F objects are G?",
+                options: ["Because the conclusion extends from examined cases to all cases", "Because the conclusion follows necessarily from the observations", "Because H is defined as the best explanation of e", "Because one failed observation proves H"],
+                correctIndex: 0,
+                explanation: "The inference generalizes from examined members to the whole class. That extension is probabilistic and therefore inductive rather than deductively necessary."
+            },
+            {
+                question: "A theory predicts an observation, and that observation occurs. What is the strongest conclusion licensed by the presented method?",
+                options: ["The theory has been deductively proven", "The theory has been inductively confirmed", "Every competing theory has been refuted", "The observation has become a law of nature"],
+                correctIndex: 1,
+                explanation: "A successful implication provides probable confirmation. It does not deductively prove the hypothesis, because the same observation may be compatible with alternatives."
+            },
+            {
+                question: "What is the central purpose of reliable theories at the theory-application stage?",
+                options: ["To replace logic with observation", "To eliminate the need for initial conditions", "To explain and predict observations", "To guarantee that every theory is cumulative"],
+                correctIndex: 2,
+                explanation: "The application stage uses reliable theories to explain phenomena already observed and predict phenomena not yet observed. Formulation and evaluation prepare theories for these tasks."
+            },
+            {
+                question: "According to Hempel, when does a proposed explanation T of phenomenon E qualify as scientific?",
+                options: ["When T is simpler than every alternative", "When E can be restated as a definition", "When T is proposed only after E occurs", "When T could have predicted E before E occurred"],
+                correctIndex: 3,
+                explanation: "Hempel raises explanations to the standard of predictions. A scientific explanation must contain reasoning that could have produced the phenomenon as a prediction in advance."
+            },
+            {
+                question: "Which set of components has the general structure of a deductive-nomological argument?",
+                options: ["General law, initial condition, and derived phenomenon", "Observation, best explanation, and proposed hypothesis", "Examined cases, generalization, and probable law", "Old theory, failed implication, and unrelated new theory"],
+                correctIndex: 0,
+                explanation: "The D-N model derives a phenomenon from a law of nature and an initial condition. The other structures describe abduction, induction, or theory replacement."
+            },
+            {
+                question: "A valid law-and-condition argument derives tomorrow's planetary position before it has been observed. Within Hempel's framework, the argument is a:",
+                options: ["Synchronous reduction", "Prediction", "Retrospective explanation", "Bridge law"],
+                correctIndex: 1,
+                explanation: "The argument is a prediction because its conclusion has not yet been observed. The same logical argument becomes an explanation once the phenomenon is already known."
+            },
+            {
+                question: "Which feature makes the deductive-nomological model nomological?",
+                options: ["Its conclusion is probable", "Its premises contain a translation scheme", "Its premises include at least one general law", "Its conclusion concerns a new theory"],
+                correctIndex: 2,
+                explanation: "Nomological refers to the use of a general law or law of nature. Deductive refers separately to the necessary relation between the premises and conclusion."
+            },
+            {
+                question: "Why does the argument about apples and fruits fail as a deductive-nomological explanation even if its conclusion follows from its premises?",
+                options: ["It contains too many premises", "Its conclusion is an observation", "It uses induction instead of deduction", "Its premises are definitions rather than a law of nature and an initial condition"],
+                correctIndex: 3,
+                explanation: "A D-N explanation requires a law of nature and an empirical initial condition. Definitions may support a valid classification argument, but they do not satisfy these explanatory roles."
+            },
+            {
+                question: "An argument includes the instruction to take an umbrella as one of its premises. Why can that instruction not function as an initial condition in the presented model?",
+                options: ["An imperative is not a proposition used in the required logical derivation", "Initial conditions must always be universal laws", "Instructions are necessarily false", "An initial condition must be a prediction"],
+                correctIndex: 0,
+                explanation: "An imperative issues a command rather than stating an empirical circumstance that can be true or false. It therefore cannot fill the logical role of an initial condition."
+            },
+            {
+                question: "Two arguments have identical law, initial-condition, and conclusion structures. In one, the conclusion was already observed; in the other, it was not. What distinguishes them?",
+                options: ["The first is inductive and the second abductive", "The first is an explanation and the second a prediction", "The first is synchronous and the second diachronic", "The first contains a law while the second does not"],
+                correctIndex: 1,
+                explanation: "Their logical structures are identical. Their classification depends on whether the derived phenomenon was already observed or was still unobserved."
+            },
+            {
+                question: "Which case is an example of a synchronous inter-theoretic relation?",
+                options: ["A new astronomical theory replacing an older theory", "A failed hypothesis followed by an abductive proposal", "A physics theory explaining a chemistry theory at the same time", "Einstein's theory yielding Newton's formula at low speeds"],
+                correctIndex: 2,
+                explanation: "Synchronous relations connect theories in different disciplines at the same time. Einstein and Newton illustrate a diachronic relation within physics."
+            },
+            {
+                question: "Which case is an example of a diachronic inter-theoretic relation?",
+                options: ["Statistical mechanics explaining a gas law", "Physics explaining chemistry through bridge laws", "Biology explaining psychology at the same time", "A newer physics theory deriving an older physics theory under restricted conditions"],
+                correctIndex: 3,
+                explanation: "A diachronic relation links old and new theories within the same discipline. Cross-disciplinary reduction is synchronous."
+            },
+            {
+                question: "What does logical positivism require for theory T1 to explain theory T2?",
+                options: ["T2 must be logically derived from T1", "T1 and T2 must use identical examples", "T2 must historically precede T1", "T1 must be less basic than T2"],
+                correctIndex: 0,
+                explanation: "Inter-theoretic explanation is modeled as deduction: T1 serves as a premise and T2 as the conclusion. Historical order alone does not establish explanation."
+            },
+            {
+                question: "Einstein's velocity relation yields the Newtonian approximation when both velocities are very small relative to the speed of light. What does this derivation show?",
+                options: ["Newton's relation is universally exact", "Einstein's theory explains the restricted domain of Newtonian success", "The theories have no diachronic relationship", "Newton's theory deductively refutes Einstein's theory"],
+                correctIndex: 1,
+                explanation: "The newer relation produces the older one under a limiting condition. It thereby explains both why Newton's formula worked at low speeds and why it failed outside that domain."
+            },
+            {
+                question: "What is the main obstacle to deductively reducing a chemistry theory to a physics theory?",
+                options: ["Deduction can never connect scientific theories", "Chemistry contains no general laws", "The theories often use different sets of terms", "Physics cannot describe molecular motion"],
+                correctIndex: 2,
+                explanation: "Different theoretical vocabularies block a direct deduction. Nagel's bridge laws are intended to translate between those vocabularies."
+            },
+            {
+                question: "What role do bridge laws play in Nagel's reduction model?",
+                options: ["They replace deduction with induction", "They identify which observations refute both theories", "They convert laws into imperatives", "They translate terms in the explained theory into terms of the explaining theory"],
+                correctIndex: 3,
+                explanation: "Bridge laws connect the distinct terminologies of the theories. Once translation is available, the explained theory can be deductively derived."
+            },
+            {
+                question: "Which statement functions as a bridge law in the reduction of a gas law to statistical mechanics?",
+                options: ["An increase in temperature is an increase in molecular kinetic motion", "If pressure increases, the gas law is probably true", "A gas law is better because it is older", "Molecular collisions are initial observations only"],
+                correctIndex: 0,
+                explanation: "The statement translates a thermodynamic term into the vocabulary of molecular motion. It therefore supplies the connection needed for inter-theoretic deduction."
+            },
+            {
+                question: "Statistical mechanics states that increased molecular motion increases the rate and intensity of wall collisions. Bridge laws identify temperature with molecular motion and pressure with wall collisions. What can then be derived?",
+                options: ["A rise in pressure causes lower temperature", "A rise in temperature causes increased gas pressure", "Temperature and pressure are unrelated", "The gas theory refutes statistical mechanics"],
+                correctIndex: 1,
+                explanation: "The bridge laws translate both ends of the statistical-mechanical relation. The result is the gas-theory claim connecting increased temperature with increased pressure."
+            },
+            {
+                question: "Why is the bridge-law stage described as decisive in cross-disciplinary reduction?",
+                options: ["It makes the conclusion merely probable", "It removes all laws from the argument", "It makes terms from different theoretical vocabularies logically connectable", "It establishes that the theories were developed simultaneously"],
+                correctIndex: 2,
+                explanation: "Without translation, a conclusion expressed in one vocabulary cannot be directly obtained from premises expressed in another. Bridge laws supply that missing conceptual connection."
+            },
+            {
+                question: "Which ideal is most directly expressed by deriving a higher-level theory from a more basic theory through bridge laws?",
+                options: ["The discovery-context ideal", "The decisive-experiment ideal", "The two-sphere ideal", "The unity of science ideal"],
+                correctIndex: 3,
+                explanation: "The unity of science ideal organizes disciplines through reductions from higher-level to more basic theories. The derivation depends on bridge laws when vocabularies differ."
+            },
+            {
+                question: "Which ideal is expressed when a new theory explains an older theory as a restricted case?",
+                options: ["The cumulative science ideal", "The geocentric ideal", "The confirmation ideal", "The imperative ideal"],
+                correctIndex: 0,
+                explanation: "Cumulative science preserves and explains an older theory's limited successes within a broader new theory. It does not require the older theory to remain universally valid."
+            },
+            {
+                question: "An old theory H1 predicts e1, but not-e1 is observed. A scientist then proposes H2 as the best explanation of not-e1. Which sequence of reasoning is used?",
+                options: ["Induction followed by deduction", "Deductive refutation followed by abduction", "Abduction followed by confirmation", "Two deductive explanations"],
+                correctIndex: 1,
+                explanation: "The failed required implication deductively refutes H1. Selecting H2 as the best explanation of the anomaly is then abductive."
+            },
+            {
+                question: "H1 predicts e1 and H2 predicts e2. An experiment yields e1 and not-e2. Which conclusion is logically strongest?",
+                options: ["H1 is deductively proven", "Both theories are deductively refuted", "H2 is deductively refuted, while H1 is only inductively supported", "H2 is confirmed because e1 occurred"],
+                correctIndex: 2,
+                explanation: "Not-e2 conflicts with a required implication of H2 and therefore refutes it deductively. The occurrence of e1 confirms H1 only probabilistically."
+            },
+            {
+                question: "What is the correct summary of the inference rules used for explaining observations, diachronically deriving an old theory, and synchronously reducing a higher theory?",
+                options: ["Abduction, induction, and deduction", "Induction in all three cases", "Abduction in all three cases", "Deduction in all three cases"],
+                correctIndex: 3,
+                explanation: "Each task is represented as a deductive derivation. Their premises and conclusions differ, but the truth of the premises is intended to necessitate the conclusion."
+            },
+            {
+                question: "Why did the positivist scientific method appear suitable for implementation as an algorithm?",
+                options: ["It offered explicit logical procedures based on observations and logic", "It rejected all fixed rules of inference", "It treated every explanation as equally scientific", "It required intuitive judgment at every step and nothing else"],
+                correctIndex: 0,
+                explanation: "The method presents major scientific tasks as structured inputs, inference rules, and outputs. This clarity makes it appear possible to formalize the procedures computationally."
+            },
+            {
+                question: "What observation first motivated expanding the intuitive two-sphere astronomical model?",
+                options: ["Venus was always near the Sun", "The Sun, Moon, and five apparent stars slowly moved eastward", "Winter was longer than summer", "Planetary speed changed in winter"],
+                correctIndex: 1,
+                explanation: "The two-sphere model could not accommodate the slow eastward recession of the Sun, Moon, and five other apparent stars. A further sphere for the planets was introduced."
+            },
+            {
+                question: "Why was the three-sphere model replaced by a seven-sphere model?",
+                options: ["The stars stopped moving east to west", "The planets all moved at one identical rate", "The apparent planets moved eastward at different rates", "The model needed to explain molecular collisions"],
+                correctIndex: 2,
+                explanation: "One shared planetary sphere could not represent different rates. Assigning a separate sphere to each apparent planet addressed that discrepancy."
+            },
+            {
+                question: "Which anomaly directly challenged the seven-sphere model and led to combinations of axes?",
+                options: ["The identification of water with H2O", "The unequal lengths of seasons", "The closeness of Venus to the Sun", "Chaotic retrograde motion"],
+                correctIndex: 3,
+                explanation: "The simple seven-sphere arrangement did not account for retrograde motion. Combinations of axes were added to represent this more complex apparent movement."
+            },
+            {
+                question: "What marked Ptolemy's epicycle model as a break from Aristotle's model?",
+                options: ["It was a mathematical construction rather than a realistic model of physical spheres", "It eliminated every correction from astronomy", "It adopted the heliocentric worldview", "It explained theories using bridge laws"],
+                correctIndex: 0,
+                explanation: "Aristotle's spheres were intended realistically, whereas Ptolemy used a mathematical epicycle construction. The change addressed planetary motion and brightness without retaining the same realistic sphere interpretation."
+            },
+            {
+                question: "In Ptolemy's mathematical model, which device addressed the observation that winter is longer than summer?",
+                options: ["Epicycle", "Eccentric", "Equant", "Bridge law"],
+                correctIndex: 1,
+                explanation: "The eccentric was introduced for the unequal lengths of winter and summer. The equant addressed changes in planetary speed."
+            },
+            {
+                question: "In Ptolemy's mathematical model, which device addressed the observation that planets move faster in winter?",
+                options: ["A separate fixed-star sphere", "An epicycle alone", "Equant", "A molecular translation"],
+                correctIndex: 2,
+                explanation: "The equant was used to represent variation in planetary speed. It is distinct from the eccentric used for unequal seasonal lengths."
+            },
+            {
+                question: "Which pair of patterns remained unexplained by Ptolemy's model?",
+                options: ["Daily stellar motion and molecular collisions", "Unequal seasons and changing planetary speed", "The existence of laws and initial conditions", "Venus staying near the Sun and retrograde motion occurring far from the Sun"],
+                correctIndex: 3,
+                explanation: "Ptolemy's system required continual corrections and did not explain these two systematic relationships. The Copernican framework connected them within one arrangement."
+            },
+            {
+                question: "What was a central explanatory advantage attributed to the Copernican model?",
+                options: ["It jointly explained planetary brightness, Venus's proximity to the Sun, and retrograde patterns", "It restored the original two-sphere model without changes", "It proved every heliocentric claim by induction", "It replaced mathematical models with bridge laws"],
+                correctIndex: 0,
+                explanation: "Copernicus offered one framework for several previously disconnected regularities. This explanatory integration went beyond making another local correction."
+            },
+            {
+                question: "A geocentric model is repeatedly modified so that it describes new observations but still does not explain why several patterns coincide. What limitation does this illustrate?",
+                options: ["Every descriptive correction is a deductive refutation", "Descriptive fit can improve without corresponding explanatory integration", "A law of nature can never predict an observation", "A model with corrections automatically becomes heliocentric"],
+                correctIndex: 1,
+                explanation: "Added devices may preserve agreement with observations while leaving systematic connections unexplained. The Copernican case emphasizes the difference between continued adjustment and unified explanation."
+            },
+            {
+                question: "Which statement best captures the final assessment of the positivist method?",
+                options: ["It was rejected because it used neither logic nor observation", "It solved every problem in scientific reasoning", "It is elegant and clear, but serious problems were later identified in every component", "Its only limitation concerned astronomical spheres"],
+                correctIndex: 2,
+                explanation: "The method is attractive for its simplicity, clarity, and reliance on logic and observation. Nevertheless, the framework is presented as vulnerable to serious criticisms, beginning with induction."
+            },
+            {
+                question: "Which complete sequence correctly represents the major positivist tasks from formulation through theory application?",
+                options: ["Deduction formulates, abduction confirms, and induction predicts", "Induction formulates, deduction confirms, and abduction predicts", "Abduction refutes, induction predicts, and deduction formulates", "Abduction formulates, induction confirms, deduction refutes, and deduction explains or predicts"],
+                correctIndex: 3,
+                explanation: "Theory formulation uses abduction, confirmation uses induction, and refutation uses deduction. Explanation and prediction are also deductive in the D-N model."
+            }
+        ];
+
+        const tfData = [
+            {
+                question: "Logical positivism treats observation and logic as the only reliable sources of scientific knowledge.",
+                answer: true,
+                explanation: "The proposed method seeks to perform scientific tasks using observations and logical inference alone."
+            },
+            {
+                question: "The discovery context is the stage in which an existing theory is tested through additional observations.",
+                answer: false,
+                explanation: "The discovery context concerns theory formulation. Testing through further observations belongs to the justification context."
+            },
+            {
+                question: "Abduction proposes a hypothesis because it is judged to be the best explanation of an observed phenomenon.",
+                answer: true,
+                explanation: "Abduction moves from phenomenon e and a best-explanation judgment to hypothesis H."
+            },
+            {
+                question: "If H implies e and e occurs, H follows with deductive certainty.",
+                answer: false,
+                explanation: "The occurrence of e provides inductive confirmation only. It does not exclude other hypotheses that could also imply e."
+            },
+            {
+                question: "The move from all examined F objects being G to all F objects being G is an inductive generalization.",
+                answer: true,
+                explanation: "The conclusion extends beyond the examined cases and is therefore probabilistic rather than deductively necessary."
+            },
+            {
+                question: "In the positivist framework, the failure of an observational implication required by a hypothesis supports deductive refutation.",
+                answer: true,
+                explanation: "The form is if H then e, not-e, therefore not-H."
+            },
+            {
+                question: "The deductive-nomological model requires only a valid deductive argument, regardless of the kinds of premises used.",
+                answer: false,
+                explanation: "Its premises must include at least one general law and an initial condition; mere deductive validity is insufficient."
+            },
+            {
+                question: "A definition can always substitute for a law of nature in a deductive-nomological explanation.",
+                answer: false,
+                explanation: "Definitions do not perform the required nomological role of a law of nature."
+            },
+            {
+                question: "The same law-and-condition argument is an explanation after its conclusion has been observed and a prediction before it has been observed.",
+                answer: true,
+                explanation: "Hempel treats explanation and prediction as logically symmetrical, with observation time determining the label."
+            },
+            {
+                question: "An imperative can function as an empirical initial condition because it directs an action.",
+                answer: false,
+                explanation: "An imperative is a command, not a truth-valued empirical proposition suitable for the required deduction."
+            },
+            {
+                question: "A synchronous relation connects theories from different disciplines at the same time.",
+                answer: true,
+                explanation: "Cross-disciplinary relations are synchronous, whereas old-new relations within a discipline are diachronic."
+            },
+            {
+                question: "A diachronic relation must connect theories from two different scientific disciplines.",
+                answer: false,
+                explanation: "A diachronic relation connects an old and a new theory in the same discipline."
+            },
+            {
+                question: "Logical positivism models one theory's explanation of another as logical derivation.",
+                answer: true,
+                explanation: "The explaining theory functions as a premise from which the explained theory is derived."
+            },
+            {
+                question: "Einstein's relative-velocity relation makes Newton's relation an exact universal law at every speed.",
+                answer: false,
+                explanation: "The Newtonian result is an approximation when the relevant velocities are very small relative to the speed of light."
+            },
+            {
+                question: "Deriving Newton's approximation from Einstein's relation explains both Newtonian success in a restricted domain and failure outside it.",
+                answer: true,
+                explanation: "The limiting derivation identifies the conditions under which the older theory works."
+            },
+            {
+                question: "Different vocabularies make direct synchronous reduction difficult even when the theories concern related phenomena.",
+                answer: true,
+                explanation: "Terms in the conclusion cannot simply be derived from unrelated terms in the premises without a translation scheme."
+            },
+            {
+                question: "Nagel's bridge laws replace deductive reduction with abductive inference.",
+                answer: false,
+                explanation: "Bridge laws enable translation so that a deductive derivation can proceed."
+            },
+            {
+                question: "Identifying increased temperature with increased molecular kinetic motion is an example of a bridge law.",
+                answer: true,
+                explanation: "It translates a thermodynamic term into the vocabulary of statistical mechanics."
+            },
+            {
+                question: "The unity of science ideal is associated with explaining more basic theories through higher-level theories.",
+                answer: false,
+                explanation: "The direction is the reverse: higher-level theories are explained through more basic theories."
+            },
+            {
+                question: "The cumulative science ideal is served when a newer theory derives an older theory as a restricted case.",
+                answer: true,
+                explanation: "Such a derivation preserves and explains the older theory's limited successes."
+            },
+            {
+                question: "In a decisive experiment, observing H1's predicted result proves H1 deductively even if H2's prediction fails.",
+                answer: false,
+                explanation: "Failure of H2's required prediction refutes H2 deductively, but success of H1's prediction confirms H1 only inductively."
+            },
+            {
+                question: "After an old theory is refuted, proposing a new theory as the best explanation of the anomaly is abductive.",
+                answer: true,
+                explanation: "The new theory is selected through inference to the best explanation rather than derived from the refuted theory."
+            },
+            {
+                question: "The two-sphere astronomical model included Earth and a sphere of stars moving from east to west.",
+                answer: true,
+                explanation: "This was the initial intuitive model used to represent observed stellar motion."
+            },
+            {
+                question: "The three-sphere model was replaced because all apparent planets moved eastward at exactly the same rate.",
+                answer: false,
+                explanation: "It was replaced because the apparent planets moved eastward at different rates, requiring separate spheres."
+            },
+            {
+                question: "Retrograde motion motivated the use of combinations of axes in attempts to preserve the sphere model.",
+                answer: true,
+                explanation: "The simple seven-sphere model could not represent the apparent reversals, so more complex axes were introduced."
+            },
+            {
+                question: "Ptolemy's epicycles continued Aristotle's realistic interpretation of physical spheres without any conceptual break.",
+                answer: false,
+                explanation: "Ptolemy's epicycles formed a mathematical model and represented a break from Aristotle's realistic sphere model."
+            },
+            {
+                question: "In Ptolemy's model, the eccentric addressed unequal seasonal lengths, while the equant addressed changes in planetary speed.",
+                answer: true,
+                explanation: "The two devices responded to different observational deviations."
+            },
+            {
+                question: "Ptolemy's model explained why Venus remains near the Sun and why retrograde motion occurs when a planet is far from the Sun.",
+                answer: false,
+                explanation: "These systematic patterns remained unexplained and helped motivate the Copernican alternative."
+            },
+            {
+                question: "The Copernican framework was valued for connecting planetary brightness, Venus's position near the Sun, and retrograde patterns.",
+                answer: true,
+                explanation: "It supplied a unified explanation of patterns that the Ptolemaic model did not explain together."
+            },
+            {
+                question: "The positivist method is presented as elegant and algorithm-like, but also as having serious problems in every component.",
+                answer: true,
+                explanation: "Its simplicity and reliance on logic and observation make it attractive, yet the framework is not presented as immune to criticism."
+            }
+        ];
+
+        // --- Global State Variables ---
+        let currentCardIndex = 0;
+        let isCardFront = true;
+        let isCardAnimating = false;
+        let currentMCQIndex = 0;
+        let currentTFIndex = 0;
+        let mcqAnswers = new Array(mcqData.length).fill(null);
+        let tfAnswers = new Array(tfData.length).fill(null);
+
+        // --- DOM Element References ---
+        const flashcardContent = document.getElementById('flashcard-content');
+        const cardCounter = document.getElementById('card-counter');
+        const prevCardBtn = document.getElementById('prev-card');
+        const nextCardBtn = document.getElementById('next-card');
+        const mcqQuestion = document.getElementById('mcq-question');
+        const mcqOptions = document.getElementById('mcq-options');
+        const mcqFeedback = document.getElementById('mcq-feedback');
+        const mcqExplanation = document.getElementById('mcq-explanation');
+        const mcqCounter = document.getElementById('mcq-counter');
+        const prevMCQBtn = document.getElementById('prev-mcq');
+        const nextMCQBtn = document.getElementById('next-mcq');
+        const viewAllMCQBtn = document.getElementById('view-all-mcq');
+        const mcqSingleView = document.getElementById('mcq-single-view');
+        const mcqAllQuestionsContainer = document.getElementById('mcq-all-questions');
+        const tfQuestion = document.getElementById('tf-question');
+        const tfOptionsContainer = document.getElementById('tf-options');
+        const tfFeedback = document.getElementById('tf-feedback');
+        const tfExplanation = document.getElementById('tf-explanation');
+        const tfCounter = document.getElementById('tf-counter');
+        const prevTFBtn = document.getElementById('prev-tf');
+        const nextTFBtn = document.getElementById('next-tf');
+        const viewAllTFBtn = document.getElementById('view-all-tf');
+        const tfSingleView = document.getElementById('tf-single-view');
+        const tfAllQuestionsContainer = document.getElementById('tf-all-questions');
+
+        // --- MathJax Re-rendering Helper ---
+        function triggerMathJax() {
+            if (window.MathJax && window.MathJax.typesetPromise) {
+                window.MathJax.typesetPromise().catch((err) => console.error('MathJax error:', err.message));
+            }
+        }
+
+        function displayCard(index) {
+            if (!flashcardData || flashcardData.length === 0) return;
+            const cardData = flashcardData[index];
+            isCardFront = true;
+            flashcardContent.style.opacity = '1';
+            flashcardContent.textContent = cardData.term;
+            flashcardContent.className = 'flashcard-front-style';
+            cardCounter.textContent = `Card ${index + 1} / ${flashcardData.length}`;
+            prevCardBtn.disabled = index === 0;
+            nextCardBtn.disabled = index === flashcardData.length - 1;
+            triggerMathJax();
+        }
+
+        function flipCard() {
+            if (isCardAnimating || !flashcardData || flashcardData.length === 0) return;
+            isCardAnimating = true;
+            flashcardContent.style.opacity = '0';
+            setTimeout(() => {
+                isCardFront = !isCardFront;
+                const cardData = flashcardData[currentCardIndex];
+                if (isCardFront) {
+                    flashcardContent.textContent = cardData.term;
+                    flashcardContent.className = 'flashcard-front-style';
+                } else {
+                    flashcardContent.textContent = cardData.definition;
+                    flashcardContent.className = 'flashcard-back-style';
+                }
+                flashcardContent.style.opacity = '1';
+                isCardAnimating = false;
+                triggerMathJax();
+            }, 300);
+        }
+
+        function displayMCQuestion(index) {
+            if (!mcqData || mcqData.length === 0) return;
+            const qData = mcqData[index];
+            mcqQuestion.textContent = qData.question;
+            mcqOptions.innerHTML = '';
+            mcqFeedback.classList.add('hidden');
+            mcqExplanation.classList.add('hidden');
+            qData.options.forEach((option, i) => {
+                const button = document.createElement('button');
+                button.textContent = option;
+                button.onclick = () => handleMCQAnswer(index, i);
+                mcqOptions.appendChild(button);
+            });
+            mcqCounter.textContent = `Question ${index + 1} / ${mcqData.length}`;
+            prevMCQBtn.disabled = index === 0;
+            nextMCQBtn.disabled = index === mcqData.length - 1;
+            if (mcqAnswers[index] !== null) {
+                highlightMCQAnswer(mcqOptions, mcqFeedback, mcqExplanation, index, mcqAnswers[index].selected);
+            }
+            triggerMathJax();
+        }
+
+        function handleMCQAnswer(qIndex, selectedIndex) {
+            if (mcqAnswers[qIndex] !== null) return;
+            const isCorrect = selectedIndex === mcqData[qIndex].correctIndex;
+            mcqAnswers[qIndex] = { selected: selectedIndex, correct: isCorrect };
+            highlightMCQAnswer(mcqOptions, mcqFeedback, mcqExplanation, qIndex, selectedIndex);
+        }
+
+        function highlightMCQAnswer(optionsContainer, feedbackEl, explanationEl, qIndex, selectedIndex) {
+            const qData = mcqData[qIndex];
+            const buttons = optionsContainer.querySelectorAll('button');
+            buttons.forEach((button, i) => {
+                button.disabled = true;
+                if (i === qData.correctIndex) {
+                    button.classList.add('correct');
+                }
+                if (i === selectedIndex && i !== qData.correctIndex) {
+                    button.classList.add('incorrect');
+                }
+            });
+            feedbackEl.textContent = selectedIndex === qData.correctIndex ? "Correct!" : "Incorrect.";
+            feedbackEl.className = `feedback ${selectedIndex === qData.correctIndex ? 'correct' : 'incorrect'}`;
+            explanationEl.innerHTML = `<strong>Explanation:</strong> ${qData.explanation}`;
+            explanationEl.classList.remove('hidden');
+            triggerMathJax();
+        }
+
+        function displayAllMCQ() {
+            if (!mcqData || mcqData.length === 0) return;
+            mcqSingleView.classList.add('hidden');
+            mcqAllQuestionsContainer.innerHTML = '';
+            mcqData.forEach((qData, index) => {
+                const questionDiv = document.createElement('div');
+                questionDiv.className = 'question-container-all';
+                questionDiv.innerHTML = `
+                    <div class="question-text">${index + 1}. ${qData.question}</div>
+                    <div class="options">
+                        ${qData.options.map((option, i) => `<button data-qindex="${index}" data-oindex="${i}">${option}</button>`).join('')}
+                    </div>
+                    <div class="feedback hidden"></div>
+                    <div class="explanation hidden"></div>
+                `;
+                mcqAllQuestionsContainer.appendChild(questionDiv);
+                 const optionButtons = questionDiv.querySelectorAll('.options button');
+                 optionButtons.forEach(button => {
+                     button.onclick = () => {
+                        const qIndex = parseInt(button.dataset.qindex);
+                        const oIndex = parseInt(button.dataset.oindex);
+                        if (mcqAnswers[qIndex] === null) {
+                            const isCorrect = oIndex === mcqData[qIndex].correctIndex;
+                            mcqAnswers[qIndex] = { selected: oIndex, correct: isCorrect };
+                        }
+                        const optionsDiv = button.closest('.options');
+                        const feedbackDiv = questionDiv.querySelector('.feedback');
+                        const explanationDiv = questionDiv.querySelector('.explanation');
+                        highlightMCQAnswer(optionsDiv, feedbackDiv, explanationDiv, qIndex, mcqAnswers[qIndex].selected);
+                     };
+                 });
+                 if (mcqAnswers[index] !== null) {
+                    const optionsDiv = questionDiv.querySelector('.options');
+                    const feedbackDiv = questionDiv.querySelector('.feedback');
+                    const explanationDiv = questionDiv.querySelector('.explanation');
+                    highlightMCQAnswer(optionsDiv, feedbackDiv, explanationDiv, index, mcqAnswers[index].selected);
+                 }
+            });
+            mcqAllQuestionsContainer.classList.remove('hidden');
+            triggerMathJax();
+        }
+
+        function displayTFQuestion(index) {
+            if (!tfData || tfData.length === 0) return;
+            const qData = tfData[index];
+            tfQuestion.textContent = qData.question;
+            tfFeedback.classList.add('hidden');
+            tfExplanation.classList.add('hidden');
+             const buttons = tfOptionsContainer.querySelectorAll('button');
+             buttons.forEach(button => {
+                 button.disabled = false;
+                 button.classList.remove('correct', 'incorrect');
+                 button.onclick = () => handleTFAnswer(index, button.dataset.answer === 'true');
+             });
+            tfCounter.textContent = `Question ${index + 1} / ${tfData.length}`;
+            prevTFBtn.disabled = index === 0;
+            nextTFBtn.disabled = index === tfData.length - 1;
+            if (tfAnswers[index] !== null) {
+                highlightTFAnswer(tfOptionsContainer, tfFeedback, tfExplanation, index, tfAnswers[index].selected);
+            }
+            triggerMathJax();
+        }
+
+        function handleTFAnswer(qIndex, selectedAnswer) {
+            if (tfAnswers[qIndex] !== null) return;
+            const isCorrect = selectedAnswer === tfData[qIndex].answer;
+            tfAnswers[qIndex] = { selected: selectedAnswer, correct: isCorrect };
+            highlightTFAnswer(tfOptionsContainer, tfFeedback, tfExplanation, qIndex, selectedAnswer);
+        }
+
+        function highlightTFAnswer(optionsContainer, feedbackEl, explanationEl, qIndex, selectedAnswer) {
+             const qData = tfData[qIndex];
+             const buttons = optionsContainer.querySelectorAll('button');
+             buttons.forEach(button => {
+                 const buttonAnswer = button.dataset.answer === 'true';
+                 button.disabled = true;
+                 if (buttonAnswer === qData.answer) {
+                     button.classList.add('correct');
+                 }
+                 if (buttonAnswer === selectedAnswer && buttonAnswer !== qData.answer) {
+                     button.classList.add('incorrect');
+                 }
+             });
+             feedbackEl.textContent = selectedAnswer === qData.answer ? "Correct!" : "Incorrect.";
+             feedbackEl.className = `feedback ${selectedAnswer === qData.answer ? 'correct' : 'incorrect'}`;
+             explanationEl.innerHTML = `<strong>Explanation:</strong> ${qData.explanation}`;
+             explanationEl.classList.remove('hidden');
+             triggerMathJax();
+        }
+
+        function displayAllTF() {
+             if (!tfData || tfData.length === 0) return;
+             tfSingleView.classList.add('hidden');
+             tfAllQuestionsContainer.innerHTML = '';
+             tfData.forEach((qData, index) => {
+                 const questionDiv = document.createElement('div');
+                 questionDiv.className = 'question-container-all';
+                 questionDiv.innerHTML = `
+                     <div class="question-text">${index + 1}. ${qData.question}</div>
+                     <div class="tf-options">
+                         <button data-qindex="${index}" data-answer="true">True</button>
+                         <button data-qindex="${index}" data-answer="false">False</button>
+                     </div>
+                     <div class="feedback hidden"></div>
+                     <div class="explanation hidden"></div>
+                 `;
+                 tfAllQuestionsContainer.appendChild(questionDiv);
+                 const optionButtons = questionDiv.querySelectorAll('.tf-options button');
+                 optionButtons.forEach(button => {
+                     button.onclick = () => {
+                         const qIndex = parseInt(button.dataset.qindex);
+                         const selectedAnswer = button.dataset.answer === 'true';
+                         if (tfAnswers[qIndex] === null) {
+                             const isCorrect = selectedAnswer === tfData[qIndex].answer;
+                             tfAnswers[qIndex] = { selected: selectedAnswer, correct: isCorrect };
+                         }
+                         const optionsDiv = button.closest('.tf-options');
+                         const feedbackDiv = questionDiv.querySelector('.feedback');
+                         const explanationDiv = questionDiv.querySelector('.explanation');
+                         highlightTFAnswer(optionsDiv, feedbackDiv, explanationDiv, qIndex, tfAnswers[qIndex].selected);
+                     };
+                 });
+                 if (tfAnswers[index] !== null) {
+                    const optionsDiv = questionDiv.querySelector('.tf-options');
+                    const feedbackDiv = questionDiv.querySelector('.feedback');
+                    const explanationDiv = questionDiv.querySelector('.explanation');
+                    highlightTFAnswer(optionsDiv, feedbackDiv, explanationDiv, index, tfAnswers[index].selected);
+                 }
+             });
+             tfAllQuestionsContainer.classList.remove('hidden');
+             triggerMathJax();
+        }
+
+        function initialize() {
+            if (flashcardData.length > 0) displayCard(currentCardIndex);
+            if (mcqData.length > 0) displayMCQuestion(currentMCQIndex);
+            if (tfData.length > 0) displayTFQuestion(currentTFIndex);
+            flashcardContent.addEventListener('click', flipCard);
+            prevCardBtn.addEventListener('click', () => { if (currentCardIndex > 0) { currentCardIndex--; displayCard(currentCardIndex); } });
+            nextCardBtn.addEventListener('click', () => { if (currentCardIndex < flashcardData.length - 1) { currentCardIndex++; displayCard(currentCardIndex); } });
+            prevMCQBtn.addEventListener('click', () => { if (currentMCQIndex > 0) { currentMCQIndex--; displayMCQuestion(currentMCQIndex); } });
+            nextMCQBtn.addEventListener('click', () => { if (currentMCQIndex < mcqData.length - 1) { currentMCQIndex++; displayMCQuestion(currentMCQIndex); } });
+            viewAllMCQBtn.addEventListener('click', displayAllMCQ);
+            prevTFBtn.addEventListener('click', () => { if (currentTFIndex > 0) { currentTFIndex--; displayTFQuestion(currentTFIndex); } });
+            nextTFBtn.addEventListener('click', () => { if (currentTFIndex < tfData.length - 1) { currentTFIndex++; displayTFQuestion(currentTFIndex); } });
+            viewAllTFBtn.addEventListener('click', displayAllTF);
+
+            // Initial MathJax render for static HTML (like the Theory section)
+            triggerMathJax();
+        }
+
+        initialize();
+    });
+    </script>
+</body>
+</html>

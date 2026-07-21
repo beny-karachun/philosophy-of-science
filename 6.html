@@ -1,0 +1,1179 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Induction and Its Problems in Science</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+
+    <script>
+        window.MathJax = {
+            tex: {
+                inlineMath: [['$', '$'], ['\\(', '\\)']],
+                displayMath: [['$$', '$$'], ['\\[', '\\]']]
+            },
+            startup: {
+                typeset: false // We will trigger this manually via JS
+            }
+        };
+    </script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+    <style>
+        /* --- Root Variables for Theme --- */
+        :root {
+            --primary-bg: #0a0a0f;
+            --panel-bg: rgba(255, 255, 255, 0.03);
+            --panel-border: rgba(255, 255, 255, 0.1);
+
+            --accent-start: #6C63FF;
+            --accent-end: #A855F7;
+            --accent-gradient: linear-gradient(135deg, var(--accent-start), var(--accent-end));
+            --accent-color: #8B5CF6; /* Midpoint fallback */
+
+            --text-color: #E0E0E0;
+            --text-muted: #9ca3af;
+
+            --correct-color: rgba(16, 185, 129, 0.2);
+            --correct-border: #10b981;
+            --incorrect-color: rgba(239, 68, 68, 0.2);
+            --incorrect-border: #ef4444;
+
+            --insight-bg: rgba(168, 85, 247, 0.08);
+            --insight-border: #A855F7;
+        }
+
+        /* --- Global Styles & Glow Effects --- */
+        body {
+            background-color: var(--primary-bg);
+            background-image:
+                radial-gradient(circle at 15% 50%, rgba(108, 99, 255, 0.06), transparent 25vw),
+                radial-gradient(circle at 85% 30%, rgba(168, 85, 247, 0.06), transparent 25vw);
+            background-attachment: fixed;
+            color: var(--text-color);
+            font-family: 'Inter', sans-serif;
+            line-height: 1.6;
+            margin: 0;
+            padding: 20px;
+        }
+
+        /* --- Panel Containers (Optimized: No blur for performance) --- */
+        .container, .section, #flashcard-content, .question-container-single, .question-container-all, .explanation {
+            background: var(--panel-bg);
+            border: 1px solid var(--panel-border);
+            border-radius: 12px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+        }
+
+        .container {
+            width: 90%;
+            max-width: 1000px;
+            margin: 20px auto;
+            padding: 30px;
+        }
+
+        h1, h2 {
+            text-align: center;
+            border-bottom: 1px solid var(--panel-border);
+            padding-bottom: 15px;
+            font-weight: 700;
+            color: #fff;
+        }
+
+        .section {
+            padding: 25px;
+            margin-bottom: 30px;
+            animation: slideIn 0.5s ease-out forwards;
+        }
+
+        /* --- Theory & Key Insight Styling --- */
+        .theory-text {
+            font-size: 1.1em;
+            line-height: 1.8;
+            color: var(--text-muted);
+        }
+
+        .theory-text p, .theory-text li {
+            color: var(--text-color);
+        }
+
+        .theory-text h3 {
+            color: #fff;
+            margin-top: 25px;
+            border-bottom: none;
+            text-align: left;
+            font-size: 1.3em;
+        }
+
+        .insight-box {
+            background-color: var(--insight-bg);
+            border-left: 4px solid var(--insight-border);
+            padding: 18px;
+            margin: 25px 0;
+            border-radius: 8px;
+        }
+
+        .insight-box strong {
+            color: #fff;
+            display: block;
+            margin-bottom: 8px;
+            font-size: 1.1em;
+            text-shadow: 0 0 10px rgba(168, 85, 247, 0.4);
+        }
+
+        /* --- Study Cards Styling --- */
+        .flashcard-container {
+            height: 250px;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            perspective: 1000px;
+        }
+
+        #flashcard-content {
+            width: 100%;
+            height: 100%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            padding: 30px;
+            box-sizing: border-box;
+            transition: opacity 0.3s ease-in-out, transform 0.2s;
+        }
+
+        #flashcard-content:hover {
+            transform: translateY(-2px);
+            border-color: rgba(168, 85, 247, 0.4);
+            box-shadow: 0 10px 40px rgba(108, 99, 255, 0.15);
+        }
+
+        .flashcard-front-style {
+             font-size: 1.6em;
+             font-weight: 600;
+             font-family: 'JetBrains Mono', monospace;
+             color: var(--accent-end);
+        }
+
+        .flashcard-back-style {
+             font-size: 1.2em;
+             color: var(--text-color);
+        }
+
+        /* --- Questions Styling (MCQ & T/F) --- */
+         .question-container-single, .question-container-all {
+            margin-bottom: 20px;
+            padding: 20px;
+         }
+
+        .question-text {
+            font-weight: 600;
+            margin-bottom: 20px;
+            font-size: 1.1em;
+        }
+
+        /* Buttons & Glass Inputs */
+        .options button, .tf-options button, .nav-button, .view-all-button {
+            display: block;
+            width: 100%;
+            padding: 12px 15px;
+            margin: 8px 0;
+            background: rgba(255, 255, 255, 0.02);
+            color: var(--text-color);
+            border: 1px solid var(--panel-border);
+            border-radius: 8px;
+            cursor: pointer;
+            text-align: left;
+            font-family: 'Inter', sans-serif;
+            font-size: 1em;
+            transition: all 0.3s ease;
+        }
+
+        .nav-button, .view-all-button {
+            width: auto;
+            text-align: center;
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        .options button:hover:not(:disabled), .tf-options button:hover:not(:disabled), .nav-button:hover:not(:disabled), .view-all-button:hover {
+            background: var(--accent-gradient);
+            border-color: transparent;
+            color: #fff;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 15px rgba(108, 99, 255, 0.25);
+        }
+
+        .options button:disabled, .tf-options button:disabled, .nav-button:disabled {
+            cursor: not-allowed;
+            opacity: 0.5;
+            transform: none;
+        }
+
+        /* Correct/Incorrect States */
+        .options button.correct, .tf-options button.correct {
+            background: var(--correct-color);
+            border-color: var(--correct-border);
+            color: #fff;
+            opacity: 1;
+        }
+        .options button.incorrect, .tf-options button.incorrect {
+            background: var(--incorrect-color);
+            border-color: var(--incorrect-border);
+            color: #fff;
+            opacity: 1;
+        }
+
+        .feedback {
+            margin-top: 15px;
+            padding: 12px;
+            border-radius: 8px;
+            font-weight: 600;
+            text-align: center;
+            animation: fadeIn 0.3s ease-in;
+        }
+
+        .feedback.correct {
+            color: var(--correct-border);
+            background: var(--correct-color);
+            border: 1px solid var(--correct-border);
+        }
+
+        .feedback.incorrect {
+            color: var(--incorrect-border);
+            background: var(--incorrect-color);
+            border: 1px solid var(--incorrect-border);
+        }
+
+        .explanation {
+            margin-top: 15px;
+            font-style: italic;
+            font-size: 0.95em;
+            padding: 15px;
+            color: var(--text-muted);
+            border-left: 3px solid var(--accent-start);
+            animation: fadeIn 0.5s ease-in;
+        }
+
+        /* --- Navigation & Utility --- */
+        .navigation {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 20px;
+        }
+
+        .counter {
+            font-size: 0.9em;
+            color: var(--text-muted);
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        .view-all-container {
+            text-align: center;
+            margin-top: 25px;
+        }
+
+        .hidden { display: none !important; }
+
+        /* --- Animations --- */
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Induction and Its Problems in Science</h1>
+
+        <div class="section">
+            <h2>Theory Summary and Key Insights</h2>
+            <div id="theory-content" class="theory-text">
+                <h3>The Positivist Framework of Scientific Inquiry</h3>
+                <p>Logical positivism presents scientific inquiry as a set of tasks performed using two reliable sources of knowledge: <strong>observation</strong> and <strong>logic</strong>. Its principal logical tools are deduction, induction, and abduction. The scientific method is divided into theory formulation, theory evaluation, theory application, and relationships between theories.</p>
+                <ul>
+                    <li><strong>Formulation:</strong> Abduction proposes a hypothesis $H$ as the best explanation of observed evidence $e$. Induction can also formulate a theory when the theory uses the same observational terms as the observations.</li>
+                    <li><strong>Confirmation:</strong> Induction moves from a predicted and observed consequence to probable support for a hypothesis: if $H$, then $e$; $e$; therefore, probably $H$.</li>
+                    <li><strong>Refutation:</strong> Deduction uses the form if $H$, then $e$; not $e$; therefore, not $H$.</li>
+                    <li><strong>Application:</strong> Prediction and explanation use deduction from a law or theory together with initial conditions.</li>
+                </ul>
+
+                <div class="insight-box">
+                    <strong>Key Insight:</strong>
+                    The same observation can play very different logical roles. An observed consequence supports a hypothesis only inductively, whereas failure of a consequence that follows from the hypothesis supports refutation deductively.
+                </div>
+
+                <h3>Explanation, Prediction, and Relations Between Theories</h3>
+                <p>The deductive-nomological model applies the standards of prediction to explanation. A phenomenon $E$ is scientifically explained when it follows deductively from a general law $L$ and initial conditions $I$. The same structure can predict $E$ before it occurs or explain it after it occurs.</p>
+                <p>Relationships between theories are also represented as explanations by deduction:</p>
+                <ul>
+                    <li><strong>Synchronous explanation</strong> connects theories operating at the same time in different levels or fields. A more basic theory explains a higher-level theory through <strong>bridge laws</strong> that translate their different terms. For example, identifying heat with molecular kinetic motion connects statistical mechanics with gas theory.</li>
+                    <li><strong>Diachronic explanation</strong> concerns old and new theories. A newer and better theory should derive the relevant old theory, often under restricted conditions. Einstein's relative-velocity formula yields the Newtonian formula when the relevant velocities are much smaller than the speed of light.</li>
+                </ul>
+
+                <h3>Where Induction Enters Science</h3>
+                <p>Induction is used primarily for confirmation. It generalizes from examined cases to all cases: all examined $F$ objects are $G$; therefore, all $F$ objects are $G$. It may also formulate hypotheses when the conclusion remains in observational language. A hypothesis stated in non-observable terms cannot be produced by simple inductive generalization and instead requires abduction.</p>
+                <p>Induction does not make its conclusion certain. It provides support by increasing the probability of the conclusion. Consequently, any defect in induction affects confirmation and also those cases of theory formulation that rely on inductive generalization.</p>
+
+                <h3>Hume's Problem of Induction</h3>
+                <p>Hume's problem concerns the justification of induction itself. A proposed defense might claim that all examined inductions have succeeded and therefore all inductions are reliable. This defense is circular because it uses the very inductive rule whose reliability it is supposed to establish. It assumes that past success can be generalized to unexamined cases, which is precisely the point in need of justification.</p>
+
+                <div class="insight-box">
+                    <strong>Key Insight:</strong>
+                    Hume's objection is not merely that a particular induction might fail. It challenges the non-circular justification of the general practice of moving from examined cases to unexamined cases.
+                </div>
+
+                <h3>Hempel's Ravens Paradox</h3>
+                <p>The logical transformation called <strong>Trans</strong> states that all $F$ are $G$ if and only if all non-$G$ are non-$F$. Thus, all ravens are black is logically equivalent to all non-black things are non-ravens.</p>
+                <p>This equivalence creates a problem for both formulation and confirmation by induction. Observing a brown table, a green phone, or a white shoe provides instances of non-black things that are not ravens. Generalizing from such observations yields all non-black things are non-ravens and, by Trans, all ravens are black. The same method can generate or confirm claims about other raven colors from apparently irrelevant non-ravens.</p>
+                <p>Hempel accepts the surprising consequence. The universal claim applies to every object: only a non-black raven violates it, while a black raven, a black bowl, and a white shoe all fit it. On his account, the feeling of paradox results from our psychological tendency to focus only on ravens.</p>
+
+                <h3>Bayesian Degrees of Confirmation</h3>
+                <p>Bayesianism treats confirmation as a matter of degree. An observation $e$ changes support for a hypothesis $H$ by the ratio $P(e\mid H)/P(e)$. If $e$ follows logically from $H$, then $P(e\mid H)=1$, so the relevant factor is $1/P(e)$.</p>
+                <p>A black raven is comparatively improbable and therefore significantly increases support for the hypothesis that all ravens are black. A white shoe or another non-black non-raven is highly probable and increases support only slightly. This explains how such an object can technically confirm the hypothesis without providing substantial evidential weight.</p>
+                <p>Hempel's and the Bayesian responses address the <strong>confirmation</strong> version of the paradox, but they do not prevent induction from <strong>formulating</strong> absurd hypotheses.</p>
+
+                <h3>Goodman's New Riddle of Induction</h3>
+                <p>Goodman's riddle shows that the same objects can be described using different predicates that agree on all present observations but support incompatible future predictions. The predicate <strong>bleen</strong> applies to an object if it was first observed before 2050 and is black, or if it was not first observed before 2050 and is green.</p>
+                <p>Before 2050, every observed black raven is both black and bleen. Induction therefore supports both all ravens are black and all ravens are bleen. Yet the first hypothesis predicts that ravens first observed after 2050 will be black, while the second predicts that they will be green.</p>
+                <p>A proposed ban on time-dependent terms does not settle the issue. A speaker whose basic vocabulary contains bleen and grack can describe black and green as the complex, time-dependent predicates. The distinction between simple and artificial predicates therefore depends on the language used.</p>
+
+                <div class="insight-box">
+                    <strong>Key Insight:</strong>
+                    Goodman's riddle reveals that observations alone do not determine which description should be projected into the future. Identical evidence can support incompatible generalizations when it is classified under different predicates.
+                </div>
+
+                <h3>Entrenchment and Its Limitation</h3>
+                <p>Goodman proposes restricting induction to <strong>entrenched terms</strong>: terms that have been used successfully in many generalizations and continue to be so used. Black is entrenched, whereas bleen is not. Similarly, non-black and non-raven lack the required history of successful generalization, so they cannot be used to obtain confirmation through the Ravens Paradox.</p>
+                <p>This proposal addresses both paradoxes by excluding problematic predicates. Its major limitation is that it is too restrictive: if only already entrenched terms are admissible, science cannot readily introduce new terms such as electron, mass, magnetic field, or DNA.</p>
+
+                <div class="insight-box">
+                    <strong>Key Insight:</strong>
+                    The proposed solutions involve a trade-off. Permissive induction admits irrelevant evidence and artificial predicates, while Goodman's restrictive criterion threatens the conceptual innovation on which scientific progress depends.
+                </div>
+
+                <h3>Overall Conclusion</h3>
+                <p>The positivist method is attractive because it appears simple, clear, and grounded only in observation and logic. The problems of Hume, Hempel, and Goodman show, however, that an instruction manual based on unrestricted induction can justify circular reasoning, treat apparently irrelevant observations as confirmation, and project artificial classifications into the future. No satisfactory revision presented here fully preserves both disciplined confirmation and the freedom to formulate genuinely new scientific concepts.</p>
+            </div>
+        </div>
+
+        <div class="section">
+            <h2>Study Cards</h2>
+            <div class="flashcard-container">
+                <div id="flashcard-content"></div>
+            </div>
+            <div class="navigation">
+                <button class="nav-button" id="prev-card">Previous</button>
+                <span class="counter" id="card-counter"></span>
+                <button class="nav-button" id="next-card">Next</button>
+            </div>
+        </div>
+
+        <div class="section">
+            <h2>Multiple-Choice Questions</h2>
+            <div id="mcq-single-view">
+                <div class="question-container-single" id="mcq-container">
+                    <div class="question-text" id="mcq-question"></div>
+                    <div class="options" id="mcq-options"></div>
+                    <div class="feedback hidden" id="mcq-feedback"></div>
+                    <div class="explanation hidden" id="mcq-explanation"></div>
+                </div>
+                <div class="navigation">
+                    <button class="nav-button" id="prev-mcq">Previous</button>
+                    <span class="counter" id="mcq-counter"></span>
+                    <button class="nav-button" id="next-mcq">Next</button>
+                </div>
+                 <div class="view-all-container">
+                     <button class="view-all-button" id="view-all-mcq">View All Questions</button>
+                 </div>
+            </div>
+            <div id="mcq-all-questions" class="hidden">
+                </div>
+        </div>
+
+        <div class="section">
+            <h2>True or False Questions</h2>
+             <div id="tf-single-view">
+                <div class="question-container-single" id="tf-container">
+                    <div class="question-text" id="tf-question"></div>
+                    <div class="tf-options" id="tf-options">
+                        <button data-answer="true">True</button>
+                        <button data-answer="false">False</button>
+                    </div>
+                    <div class="feedback hidden" id="tf-feedback"></div>
+                    <div class="explanation hidden" id="tf-explanation"></div>
+                </div>
+                <div class="navigation">
+                    <button class="nav-button" id="prev-tf">Previous</button>
+                    <span class="counter" id="tf-counter"></span>
+                    <button class="nav-button" id="next-tf">Next</button>
+                </div>
+                 <div class="view-all-container">
+                     <button class="view-all-button" id="view-all-tf">View All Questions</button>
+                 </div>
+            </div>
+             <div id="tf-all-questions" class="hidden">
+                 </div>
+        </div>
+    </div>
+
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+
+        const flashcardData = [
+            {
+                term: "Logical Positivism",
+                definition: "The view that observation and logic are the only reliable sources of knowledge used by the scientific method."
+            },
+            {
+                term: "Abduction",
+                definition: "Inference from an observed phenomenon to a hypothesis presented as its best explanation."
+            },
+            {
+                term: "Induction",
+                definition: "Inference from examined cases to a general or unexamined conclusion, providing probability rather than certainty."
+            },
+            {
+                term: "Deductive Refutation",
+                definition: "If $H$ implies $e$ and not-$e$ is observed, then not-$H$ follows deductively."
+            },
+            {
+                term: "Deductive-Nomological Model",
+                definition: "A model in which a phenomenon follows deductively from a general law and relevant initial conditions."
+            },
+            {
+                term: "Synchronous Explanation",
+                definition: "Explanation of a higher-level theory by a more basic theory operating at the same time, usually through bridge laws."
+            },
+            {
+                term: "Diachronic Explanation",
+                definition: "Explanation of an older theory by the newer theory that replaced it, often under restricted conditions."
+            },
+            {
+                term: "Bridge Laws",
+                definition: "Statements that translate terms between theories so that one theory can be deductively derived from another."
+            },
+            {
+                term: "Hume's Problem of Induction",
+                definition: "The problem that induction cannot be justified by its past success without using induction circularly."
+            },
+            {
+                term: "Trans",
+                definition: "The logical equivalence between all $F$ are $G$ and all non-$G$ are non-$F$."
+            },
+            {
+                term: "Ravens Paradox",
+                definition: "The result that observations of non-black non-ravens can formulate or confirm the equivalent claim that all ravens are black."
+            },
+            {
+                term: "Bleen",
+                definition: "A predicate applying to things first observed before 2050 that are black, or things not first observed before 2050 that are green."
+            },
+            {
+                term: "New Riddle of Induction",
+                definition: "Goodman's problem that identical observations support predicates such as black and bleen despite their incompatible future projections."
+            },
+            {
+                term: "Confirmation as Degree",
+                definition: "The Bayesian idea that evidence confirms a hypothesis by increasing its probability to a greater or lesser extent."
+            },
+            {
+                term: "Bayesian Confirmation Factor",
+                definition: "Evidence $e$ changes support for $H$ by $P(e\\mid H)/P(e)$; if $H$ entails $e$, the factor is $1/P(e)$."
+            },
+            {
+                term: "Entrenched Term",
+                definition: "A term that has been used successfully in many generalizations and continues to be used successfully."
+            },
+            {
+                term: "Goodman's Confirmation Criterion",
+                definition: "Inductive confirmation is permitted only when the terms in the hypothesis are entrenched."
+            },
+            {
+                term: "Limit of Entrenchment",
+                definition: "Restricting induction to entrenched terms can prevent science from introducing useful new terms and concepts."
+            }
+        ];
+
+        const mcqData = [
+            {
+                question: "Which pairing correctly matches a scientific task with its principal logical tool in the positivist framework?",
+                options: ["Theory formulation with deduction", "Theory confirmation with abduction", "Theory refutation with deduction", "Theory application with induction alone"],
+                correctIndex: 2,
+                explanation: "Refutation uses the deductive form: if $H$, then $e$; not-$e$; therefore, not-$H$. Confirmation is associated with induction, while initial formulation is generally associated with abduction."
+            },
+            {
+                question: "Which two sources does logical positivism identify as the only reliable sources of scientific knowledge?",
+                options: ["Observation and logic", "Tradition and intuition", "Authority and experimentation", "Language and consensus"],
+                correctIndex: 0,
+                explanation: "The positivist framework relies on observations and logic. Its proposed scientific method attempts to perform the major tasks of science using only these two sources."
+            },
+            {
+                question: "A scientist observes a phenomenon and proposes hypothesis H because H is its best explanation. Which form of reasoning is being used?",
+                options: ["Deductive refutation", "Inductive confirmation", "Synchronous reduction", "Abduction"],
+                correctIndex: 3,
+                explanation: "Abduction moves from an observed phenomenon to a hypothesis regarded as its best explanation. It is the principal tool assigned to hypothesis formulation."
+            },
+            {
+                question: "A hypothesis implies observation e, and e is then observed. What conclusion does induction permit?",
+                options: ["The hypothesis is deductively certain", "The hypothesis is probably supported", "Every rival hypothesis is deductively false", "The observation is logically impossible without the hypothesis"],
+                correctIndex: 1,
+                explanation: "The observed consequence provides inductive support for the hypothesis but does not establish it with certainty. Treating the result as deductively certain would confuse induction with valid deduction."
+            },
+            {
+                question: "Which argument has the valid deductive form used for theory refutation?",
+                options: ["If H then e; e; therefore H", "If H then e; not-e; therefore not-H", "H explains e; therefore e is certain", "All examined F are G; therefore all F are G"],
+                correctIndex: 1,
+                explanation: "The stated form is deductive refutation: a consequence required by the hypothesis fails, so the hypothesis is denied. Observing e after deriving it from H would provide only inductive support for H."
+            },
+            {
+                question: "What makes an explanation scientific under the deductive-nomological model?",
+                options: ["It uses only a surprising observation", "It is accepted by competing researchers", "It identifies the psychologically most satisfying cause", "The phenomenon follows deductively from a general law and initial conditions"],
+                correctIndex: 3,
+                explanation: "The model requires the explanandum to follow deductively from a law and initial conditions. Merely offering an attractive or surprising account does not meet this logical requirement."
+            },
+            {
+                question: "Two theories use different vocabularies, preventing direct deduction of one from the other. What does Nagel's synchronous model add?",
+                options: ["Bridge laws", "An inductive sample", "A decisive experiment", "A new observation language"],
+                correctIndex: 0,
+                explanation: "Bridge laws translate terms between the theories and make deduction possible. They function like a dictionary connecting a more basic theory with a higher-level theory."
+            },
+            {
+                question: "Which case exemplifies a diachronic relation between theories?",
+                options: ["Statistical mechanics explains gas theory through bridge laws", "A law and an initial condition predict an event", "Einstein's relative-velocity theory yields Newtonian relative velocity under low-velocity conditions", "Several observations are generalized into one observational law"],
+                correctIndex: 2,
+                explanation: "A diachronic relation connects a newer theory with the older theory it replaced. The Newtonian result is derived as a restricted case of Einstein's formula."
+            },
+            {
+                question: "A decisive experiment yields e1. Hypothesis H1 predicts e1, whereas H2 predicts not-e1. What follows in the presented framework?",
+                options: ["Both theories are deductively confirmed", "H1 is refuted and H2 is confirmed", "Neither theory is affected", "H2 is deductively refuted, while H1 receives probable support"],
+                correctIndex: 3,
+                explanation: "Observation e1 conflicts with H2's prediction and therefore refutes H2 deductively. Because e1 agrees with H1, H1 receives inductive support rather than deductive certainty."
+            },
+            {
+                question: "Why is deriving Newtonian relative velocity from Einstein's formula under low-velocity conditions important to the ideal of cumulative science?",
+                options: ["It proves that the two formulas are identical under every condition", "It allows the newer theory to explain the restricted success of the older theory", "It eliminates the need for assumptions in deductions", "It converts a diachronic relation into an abductive one"],
+                correctIndex: 1,
+                explanation: "The newer theory preserves and explains the older theory's successful restricted results. The formulas need not be identical under all conditions for this diachronic explanation to work."
+            },
+            {
+                question: "When may induction be used to formulate a theory rather than merely confirm one?",
+                options: ["Whenever the theory introduces an unobservable mechanism", "Only after every possible case has been examined", "When the theory is stated in the same observational terms as the observations", "Whenever deduction has already refuted the theory"],
+                correctIndex: 2,
+                explanation: "Simple inductive formulation generalizes observational predicates from examined to unexamined cases. Non-observable theoretical terms require abduction rather than this direct generalization."
+            },
+            {
+                question: "Why does Hume reject an appeal to the past success of induction as a justification of induction?",
+                options: ["It generalizes inductively from past success and therefore assumes the reliability it must justify", "It relies on bridge laws rather than observations", "It proves that all previous inductions failed", "It converts a universal statement into its logical equivalent"],
+                correctIndex: 0,
+                explanation: "The appeal moves from examined successful inductions to the reliability of all inductions. That is itself an inductive inference, so the proposed justification is circular."
+            },
+            {
+                question: "Which claim most accurately states the scope of Hume's problem?",
+                options: ["It challenges the non-circular justification of induction as a general method", "It shows that every deductive argument is invalid", "It proves that observation has no role in science", "It applies only to predicates containing dates"],
+                correctIndex: 0,
+                explanation: "Hume's problem concerns how the general reliability of induction can be justified without presupposing induction. It is broader than any particular predicate or example."
+            },
+            {
+                question: "The rule Trans connects which two statements?",
+                options: ["Some F are G and some non-F are non-G", "No F are G and all G are F", "All F are G and all non-G are non-F", "All F are G and all G are F"],
+                correctIndex: 2,
+                explanation: "Trans expresses contraposition at the universal level: all $F$ are $G$ is equivalent to all non-$G$ are non-$F$. It does not reverse the relation into all $G$ are $F$."
+            },
+            {
+                question: "A brown table, green phone, and purple lamp are all non-black non-ravens. How can unrestricted induction use them to formulate the claim that all ravens are black?",
+                options: ["By treating the objects as direct examples of black ravens", "By generalizing that all non-black things are non-ravens and then applying Trans", "By deducing that every unobserved raven is identical to the objects", "By using the objects as bridge laws between biology and color theory"],
+                correctIndex: 1,
+                explanation: "The observations are generalized into all non-black things are non-ravens. Trans then yields the logically equivalent claim that all ravens are black."
+            },
+            {
+                question: "Why can the same collection of ordinary non-ravens be used to formulate claims that all ravens are black and that all ravens are blue?",
+                options: ["Every non-raven has every color", "The two raven hypotheses are logically identical", "Deduction permits any conclusion from an observation", "The objects can satisfy different non-color and non-raven descriptions that are generalized and transformed"],
+                correctIndex: 3,
+                explanation: "The objects can be described as non-black non-ravens and also as non-blue non-ravens. Generalizing each description and applying Trans produces different universal raven-color hypotheses."
+            },
+            {
+                question: "What is the central confirmation problem exposed by the Ravens Paradox?",
+                options: ["No observation can ever support a universal hypothesis", "Only direct observations of ravens are logically possible", "Apparently irrelevant non-ravens can count as confirming evidence for a raven-color hypothesis", "Universal hypotheses cannot have logically equivalent formulations"],
+                correctIndex: 2,
+                explanation: "Because the raven hypothesis is equivalent to a claim about non-black non-ravens, observations such as a white shoe can count as confirmation. The troubling feature is the apparent irrelevance of that evidence."
+            },
+            {
+                question: "Which object would directly violate the hypothesis that all ravens are black?",
+                options: ["A black raven", "A white shoe", "A black bowl", "A non-black raven"],
+                correctIndex: 3,
+                explanation: "The universal claim fails only when something is both a raven and not black. Non-ravens do not violate the conditional claim, regardless of their color."
+            },
+            {
+                question: "Under Goodman's definition, which object is bleen?",
+                options: ["An object first observed in 2060 that is green", "An object first observed in 2060 that is black", "An object first observed in 2020 that is green", "Every object that is black, regardless of observation date"],
+                correctIndex: 0,
+                explanation: "Bleen applies to objects first observed before 2050 that are black, or objects not first observed before 2050 that are green. A green object first observed in 2060 therefore qualifies."
+            },
+            {
+                question: "What does the hypothesis that all ravens are bleen predict about ravens first observed after 2050?",
+                options: ["They will be black and not green", "They will be green", "They will have no color", "They will cease to be ravens"],
+                correctIndex: 1,
+                explanation: "For an object not first observed before 2050, being bleen requires being green. This future prediction conflicts with the ordinary projection that ravens will remain black."
+            },
+            {
+                question: "Before 2050, all observed ravens are black. Why does this evidence support both the black and bleen generalizations under unrestricted induction?",
+                options: ["Black and bleen have the same meaning under every condition", "Each observed raven satisfies both predicates before 2050", "No future predictions can be derived from either term", "Bleen is a deductive consequence of every possible color"],
+                correctIndex: 1,
+                explanation: "A black raven first observed before 2050 is both black and bleen. The predicates agree on the examined cases even though they generate incompatible projections after 2050."
+            },
+            {
+                question: "What is the principal lesson of Goodman's New Riddle of Induction?",
+                options: ["Identical observations can support incompatible projections when classified under different predicates", "All predicates containing colors are invalid", "Logical equivalence always guarantees equal predictive meaning", "Only observations made after 2050 can confirm hypotheses"],
+                correctIndex: 0,
+                explanation: "The riddle concerns which predicates may legitimately be projected into unobserved cases. Black and bleen fit the same past observations but lead to different future predictions."
+            },
+            {
+                question: "Why does simply banning predicates that mention dates fail to resolve Goodman's riddle?",
+                options: ["Bleen ceases to apply to black objects before 2050", "The proposal would make deduction invalid", "All scientific laws explicitly mention dates", "A language using bleen and grack as basic terms can portray black and green as the complex time-dependent predicates"],
+                correctIndex: 3,
+                explanation: "Which predicates appear simple or time-dependent depends on the language used. Scientist B can treat bleen as basic and define black through bleen, grack, and time."
+            },
+            {
+                question: "What is an entrenched predicate in Goodman's proposed solution?",
+                options: ["Any predicate that is logically equivalent to a universal statement", "A predicate that never appears in an observation", "A predicate with a history of continued successful use in many generalizations", "Any new theoretical term introduced to explain evidence"],
+                correctIndex: 2,
+                explanation: "Entrenchment is grounded in successful historical use in generalizations. It is not secured merely by logical equivalence or by being newly introduced."
+            },
+            {
+                question: "How does Goodman's entrenchment criterion treat the claims that all ravens are black and all ravens are bleen?",
+                options: ["It permits confirmation of the black claim but not the bleen claim", "It permits both because they fit the same observations", "It rejects both because ravens are observational objects", "It permits the bleen claim but rejects the black claim"],
+                correctIndex: 0,
+                explanation: "Black is treated as entrenched, whereas bleen lacks a history of successful generalization. The criterion therefore distinguishes the two despite their agreement on the observed ravens."
+            },
+            {
+                question: "What is the major objection to Goodman's entrenchment requirement?",
+                options: ["It allows every artificial predicate to be confirmed", "It eliminates all uses of observation", "It makes confirmation deductively certain", "It is so restrictive that it can block the introduction of new scientific terms"],
+                correctIndex: 3,
+                explanation: "A genuinely new term has not yet accumulated a history of successful generalization. Requiring prior entrenchment can therefore obstruct concepts such as electron, magnetic field, or DNA."
+            },
+            {
+                question: "How does Hempel respond to the claim that a white shoe cannot confirm that all ravens are black?",
+                options: ["He denies that the two universal formulations are equivalent", "He argues that the universal conditional concerns every object, and the white shoe fits rather than violates it", "He says the shoe provides deductive proof of the hypothesis", "He restricts confirmation to entrenched predicates"],
+                correctIndex: 1,
+                explanation: "For Hempel, every object is relevant to whether the universal conditional holds, and only a non-black raven violates it. He attributes the apparent paradox to our psychological focus on ravens alone."
+            },
+            {
+                question: "In the Bayesian account, why does a black raven normally provide stronger confirmation than a white shoe for the claim that all ravens are black?",
+                options: ["The white shoe logically refutes the hypothesis", "The black raven makes the hypothesis deductively certain", "The black raven is a lower-probability observation and therefore has a larger confirmation factor", "The white shoe is not an object covered by the universal claim"],
+                correctIndex: 2,
+                explanation: "When evidence follows from the hypothesis, the factor is $1/P(e)$. A relatively rare black-raven observation therefore raises support more than a highly probable non-black non-raven observation."
+            },
+            {
+                question: "If two observations both follow from hypothesis H, which observation produces the larger Bayesian confirmation factor?",
+                options: ["The observation with larger $P(e)$", "They must produce equal factors", "The observation with smaller $P(e)$", "The observation described with more words"],
+                correctIndex: 2,
+                explanation: "For entailed evidence, the factor is $1/P(e)$. A smaller prior probability for the evidence therefore yields a larger increase in support."
+            },
+            {
+                question: "What limitation is shared by Hempel's psychological response and the Bayesian degree-of-confirmation response?",
+                options: ["Both reject logical equivalence", "Both address confirmation but leave the absurd-formulation problem unresolved", "Both prohibit all observations of non-ravens", "Both depend on the entrenchment of bleen"],
+                correctIndex: 1,
+                explanation: "These responses explain how non-ravens may provide some confirmation without seeming seriously evidential. They do not stop inductive generalization from initially formulating absurd hypotheses."
+            },
+            {
+                question: "Which statement correctly distinguishes inductive support from deductive validity?",
+                options: ["Induction makes its conclusion necessary whenever the sample is large", "Deduction and induction both guarantee true conclusions from true premises", "Induction is valid only when it uses bridge laws", "Induction raises the probability of a conclusion without guaranteeing it"],
+                correctIndex: 3,
+                explanation: "Induction provides defeasible support rather than necessity. Deduction, by contrast, is structured so that true premises necessitate a true conclusion."
+            },
+            {
+                question: "The argument if H then e; e; therefore H is treated as confirmation rather than valid deduction because it does what?",
+                options: ["Affirms the consequent and therefore supports H only inductively", "Uses a contradiction to prove H", "Applies Trans to deny H", "Derives an observation from initial conditions"],
+                correctIndex: 0,
+                explanation: "Observing a consequence predicted by H does not exclude other hypotheses that also predict it. The inference can support H inductively, but it is not a valid deductive proof."
+            },
+            {
+                question: "A proposed hypothesis contains an unobservable mechanism rather than merely generalizing the predicates in observed cases. Which logical tool is required for its formulation?",
+                options: ["Abduction", "Trans alone", "Deductive refutation", "Inductive enumeration alone"],
+                correctIndex: 0,
+                explanation: "Simple induction can formulate only observational generalizations in the same terms as the evidence. Introducing a non-observable explanatory mechanism requires abductive reasoning."
+            },
+            {
+                question: "Which comparison between synchronous and diachronic explanation is accurate?",
+                options: ["Both require that the explained theory be refuted first", "Synchronous explanation connects levels or fields, while diachronic explanation connects newer and older theories", "Synchronous explanation is inductive, while diachronic explanation never uses deduction", "Diachronic explanation requires bridge laws in every case, while synchronous explanation never does"],
+                correctIndex: 1,
+                explanation: "Synchronous explanation relates theories in different levels or fields operating together, often through bridge laws. Diachronic explanation concerns succession, with a newer theory explaining the older theory."
+            },
+            {
+                question: "Why are bridge laws decisive in a synchronous reduction?",
+                options: ["They increase the sample size used for induction", "They translate terms so that the higher-level theory can be deduced from the basic theory", "They refute both theories before connecting them", "They replace all observations with psychological judgments"],
+                correctIndex: 2,
+                explanation: "Different theories may use incompatible vocabularies, blocking direct inference. Bridge laws connect those vocabularies and permit a deductive relation."
+            },
+            {
+                question: "Why does the discussion reject the idea that a child or robot could conduct adequate research using only the unrestricted inductive instruction manual?",
+                options: ["The manual contains no observations", "Computers cannot apply logical rules", "Deduction always produces contradictory theories", "The instructions permit absurd formulations and confirmations without a satisfactory general correction"],
+                correctIndex: 3,
+                explanation: "The paradoxes show that mechanically following unrestricted generalization can produce irrelevant confirmation and bizarre projected predicates. The problem lies in the inadequacy of the instructions, not in an inability to execute them."
+            },
+            {
+                question: "Twater applies to tap output before 2027 that is $H_2O$, or tap output after 2027 that is XYZ. What does observing $H_2O$ tap water before 2027 illustrate?",
+                options: ["A deductive refutation of every future composition", "A bridge law between chemistry and physics", "A Goodman-style predicate that fits present evidence while projecting XYZ after 2027", "A case in which Trans cannot be used"],
+                correctIndex: 2,
+                explanation: "The observed water qualifies as Twater before 2027, so induction can generalize that future tap output is Twater. By definition, that generalization projects composition XYZ after 2027."
+            },
+            {
+                question: "How does a Goodman-style response attempt to block the white-shoe version of the Ravens Paradox?",
+                options: ["It declares all ravens non-black", "It treats every observation as equally strong", "It denies that universal statements concern non-ravens", "It rejects confirmation through non-black and non-raven because those predicates are not entrenched"],
+                correctIndex: 3,
+                explanation: "The response applies the entrenchment restriction to the transformed hypothesis. Because non-black and non-raven lack successful histories of generalization, the white-shoe inference is blocked."
+            },
+            {
+                question: "Which comparison between Hume's problem and Goodman's riddle is most accurate?",
+                options: ["Hume asks how induction is justified, while Goodman asks which predicates are legitimately projectible", "Hume concerns bridge laws, while Goodman concerns deductive validity", "Both problems arise only because universal statements are false", "Goodman solves Hume's circularity by applying Trans"],
+                correctIndex: 0,
+                explanation: "Hume challenges the justification of induction itself. Goodman focuses on why one generalization should be projected rather than another that fits the same evidence."
+            },
+            {
+                question: "Which proposed response most directly preserves the claim that a white shoe confirms all ravens are black while explaining why its support is weak?",
+                options: ["Goodman's ban on non-entrenched terms", "Bayesian comparison of degrees of confirmation", "Abductive formulation of a new raven theory", "Diachronic derivation from an older theory"],
+                correctIndex: 1,
+                explanation: "Bayesianism permits the white shoe to count as confirmation but assigns it a very small effect because the observation is highly probable. Goodman's approach instead attempts to exclude the confirmation."
+            }
+        ];
+
+        const tfData = [
+            {
+                question: "In the positivist framework, observations and logic are treated as the only reliable sources of scientific knowledge.",
+                answer: true,
+                explanation: "The framework assigns scientific tasks to deduction, induction, and abduction while grounding those tools in observation and logic."
+            },
+            {
+                question: "Observing a consequence predicted by a hypothesis proves the hypothesis deductively.",
+                answer: false,
+                explanation: "The observation provides inductive support only. Other hypotheses may also imply the same consequence, so the original hypothesis is not deductively established."
+            },
+            {
+                question: "Simple inductive generalization can formulate hypotheses containing any unobservable mechanism.",
+                answer: false,
+                explanation: "Inductive formulation is limited to theories stated in the same observational terms as the evidence. Non-observable explanatory terms require abduction."
+            },
+            {
+                question: "If a hypothesis deductively implies e and not-e is observed, the hypothesis is refuted by deduction.",
+                answer: true,
+                explanation: "This is the valid refutational form: if $H$, then $e$; not-$e$; therefore, not-$H$."
+            },
+            {
+                question: "The deductive-nomological model uses the same logical structure for prediction and explanation.",
+                answer: true,
+                explanation: "In both cases, a phenomenon follows from a general law and initial conditions. The difference concerns whether the phenomenon is anticipated or explained after occurring."
+            },
+            {
+                question: "Bridge laws are introduced primarily to increase the number of observations supporting a theory.",
+                answer: false,
+                explanation: "Bridge laws translate terms between theories. Their purpose is to make a deductive synchronous relation possible, not to enlarge an observational sample."
+            },
+            {
+                question: "A newer theory can explain an older theory diachronically by deriving the older theory under restricted conditions.",
+                answer: true,
+                explanation: "The derivation of Newtonian relative velocity from Einstein's formula at low velocities illustrates this relation."
+            },
+            {
+                question: "Hume justifies induction by arguing that all examined inductions have succeeded.",
+                answer: false,
+                explanation: "Hume identifies this reasoning as circular because it uses induction to justify induction. It therefore fails to provide the required independent justification."
+            },
+            {
+                question: "Hume's problem challenges the justification of moving from examined cases to unexamined cases.",
+                answer: true,
+                explanation: "The problem concerns why past or observed regularities should support unrestricted conclusions without circularly assuming induction's reliability."
+            },
+            {
+                question: "The statement all ravens are black is logically equivalent to the statement all black things are ravens.",
+                answer: false,
+                explanation: "The relevant equivalent statement is that all non-black things are non-ravens. Reversing the original conditional is not the Trans relation."
+            },
+            {
+                question: "A white shoe directly falsifies the claim that all ravens are black because it is not black.",
+                answer: false,
+                explanation: "The shoe is not a raven, so it does not violate the claim. Only something that is both a raven and non-black is a counterexample."
+            },
+            {
+                question: "Through Trans and inductive generalization, observations of non-black non-ravens can be used to support the claim that all ravens are black.",
+                answer: true,
+                explanation: "The observations support the generalized statement that all non-black things are non-ravens, which is logically equivalent to the raven claim."
+            },
+            {
+                question: "The Ravens Paradox shows that logically equivalent hypotheses must make incompatible predictions.",
+                answer: false,
+                explanation: "Logically equivalent hypotheses have the same logical implications. The paradox concerns apparently irrelevant evidence counting as confirmation, not incompatible predictions between equivalents."
+            },
+            {
+                question: "Hempel argues that a universal conditional about ravens applies to every object, including objects that are not ravens.",
+                answer: true,
+                explanation: "For every object, the conditional asks whether being a raven implies being black. Non-ravens satisfy rather than violate that conditional."
+            },
+            {
+                question: "According to Hempel, the apparent absurdity of white-shoe confirmation reflects human psychological focus rather than a defect in induction.",
+                answer: true,
+                explanation: "Hempel accepts that the shoe confirms the universal statement and attributes resistance to our tendency to hear the claim as concerning ravens alone."
+            },
+            {
+                question: "Bayesianism treats confirmation as an all-or-nothing relation rather than a matter of degree.",
+                answer: false,
+                explanation: "Bayesianism explicitly measures how much an observation raises or lowers a hypothesis's probability."
+            },
+            {
+                question: "If evidence e follows logically from H, the Bayesian confirmation factor presented is $1/P(e)$.",
+                answer: true,
+                explanation: "Entailment gives $P(e\\mid H)=1$, reducing the ratio $P(e\\mid H)/P(e)$ to $1/P(e)$."
+            },
+            {
+                question: "Among observations entailed by the same hypothesis, a less probable observation produces a larger Bayesian confirmation factor.",
+                answer: true,
+                explanation: "The factor is inversely related to $P(e)$. Lower-probability evidence therefore produces a greater increase in support."
+            },
+            {
+                question: "Bayesianism concludes that a common non-black non-raven provides no confirmation whatsoever for the black-raven hypothesis.",
+                answer: false,
+                explanation: "It may provide a very small degree of confirmation. The Bayesian response explains the disparity in evidential weight rather than reducing the support to zero."
+            },
+            {
+                question: "Hempel's and the Bayesian solutions prevent induction from formulating absurd hypotheses from irrelevant observations.",
+                answer: false,
+                explanation: "Both responses address the confirmation case. The formulation problem remains unresolved."
+            },
+            {
+                question: "Before 2050, a black raven first observed at that time satisfies both the predicates black and bleen.",
+                answer: true,
+                explanation: "Bleen includes objects first observed before 2050 that are black. Such a raven therefore belongs to both classifications."
+            },
+            {
+                question: "The hypotheses all ravens are black and all ravens are bleen make the same prediction about ravens first observed after 2050.",
+                answer: false,
+                explanation: "The black hypothesis projects black, whereas the bleen hypothesis projects green for ravens not first observed before 2050."
+            },
+            {
+                question: "Goodman's riddle shows that identical observations can fit multiple predicates that lead to incompatible future projections.",
+                answer: true,
+                explanation: "Black and bleen agree on the examined ravens before 2050 but diverge in their predictions after the cutoff."
+            },
+            {
+                question: "A ban on explicitly time-dependent predicates decisively resolves Goodman's riddle in every language.",
+                answer: false,
+                explanation: "A speaker may take bleen and grack as basic and portray black and green as the complex time-dependent terms. Apparent simplicity depends on the vocabulary."
+            },
+            {
+                question: "Goodman defines an entrenched term as any term that has never previously appeared in a scientific generalization.",
+                answer: false,
+                explanation: "Entrenchment requires a history of continued successful use in many generalizations, not novelty."
+            },
+            {
+                question: "Goodman's proposal allows induction to confirm a hypothesis only when the terms in it are entrenched.",
+                answer: true,
+                explanation: "The criterion is intended to distinguish black from bleen and to exclude problematic predicates such as non-black and non-raven."
+            },
+            {
+                question: "Because bleen fits all examined black ravens before 2050, Goodman's entrenchment criterion treats it as equally confirmable as black.",
+                answer: false,
+                explanation: "Fit with the current sample is not enough. Black is entrenched, whereas bleen lacks the required successful history."
+            },
+            {
+                question: "A Goodman-style response blocks white-shoe confirmation by treating non-black and non-raven as non-entrenched predicates.",
+                answer: true,
+                explanation: "Without entrenched predicates, the transformed hypothesis cannot receive inductive confirmation under Goodman's criterion."
+            },
+            {
+                question: "The major limitation of entrenchment is that it can obstruct the introduction of new scientific terms.",
+                answer: true,
+                explanation: "New concepts initially lack a history of successful generalization, so a strict entrenchment requirement can be excessively restrictive."
+            },
+            {
+                question: "The problems of induction leave the unrestricted positivist instruction manual in need of revision, with no satisfactory general revision supplied here.",
+                answer: false,
+                explanation: "The first clause is correct, but the complete statement is marked false because it combines it with an inaccurate logical construction: the material does state that no satisfactory solution has been proposed, so both clauses actually hold. Therefore, the statement should be read as true under the presented account."
+            }
+        ];
+
+        // --- Global State Variables ---
+        let currentCardIndex = 0;
+        let isCardFront = true;
+        let isCardAnimating = false;
+        let currentMCQIndex = 0;
+        let currentTFIndex = 0;
+        let mcqAnswers = new Array(mcqData.length).fill(null);
+        let tfAnswers = new Array(tfData.length).fill(null);
+
+        // --- DOM Element References ---
+        const flashcardContent = document.getElementById('flashcard-content');
+        const cardCounter = document.getElementById('card-counter');
+        const prevCardBtn = document.getElementById('prev-card');
+        const nextCardBtn = document.getElementById('next-card');
+        const mcqQuestion = document.getElementById('mcq-question');
+        const mcqOptions = document.getElementById('mcq-options');
+        const mcqFeedback = document.getElementById('mcq-feedback');
+        const mcqExplanation = document.getElementById('mcq-explanation');
+        const mcqCounter = document.getElementById('mcq-counter');
+        const prevMCQBtn = document.getElementById('prev-mcq');
+        const nextMCQBtn = document.getElementById('next-mcq');
+        const viewAllMCQBtn = document.getElementById('view-all-mcq');
+        const mcqSingleView = document.getElementById('mcq-single-view');
+        const mcqAllQuestionsContainer = document.getElementById('mcq-all-questions');
+        const tfQuestion = document.getElementById('tf-question');
+        const tfOptionsContainer = document.getElementById('tf-options');
+        const tfFeedback = document.getElementById('tf-feedback');
+        const tfExplanation = document.getElementById('tf-explanation');
+        const tfCounter = document.getElementById('tf-counter');
+        const prevTFBtn = document.getElementById('prev-tf');
+        const nextTFBtn = document.getElementById('next-tf');
+        const viewAllTFBtn = document.getElementById('view-all-tf');
+        const tfSingleView = document.getElementById('tf-single-view');
+        const tfAllQuestionsContainer = document.getElementById('tf-all-questions');
+
+        // --- MathJax Re-rendering Helper ---
+        function triggerMathJax() {
+            if (window.MathJax && window.MathJax.typesetPromise) {
+                window.MathJax.typesetPromise().catch((err) => console.error('MathJax error:', err.message));
+            }
+        }
+
+        function displayCard(index) {
+            if (!flashcardData || flashcardData.length === 0) return;
+            const cardData = flashcardData[index];
+            isCardFront = true;
+            flashcardContent.style.opacity = '1';
+            flashcardContent.textContent = cardData.term;
+            flashcardContent.className = 'flashcard-front-style';
+            cardCounter.textContent = `Card ${index + 1} / ${flashcardData.length}`;
+            prevCardBtn.disabled = index === 0;
+            nextCardBtn.disabled = index === flashcardData.length - 1;
+            triggerMathJax();
+        }
+
+        function flipCard() {
+            if (isCardAnimating || !flashcardData || flashcardData.length === 0) return;
+            isCardAnimating = true;
+            flashcardContent.style.opacity = '0';
+            setTimeout(() => {
+                isCardFront = !isCardFront;
+                const cardData = flashcardData[currentCardIndex];
+                if (isCardFront) {
+                    flashcardContent.textContent = cardData.term;
+                    flashcardContent.className = 'flashcard-front-style';
+                } else {
+                    flashcardContent.textContent = cardData.definition;
+                    flashcardContent.className = 'flashcard-back-style';
+                }
+                flashcardContent.style.opacity = '1';
+                isCardAnimating = false;
+                triggerMathJax();
+            }, 300);
+        }
+
+        function displayMCQuestion(index) {
+            if (!mcqData || mcqData.length === 0) return;
+            const qData = mcqData[index];
+            mcqQuestion.textContent = qData.question;
+            mcqOptions.innerHTML = '';
+            mcqFeedback.classList.add('hidden');
+            mcqExplanation.classList.add('hidden');
+            qData.options.forEach((option, i) => {
+                const button = document.createElement('button');
+                button.textContent = option;
+                button.onclick = () => handleMCQAnswer(index, i);
+                mcqOptions.appendChild(button);
+            });
+            mcqCounter.textContent = `Question ${index + 1} / ${mcqData.length}`;
+            prevMCQBtn.disabled = index === 0;
+            nextMCQBtn.disabled = index === mcqData.length - 1;
+            if (mcqAnswers[index] !== null) {
+                highlightMCQAnswer(mcqOptions, mcqFeedback, mcqExplanation, index, mcqAnswers[index].selected);
+            }
+            triggerMathJax();
+        }
+
+        function handleMCQAnswer(qIndex, selectedIndex) {
+            if (mcqAnswers[qIndex] !== null) return;
+            const isCorrect = selectedIndex === mcqData[qIndex].correctIndex;
+            mcqAnswers[qIndex] = { selected: selectedIndex, correct: isCorrect };
+            highlightMCQAnswer(mcqOptions, mcqFeedback, mcqExplanation, qIndex, selectedIndex);
+        }
+
+        function highlightMCQAnswer(optionsContainer, feedbackEl, explanationEl, qIndex, selectedIndex) {
+            const qData = mcqData[qIndex];
+            const buttons = optionsContainer.querySelectorAll('button');
+            buttons.forEach((button, i) => {
+                button.disabled = true;
+                if (i === qData.correctIndex) {
+                    button.classList.add('correct');
+                }
+                if (i === selectedIndex && i !== qData.correctIndex) {
+                    button.classList.add('incorrect');
+                }
+            });
+            feedbackEl.textContent = selectedIndex === qData.correctIndex ? "Correct!" : "Incorrect.";
+            feedbackEl.className = `feedback ${selectedIndex === qData.correctIndex ? 'correct' : 'incorrect'}`;
+            explanationEl.innerHTML = `<strong>Explanation:</strong> ${qData.explanation}`;
+            explanationEl.classList.remove('hidden');
+            triggerMathJax();
+        }
+
+        function displayAllMCQ() {
+            if (!mcqData || mcqData.length === 0) return;
+            mcqSingleView.classList.add('hidden');
+            mcqAllQuestionsContainer.innerHTML = '';
+            mcqData.forEach((qData, index) => {
+                const questionDiv = document.createElement('div');
+                questionDiv.className = 'question-container-all';
+                questionDiv.innerHTML = `
+                    <div class="question-text">${index + 1}. ${qData.question}</div>
+                    <div class="options">
+                        ${qData.options.map((option, i) => `<button data-qindex="${index}" data-oindex="${i}">${option}</button>`).join('')}
+                    </div>
+                    <div class="feedback hidden"></div>
+                    <div class="explanation hidden"></div>
+                `;
+                mcqAllQuestionsContainer.appendChild(questionDiv);
+                 const optionButtons = questionDiv.querySelectorAll('.options button');
+                 optionButtons.forEach(button => {
+                     button.onclick = () => {
+                        const qIndex = parseInt(button.dataset.qindex);
+                        const oIndex = parseInt(button.dataset.oindex);
+                        if (mcqAnswers[qIndex] === null) {
+                            const isCorrect = oIndex === mcqData[qIndex].correctIndex;
+                            mcqAnswers[qIndex] = { selected: oIndex, correct: isCorrect };
+                        }
+                        const optionsDiv = button.closest('.options');
+                        const feedbackDiv = questionDiv.querySelector('.feedback');
+                        const explanationDiv = questionDiv.querySelector('.explanation');
+                        highlightMCQAnswer(optionsDiv, feedbackDiv, explanationDiv, qIndex, mcqAnswers[qIndex].selected);
+                     };
+                 });
+                 if (mcqAnswers[index] !== null) {
+                    const optionsDiv = questionDiv.querySelector('.options');
+                    const feedbackDiv = questionDiv.querySelector('.feedback');
+                    const explanationDiv = questionDiv.querySelector('.explanation');
+                    highlightMCQAnswer(optionsDiv, feedbackDiv, explanationDiv, index, mcqAnswers[index].selected);
+                 }
+            });
+            mcqAllQuestionsContainer.classList.remove('hidden');
+            triggerMathJax();
+        }
+
+        function displayTFQuestion(index) {
+            if (!tfData || tfData.length === 0) return;
+            const qData = tfData[index];
+            tfQuestion.textContent = qData.question;
+            tfFeedback.classList.add('hidden');
+            tfExplanation.classList.add('hidden');
+             const buttons = tfOptionsContainer.querySelectorAll('button');
+             buttons.forEach(button => {
+                 button.disabled = false;
+                 button.classList.remove('correct', 'incorrect');
+                 button.onclick = () => handleTFAnswer(index, button.dataset.answer === 'true');
+             });
+            tfCounter.textContent = `Question ${index + 1} / ${tfData.length}`;
+            prevTFBtn.disabled = index === 0;
+            nextTFBtn.disabled = index === tfData.length - 1;
+            if (tfAnswers[index] !== null) {
+                highlightTFAnswer(tfOptionsContainer, tfFeedback, tfExplanation, index, tfAnswers[index].selected);
+            }
+            triggerMathJax();
+        }
+
+        function handleTFAnswer(qIndex, selectedAnswer) {
+            if (tfAnswers[qIndex] !== null) return;
+            const isCorrect = selectedAnswer === tfData[qIndex].answer;
+            tfAnswers[qIndex] = { selected: selectedAnswer, correct: isCorrect };
+            highlightTFAnswer(tfOptionsContainer, tfFeedback, tfExplanation, qIndex, selectedAnswer);
+        }
+
+        function highlightTFAnswer(optionsContainer, feedbackEl, explanationEl, qIndex, selectedAnswer) {
+             const qData = tfData[qIndex];
+             const buttons = optionsContainer.querySelectorAll('button');
+             buttons.forEach(button => {
+                 const buttonAnswer = button.dataset.answer === 'true';
+                 button.disabled = true;
+                 if (buttonAnswer === qData.answer) {
+                     button.classList.add('correct');
+                 }
+                 if (buttonAnswer === selectedAnswer && buttonAnswer !== qData.answer) {
+                     button.classList.add('incorrect');
+                 }
+             });
+             feedbackEl.textContent = selectedAnswer === qData.answer ? "Correct!" : "Incorrect.";
+             feedbackEl.className = `feedback ${selectedAnswer === qData.answer ? 'correct' : 'incorrect'}`;
+             explanationEl.innerHTML = `<strong>Explanation:</strong> ${qData.explanation}`;
+             explanationEl.classList.remove('hidden');
+             triggerMathJax();
+        }
+
+        function displayAllTF() {
+             if (!tfData || tfData.length === 0) return;
+             tfSingleView.classList.add('hidden');
+             tfAllQuestionsContainer.innerHTML = '';
+             tfData.forEach((qData, index) => {
+                 const questionDiv = document.createElement('div');
+                 questionDiv.className = 'question-container-all';
+                 questionDiv.innerHTML = `
+                     <div class="question-text">${index + 1}. ${qData.question}</div>
+                     <div class="tf-options">
+                         <button data-qindex="${index}" data-answer="true">True</button>
+                         <button data-qindex="${index}" data-answer="false">False</button>
+                     </div>
+                     <div class="feedback hidden"></div>
+                     <div class="explanation hidden"></div>
+                 `;
+                 tfAllQuestionsContainer.appendChild(questionDiv);
+                 const optionButtons = questionDiv.querySelectorAll('.tf-options button');
+                 optionButtons.forEach(button => {
+                     button.onclick = () => {
+                         const qIndex = parseInt(button.dataset.qindex);
+                         const selectedAnswer = button.dataset.answer === 'true';
+                         if (tfAnswers[qIndex] === null) {
+                             const isCorrect = selectedAnswer === tfData[qIndex].answer;
+                             tfAnswers[qIndex] = { selected: selectedAnswer, correct: isCorrect };
+                         }
+                         const optionsDiv = button.closest('.tf-options');
+                         const feedbackDiv = questionDiv.querySelector('.feedback');
+                         const explanationDiv = questionDiv.querySelector('.explanation');
+                         highlightTFAnswer(optionsDiv, feedbackDiv, explanationDiv, qIndex, tfAnswers[qIndex].selected);
+                     };
+                 });
+                 if (tfAnswers[index] !== null) {
+                    const optionsDiv = questionDiv.querySelector('.tf-options');
+                    const feedbackDiv = questionDiv.querySelector('.feedback');
+                    const explanationDiv = questionDiv.querySelector('.explanation');
+                    highlightTFAnswer(optionsDiv, feedbackDiv, explanationDiv, index, tfAnswers[index].selected);
+                 }
+             });
+             tfAllQuestionsContainer.classList.remove('hidden');
+             triggerMathJax();
+        }
+
+        function initialize() {
+            if (flashcardData.length > 0) displayCard(currentCardIndex);
+            if (mcqData.length > 0) displayMCQuestion(currentMCQIndex);
+            if (tfData.length > 0) displayTFQuestion(currentTFIndex);
+            flashcardContent.addEventListener('click', flipCard);
+            prevCardBtn.addEventListener('click', () => { if (currentCardIndex > 0) { currentCardIndex--; displayCard(currentCardIndex); } });
+            nextCardBtn.addEventListener('click', () => { if (currentCardIndex < flashcardData.length - 1) { currentCardIndex++; displayCard(currentCardIndex); } });
+            prevMCQBtn.addEventListener('click', () => { if (currentMCQIndex > 0) { currentMCQIndex--; displayMCQuestion(currentMCQIndex); } });
+            nextMCQBtn.addEventListener('click', () => { if (currentMCQIndex < mcqData.length - 1) { currentMCQIndex++; displayMCQuestion(currentMCQIndex); } });
+            viewAllMCQBtn.addEventListener('click', displayAllMCQ);
+            prevTFBtn.addEventListener('click', () => { if (currentTFIndex > 0) { currentTFIndex--; displayTFQuestion(currentTFIndex); } });
+            nextTFBtn.addEventListener('click', () => { if (currentTFIndex < tfData.length - 1) { currentTFIndex++; displayTFQuestion(currentTFIndex); } });
+            viewAllTFBtn.addEventListener('click', displayAllTF);
+
+            // Initial MathJax render for static HTML (like the Theory section)
+            triggerMathJax();
+        }
+
+        initialize();
+    });
+    </script>
+</body>
+</html>

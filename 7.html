@@ -1,0 +1,1173 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Induction, Refutation, and Falsifiability</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+
+    <script>
+        window.MathJax = {
+            tex: {
+                inlineMath: [['$', '$'], ['\\(', '\\)']],
+                displayMath: [['$$', '$$'], ['\\[', '\\]']]
+            },
+            startup: {
+                typeset: false // We will trigger this manually via JS
+            }
+        };
+    </script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+    <style>
+        /* --- Root Variables for Theme --- */
+        :root {
+            --primary-bg: #0a0a0f;
+            --panel-bg: rgba(255, 255, 255, 0.03);
+            --panel-border: rgba(255, 255, 255, 0.1);
+
+            --accent-start: #6C63FF;
+            --accent-end: #A855F7;
+            --accent-gradient: linear-gradient(135deg, var(--accent-start), var(--accent-end));
+            --accent-color: #8B5CF6; /* Midpoint fallback */
+
+            --text-color: #E0E0E0;
+            --text-muted: #9ca3af;
+
+            --correct-color: rgba(16, 185, 129, 0.2);
+            --correct-border: #10b981;
+            --incorrect-color: rgba(239, 68, 68, 0.2);
+            --incorrect-border: #ef4444;
+
+            --insight-bg: rgba(168, 85, 247, 0.08);
+            --insight-border: #A855F7;
+        }
+
+        /* --- Global Styles & Glow Effects --- */
+        body {
+            background-color: var(--primary-bg);
+            background-image:
+                radial-gradient(circle at 15% 50%, rgba(108, 99, 255, 0.06), transparent 25vw),
+                radial-gradient(circle at 85% 30%, rgba(168, 85, 247, 0.06), transparent 25vw);
+            background-attachment: fixed;
+            color: var(--text-color);
+            font-family: 'Inter', sans-serif;
+            line-height: 1.6;
+            margin: 0;
+            padding: 20px;
+        }
+
+        /* --- Panel Containers (Optimized: No blur for performance) --- */
+        .container, .section, #flashcard-content, .question-container-single, .question-container-all, .explanation {
+            background: var(--panel-bg);
+            border: 1px solid var(--panel-border);
+            border-radius: 12px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+        }
+
+        .container {
+            width: 90%;
+            max-width: 1000px;
+            margin: 20px auto;
+            padding: 30px;
+        }
+
+        h1, h2 {
+            text-align: center;
+            border-bottom: 1px solid var(--panel-border);
+            padding-bottom: 15px;
+            font-weight: 700;
+            color: #fff;
+        }
+
+        .section {
+            padding: 25px;
+            margin-bottom: 30px;
+            animation: slideIn 0.5s ease-out forwards;
+        }
+
+        /* --- Theory & Key Insight Styling --- */
+        .theory-text {
+            font-size: 1.1em;
+            line-height: 1.8;
+            color: var(--text-muted);
+        }
+
+        .theory-text p, .theory-text li {
+            color: var(--text-color);
+        }
+
+        .theory-text h3 {
+            color: #fff;
+            margin-top: 25px;
+            border-bottom: none;
+            text-align: left;
+            font-size: 1.3em;
+        }
+
+        .insight-box {
+            background-color: var(--insight-bg);
+            border-left: 4px solid var(--insight-border);
+            padding: 18px;
+            margin: 25px 0;
+            border-radius: 8px;
+        }
+
+        .insight-box strong {
+            color: #fff;
+            display: block;
+            margin-bottom: 8px;
+            font-size: 1.1em;
+            text-shadow: 0 0 10px rgba(168, 85, 247, 0.4);
+        }
+
+        /* --- Study Cards Styling --- */
+        .flashcard-container {
+            height: 250px;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            perspective: 1000px;
+        }
+
+        #flashcard-content {
+            width: 100%;
+            height: 100%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            padding: 30px;
+            box-sizing: border-box;
+            transition: opacity 0.3s ease-in-out, transform 0.2s;
+        }
+
+        #flashcard-content:hover {
+            transform: translateY(-2px);
+            border-color: rgba(168, 85, 247, 0.4);
+            box-shadow: 0 10px 40px rgba(108, 99, 255, 0.15);
+        }
+
+        .flashcard-front-style {
+             font-size: 1.6em;
+             font-weight: 600;
+             font-family: 'JetBrains Mono', monospace;
+             color: var(--accent-end);
+        }
+
+        .flashcard-back-style {
+             font-size: 1.2em;
+             color: var(--text-color);
+        }
+
+        /* --- Questions Styling (MCQ & T/F) --- */
+         .question-container-single, .question-container-all {
+            margin-bottom: 20px;
+            padding: 20px;
+         }
+
+        .question-text {
+            font-weight: 600;
+            margin-bottom: 20px;
+            font-size: 1.1em;
+        }
+
+        /* Buttons & Glass Inputs */
+        .options button, .tf-options button, .nav-button, .view-all-button {
+            display: block;
+            width: 100%;
+            padding: 12px 15px;
+            margin: 8px 0;
+            background: rgba(255, 255, 255, 0.02);
+            color: var(--text-color);
+            border: 1px solid var(--panel-border);
+            border-radius: 8px;
+            cursor: pointer;
+            text-align: left;
+            font-family: 'Inter', sans-serif;
+            font-size: 1em;
+            transition: all 0.3s ease;
+        }
+
+        .nav-button, .view-all-button {
+            width: auto;
+            text-align: center;
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        .options button:hover:not(:disabled), .tf-options button:hover:not(:disabled), .nav-button:hover:not(:disabled), .view-all-button:hover {
+            background: var(--accent-gradient);
+            border-color: transparent;
+            color: #fff;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 15px rgba(108, 99, 255, 0.25);
+        }
+
+        .options button:disabled, .tf-options button:disabled, .nav-button:disabled {
+            cursor: not-allowed;
+            opacity: 0.5;
+            transform: none;
+        }
+
+        /* Correct/Incorrect States */
+        .options button.correct, .tf-options button.correct {
+            background: var(--correct-color);
+            border-color: var(--correct-border);
+            color: #fff;
+            opacity: 1;
+        }
+        .options button.incorrect, .tf-options button.incorrect {
+            background: var(--incorrect-color);
+            border-color: var(--incorrect-border);
+            color: #fff;
+            opacity: 1;
+        }
+
+        .feedback {
+            margin-top: 15px;
+            padding: 12px;
+            border-radius: 8px;
+            font-weight: 600;
+            text-align: center;
+            animation: fadeIn 0.3s ease-in;
+        }
+
+        .feedback.correct {
+            color: var(--correct-border);
+            background: var(--correct-color);
+            border: 1px solid var(--correct-border);
+        }
+
+        .feedback.incorrect {
+            color: var(--incorrect-border);
+            background: var(--incorrect-color);
+            border: 1px solid var(--incorrect-border);
+        }
+
+        .explanation {
+            margin-top: 15px;
+            font-style: italic;
+            font-size: 0.95em;
+            padding: 15px;
+            color: var(--text-muted);
+            border-left: 3px solid var(--accent-start);
+            animation: fadeIn 0.5s ease-in;
+        }
+
+        /* --- Navigation & Utility --- */
+        .navigation {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 20px;
+        }
+
+        .counter {
+            font-size: 0.9em;
+            color: var(--text-muted);
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        .view-all-container {
+            text-align: center;
+            margin-top: 25px;
+        }
+
+        .hidden { display: none !important; }
+
+        /* --- Animations --- */
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Induction, Refutation, and Falsifiability</h1>
+
+        <div class="section">
+            <h2>Theory Summary and Key Insights</h2>
+            <div id="theory-content" class="theory-text">
+                <h3>The Positivist Scientific Method</h3>
+                <p>The positivist account presents science as a set of instructions grounded solely in logic and observation. Different scientific tasks use different forms of inference. Abduction may formulate a theory from observations, induction may confirm a theory from observations, and deduction may refute a theory, derive observational predictions, explain an older theory through a newer one, or connect a theory to a more basic theory through bridging statements.</p>
+                <p>This account is attractive because it appears simple, clear, sensible, and sufficiently precise to function like an algorithm. Yet serious problems arise in both hypothesis confirmation and hypothesis refutation. The important difficulties are not all of the same kind: induction appears problematic as an inference rule, whereas deductive refutation is logically valid but difficult to apply to an isolated scientific hypothesis.</p>
+
+                <h3>Induction in Formulation and Confirmation</h3>
+                <p>Induction is used primarily to confirm hypotheses and sometimes to formulate them. Inductive generalization moves from examined cases to a general claim. Because the conclusion extends beyond the observations, difficulties with induction affect both the testing and, in some cases, the creation of hypotheses.</p>
+                <ul>
+                    <li><strong>Hume's problem:</strong> An attempted justification of induction argues that examined inductions have succeeded and therefore all inductions are reliable. This argument is itself inductive and assumes the reliability it is meant to establish, making it circular. One response is that deductive rules also lack further justification and are treated as axioms.</li>
+                    <li><strong>The Ravens Paradox:</strong> The hypothesis that all ravens are black is logically equivalent to the claim that all non-black things are non-ravens. Inductive generalization therefore appears to let observations of brown tables, green phones, and other non-black non-ravens confirm a claim about ravens. The difficulty is that logically equivalent formulations permit apparently irrelevant evidence to count as confirmation.</li>
+                    <li><strong>The New Riddle of Induction:</strong> A raven is defined as bleen when it was first observed before 2050 and is black, or when it was not first observed before 2050 and is green. In 2026, every examined black raven is also bleen. The same observations therefore confirm both the familiar prediction that future ravens will be black and the strange prediction that ravens first observed from 2050 onward will be green.</li>
+                    <li><strong>The Tacking Paradox:</strong> If evidence confirms a conjunction and also confirms anything that follows from that conjunction, an irrelevant claim can be attached to an observation. A white shoe follows from the conjunction that the shoe is white and card reading is reliable. Card-reading reliability also follows from that conjunction. The rules would therefore allow the white shoe to confirm card reading, generalizing the problem so that any observation can confirm any hypothesis.</li>
+                </ul>
+
+                <div class="insight-box">
+                    <strong>Key Insight:</strong>
+                    Logical equivalence does not guarantee intuitive evidential relevance. The Ravens Paradox shows that evidence can support one formulation by induction and thereby support its equivalent formulation even when the observation seems unrelated to the subject of the hypothesis.
+                </div>
+
+                <h3>Proposed Responses to the Inductive Paradoxes</h3>
+                <p>Hempel responds to the Ravens Paradox by interpreting every universal statement of the form all Fs are Gs as applying to every object: for each object, if it is F, then it is G. A non-black raven refutes the hypothesis, while a black raven or a non-black non-raven fits and therefore confirms it. On this view, apparently irrelevant objects really are relevant. Even if this answers the confirmation problem, it does not solve the formulation problem, because observations of unrelated non-black objects could still be used to formulate incompatible hypotheses about raven colors.</p>
+                <p>Goodman proposes that a hypothesis can be inductively confirmed only when its terms are <strong>entrenched</strong>, meaning that they have been used successfully in many past generalizations. Black is entrenched, whereas bleen, non-raven, and non-black are not. This blocks the problematic inferences, but at a substantial cost: the proposal is too conservative because it prevents new scientific terms, such as electron, from being introduced.</p>
+
+                <div class="insight-box">
+                    <strong>Key Insight:</strong>
+                    A restriction can block bad inductions while also blocking scientific innovation. Goodman's appeal to entrenched terms distinguishes black from bleen through past use, but the same historical requirement makes genuinely new terminology difficult to admit.
+                </div>
+
+                <h3>Deductive Refutation and the Duhem-Quine Thesis</h3>
+                <p>The simple positivist model of refutation uses modus tollens: if hypothesis H is correct, observation e will occur; e does not occur; therefore H is false. The deduction itself is valid. The practical problem is that a scientific hypothesis never produces an observational prediction alone. It does so only together with background assumptions, represented as H*. The actual structure is:</p>
+                <ol>
+                    <li>If the combination of H and H* holds, then e follows.</li>
+                    <li>Observation e does not occur.</li>
+                    <li>Therefore, the combination of H and H* is false.</li>
+                    <li>Therefore, either H is false or H* is false.</li>
+                </ol>
+                <p>This is the Duhem-Quine thesis. A failed prediction refutes the conjunction of a focal hypothesis and its background assumptions, not the focal hypothesis by itself. Scientists must decide whether to revise the theory or revise an auxiliary assumption. Consequently, contrary evidence can always be accommodated in principle by changing the background assumptions.</p>
+
+                <h3>Neptune and Mercury</h3>
+                <p>Newton's theory failed to predict the observed orbit of Uranus. Instead of immediately rejecting Newton's theory, Le Verrier revised the background assumption that no additional celestial body was affecting Uranus. He calculated the mass and orbit of a proposed planet, named Neptune before it was directly seen, and Neptune was eventually observed. The episode shows that preserving a theory by changing a background assumption can produce a successful discovery.</p>
+                <p>Deviations in Mercury's orbit led to a proposed planet called Vulcan, but repeated attempts failed to observe it. Einstein's theory of relativity eventually explained Mercury's motion. In this case, scientists treated Newton's theory rather than the relevant background assumptions as refuted. The contrast with Neptune does not defeat Duhem-Quine; it illustrates the thesis because the same logical form leaves open which component should be revised.</p>
+
+                <div class="insight-box">
+                    <strong>Key Insight:</strong>
+                    The Neptune and Mercury cases had the same logical underdetermination but different scientific outcomes. Failed prediction alone did not dictate whether Newton's theory or a background assumption should be abandoned.
+                </div>
+
+                <h3>Inductive Confirmation Compared with Deductive Refutation</h3>
+                <p>The two problems must be distinguished carefully. For confirmation by induction, the problem lies in the inference itself because inductive generalization produces paradoxical or absurd results; applying the rule is not identified as the difficulty. For refutation by deduction, there is no defect in modus tollens. The problem lies in application: a scientific hypothesis cannot be isolated from the background assumptions required to derive its prediction.</p>
+                <p>If a hypothesis could be tested in complete isolation, deductive refutation would work. In actual scientific practice, however, observation can refute only the combined system. Thus, the positivist method of definitively falsifying an individual hypothesis cannot be applied as its simple formulation requires.</p>
+
+                <h3>Popper's Demarcation Principle</h3>
+                <p>Karl Popper sought a criterion separating scientific theories from pseudo-scientific theories. He contrasted Einstein's general theory of relativity with Marxism, Freudian psychoanalysis, and Adlerian psychology. He argued that the latter theories could interpret whatever happened as confirmation and did not specify observations they would accept as refutations.</p>
+                <p>Popper's criterion is <strong>falsifiability</strong>: a theory is scientific if it states which possible observations would refute it through deductive reasoning. Einstein's general theory of relativity, tested through the Eddington observation concerning the deflection of starlight by the Sun's gravity, served as his model of a falsifiable theory.</p>
+                <p>The Duhem-Quine thesis creates a severe problem for this criterion. If every apparent refutation can in principle be answered by changing background assumptions, no observation can definitively refute a theory. If Popper requires definitive observational falsifiability for scientific status, the combined argument implies that no theory satisfies his criterion and therefore that no theory is scientific.</p>
+
+                <div class="insight-box">
+                    <strong>Key Insight:</strong>
+                    Duhem-Quine challenges not the validity of deduction but Popper's use of definitive refutation as a boundary of science. If observations confront whole systems rather than isolated theories, falsifiability cannot straightforwardly classify individual theories.
+                </div>
+            </div>
+        </div>
+
+        <div class="section">
+            <h2>Study Cards</h2>
+            <div class="flashcard-container">
+                <div id="flashcard-content"></div>
+            </div>
+            <div class="navigation">
+                <button class="nav-button" id="prev-card">Previous</button>
+                <span class="counter" id="card-counter"></span>
+                <button class="nav-button" id="next-card">Next</button>
+            </div>
+        </div>
+
+        <div class="section">
+            <h2>Multiple-Choice Questions</h2>
+            <div id="mcq-single-view">
+                <div class="question-container-single" id="mcq-container">
+                    <div class="question-text" id="mcq-question"></div>
+                    <div class="options" id="mcq-options"></div>
+                    <div class="feedback hidden" id="mcq-feedback"></div>
+                    <div class="explanation hidden" id="mcq-explanation"></div>
+                </div>
+                <div class="navigation">
+                    <button class="nav-button" id="prev-mcq">Previous</button>
+                    <span class="counter" id="mcq-counter"></span>
+                    <button class="nav-button" id="next-mcq">Next</button>
+                </div>
+                 <div class="view-all-container">
+                     <button class="view-all-button" id="view-all-mcq">View All Questions</button>
+                 </div>
+            </div>
+            <div id="mcq-all-questions" class="hidden">
+                </div>
+        </div>
+
+        <div class="section">
+            <h2>True or False Questions</h2>
+             <div id="tf-single-view">
+                <div class="question-container-single" id="tf-container">
+                    <div class="question-text" id="tf-question"></div>
+                    <div class="tf-options" id="tf-options">
+                        <button data-answer="true">True</button>
+                        <button data-answer="false">False</button>
+                    </div>
+                    <div class="feedback hidden" id="tf-feedback"></div>
+                    <div class="explanation hidden" id="tf-explanation"></div>
+                </div>
+                <div class="navigation">
+                    <button class="nav-button" id="prev-tf">Previous</button>
+                    <span class="counter" id="tf-counter"></span>
+                    <button class="nav-button" id="next-tf">Next</button>
+                </div>
+                 <div class="view-all-container">
+                     <button class="view-all-button" id="view-all-tf">View All Questions</button>
+                 </div>
+            </div>
+             <div id="tf-all-questions" class="hidden">
+                 </div>
+        </div>
+    </div>
+
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+
+        const flashcardData = [
+            {
+                term: "Inductive generalization",
+                definition: "An inference from examined instances to a general hypothesis extending beyond those observations."
+            },
+            {
+                term: "Hume's problem of induction",
+                definition: "The reliability of induction cannot be justified by its past success without using induction circularly."
+            },
+            {
+                term: "Ravens Paradox",
+                definition: "The logical equivalence between all ravens are black and all non-black things are non-ravens makes apparently irrelevant objects count as confirming evidence."
+            },
+            {
+                term: "Bleen",
+                definition: "A predicate applying to an object first observed before 2050 and black, or not first observed before 2050 and green."
+            },
+            {
+                term: "New Riddle of Induction",
+                definition: "The same pre-2050 black-raven observations confirm both that ravens are black and that ravens are bleen, despite conflicting future predictions."
+            },
+            {
+                term: "Tacking Paradox",
+                definition: "By attaching an unrelated claim to an observed statement in a conjunction, confirmation rules can make any observation confirm any hypothesis."
+            },
+            {
+                term: "Hempel's response",
+                definition: "A universal hypothesis applies to every object, so every fitting object confirms it and every counterexample refutes it."
+            },
+            {
+                term: "Entrenched term",
+                definition: "In Goodman's proposal, a term with a history of successful use in many past generalizations."
+            },
+            {
+                term: "Goodman's restriction",
+                definition: "A hypothesis can be inductively confirmed only if its terms are entrenched."
+            },
+            {
+                term: "Modus tollens",
+                definition: "The deductive form: if H then e; not e; therefore not H."
+            },
+            {
+                term: "Background assumption",
+                definition: "An auxiliary assumption that works with a hypothesis to produce an observational prediction."
+            },
+            {
+                term: "Duhem-Quine thesis",
+                definition: "Observations test a hypothesis together with background assumptions, so failed prediction refutes the combination rather than the hypothesis alone."
+            },
+            {
+                term: "Neptune case",
+                definition: "Uranus's anomalous orbit was addressed by revising a background assumption and proposing Neptune rather than rejecting Newton's theory."
+            },
+            {
+                term: "Mercury case",
+                definition: "After the proposed planet Vulcan was not observed, Mercury's anomalous orbit was explained by relativity and treated as refuting Newton's theory."
+            },
+            {
+                term: "Demarcation",
+                definition: "The task of identifying a clear criterion that separates scientific theories from non-scientific theories."
+            },
+            {
+                term: "Falsifiability",
+                definition: "The capacity of a theory to specify possible observations that would refute it through deductive reasoning."
+            },
+            {
+                term: "Popper's demarcation principle",
+                definition: "A theory is scientific if it is falsifiable."
+            },
+            {
+                term: "Eddington observation",
+                definition: "An observational test of the prediction that the Sun's gravity deflects starlight, used as Popper's example of testing relativity."
+            }
+        ];
+
+        const mcqData = [
+            {
+                question: "Which inference is used primarily to confirm scientific hypotheses in the positivist account?",
+                options: ["Deduction", "Induction", "Abduction", "Bridging"],
+                correctIndex: 1,
+                explanation: "Induction moves from observations to a more general hypothesis and is used primarily for confirmation. Deduction instead derives consequences or refutations, while abduction is associated with theory formulation."
+            },
+            {
+                question: "What makes the attempted justification of induction identified by Hume circular?",
+                options: ["It uses deductive axioms to reject all observations.", "It assumes all theories are already false.", "It infers induction's general reliability from the past success of examined inductions.", "It treats every non-raven as a raven."],
+                correctIndex: 2,
+                explanation: "The argument uses an inductive move to establish that inductive moves are reliable, so it assumes the very reliability it seeks to justify. Its defect is circularity, not a rejection of observation."
+            },
+            {
+                question: "Which claim is logically equivalent to the hypothesis that all ravens are black?",
+                options: ["All non-black entities are non-ravens.", "All black entities are ravens.", "All non-ravens are non-black.", "All ravens are non-green."],
+                correctIndex: 0,
+                explanation: "The equivalent formulation is that anything non-black is not a raven. The claim that every black object is a raven reverses the relationship and is much stronger."
+            },
+            {
+                question: "Why does observing a brown table create a problem in the Ravens Paradox?",
+                options: ["It directly refutes the claim that all ravens are black.", "It proves that tables and ravens have the same color.", "It makes the original and equivalent hypotheses logically inconsistent.", "As a non-black non-raven, it appears to confirm a hypothesis about raven color."],
+                correctIndex: 3,
+                explanation: "The brown table fits the equivalent claim that all non-black things are non-ravens, so inductive confirmation transfers to the raven hypothesis. The puzzle is its apparent irrelevance, not that it is a counterexample."
+            },
+            {
+                question: "In 2026, a black raven was first observed that year. Under the stated definition of bleen, how should it be classified?",
+                options: ["Black but not bleen", "Bleen because it was first observed before 2050 and is black", "Bleen only if it later turns green", "Not bleen because 2026 is before 2050"],
+                correctIndex: 1,
+                explanation: "An object first observed before 2050 is bleen when it is black. The condition does not require a later color change."
+            },
+            {
+                question: "What is the central result of the New Riddle of Induction?",
+                options: ["No black raven can be observed before 2050.", "The black and bleen hypotheses are logically identical at all times.", "The same present observations confirm hypotheses that yield conflicting predictions for ravens first observed from 2050 onward.", "Future observations can never affect an inductive hypothesis."],
+                correctIndex: 2,
+                explanation: "Pre-2050 black ravens are also bleen, so present evidence supports both generalizations. Their predictions diverge for ravens first observed from 2050 onward, exposing the problem."
+            },
+            {
+                question: "Which feature makes the Tacking Paradox more general than the Ravens Paradox and the New Riddle of Induction?",
+                options: ["It allows any observation to confirm any hypothesis through a suitable conjunction.", "It applies only to color predicates.", "It shows that modus tollens is invalid.", "It prevents observations from confirming conjunctions."],
+                correctIndex: 0,
+                explanation: "An arbitrary claim can be tacked onto an observed statement, after which the confirmation rules transfer support to that claim. This is broader than the earlier paradoxes because it is not limited to equivalent descriptions or unusual predicates."
+            },
+            {
+                question: "Let e be that a shoe is white, H be that the shoe is white and card reading is reliable, and T be that card reading is reliable. How does the tacking argument reach T?",
+                options: ["T refutes H, and e refutes T.", "H follows from T alone, so T confirms e.", "The failure of e deductively establishes T.", "e follows from H and confirms H; T follows from H, so e is said to confirm T."],
+                correctIndex: 3,
+                explanation: "The argument first treats e as confirming the conjunction H because H entails e. It then transfers that confirmation to T, which follows from H, producing the irrelevant result that a white shoe confirms card reading."
+            },
+            {
+                question: "How does Hempel respond to the Ravens Paradox?",
+                options: ["He denies that logically equivalent statements have the same meaning.", "He argues that a universal hypothesis applies to every object, making fitting objects confirm it and counterexamples refute it.", "He permits confirmation only when a hypothesis contains a new term.", "He replaces induction with modus tollens in every scientific task."],
+                correctIndex: 1,
+                explanation: "Hempel treats all objects as relevant to a universal conditional: each either fits it or violates it. His response accepts the relevance of non-black non-ravens rather than denying logical equivalence."
+            },
+            {
+                question: "Even if Hempel resolves the confirmation version of the Ravens Paradox, which difficulty remains?",
+                options: ["The logical equivalence of the two raven statements disappears.", "No observation can ever refute a universal claim.", "Unrelated non-black objects can still be used to formulate incompatible raven-color hypotheses.", "Black ravens stop counting as evidence."],
+                correctIndex: 2,
+                explanation: "Hempel's response addresses why objects may count as confirming evidence, but it does not prevent absurd hypothesis formulation from unrelated observations. The formulation problem therefore remains."
+            },
+            {
+                question: "According to Goodman, why may the predicate black support induction while bleen does not?",
+                options: ["Black is entrenched through successful use in past generalizations.", "Black is logically simpler by definition.", "Bleen cannot describe any object before 2050.", "Bleen is logically inconsistent."],
+                correctIndex: 0,
+                explanation: "Goodman's criterion is historical entrenchment: black has been used successfully in many prior generalizations. Bleen can describe present objects and is not inconsistent, but it lacks that history."
+            },
+            {
+                question: "What is the principal objection to Goodman's proposed restriction on confirmation?",
+                options: ["It makes every old term non-entrenched.", "It confirms every conjunction regardless of evidence.", "It applies only to deductive refutation.", "It is too conservative because it can block the introduction of new scientific terms."],
+                correctIndex: 3,
+                explanation: "Requiring a record of successful past use disadvantages any genuinely new term, including a new scientific term such as electron. The proposal blocks troublesome predicates at the cost of innovation."
+            },
+            {
+                question: "A hypothesis H and background assumptions H* jointly entail observation e, but not-e is observed. What follows deductively?",
+                options: ["H alone is necessarily false.", "The conjunction of H and H* is false.", "H* alone is necessarily false.", "Both H and H* are necessarily false."],
+                correctIndex: 1,
+                explanation: "Modus tollens refutes the conjunction that entailed e. It does not identify H rather than H* as the false component, and it does not establish that both are false."
+            },
+            {
+                question: "Which conclusion follows from rejecting the conjunction of H and H*?",
+                options: ["H and H* are both true.", "H is false and H* is true.", "Either H is false or H* is false.", "H is true if and only if H* is false."],
+                correctIndex: 2,
+                explanation: "By the stated De Morgan step, not both H and H* means that at least one is false. The inference does not determine which one should be rejected."
+            },
+            {
+                question: "What does the Duhem-Quine thesis claim about scientific testing?",
+                options: ["A hypothesis is tested together with background assumptions rather than in isolation.", "Every scientific hypothesis is confirmed by every observation.", "Deductive inference is inherently circular.", "Background assumptions can always be observed directly."],
+                correctIndex: 0,
+                explanation: "Predictions arise from a focal hypothesis combined with auxiliary assumptions. Therefore, a failed prediction challenges the whole combination rather than uniquely identifying the focal hypothesis."
+            },
+            {
+                question: "Why did the anomalous orbit of Uranus not immediately refute Newton's theory?",
+                options: ["The orbit actually matched the original prediction.", "Scientists replaced deduction with inductive generalization.", "Newton's theory made no claims concerning celestial motion.", "Scientists revised the background assumption that no additional planet was causing the deviation."],
+                correctIndex: 3,
+                explanation: "Le Verrier preserved Newton's theory by proposing an additional planet that affected Uranus. This revised an auxiliary assumption instead of rejecting the focal theory."
+            },
+            {
+                question: "What was distinctive about Le Verrier's discovery of Neptune?",
+                options: ["Neptune was observed before any prediction about it was made.", "Its required mass and orbit were calculated before it was directly observed.", "It was introduced solely as an entrenched predicate.", "Its absence refuted every background assumption."],
+                correctIndex: 1,
+                explanation: "Le Verrier mathematically inferred the planet and calculated its properties before anyone saw it. Its eventual observation showed that changing a background assumption could lead to a successful discovery."
+            },
+            {
+                question: "How did the treatment of Mercury's orbital anomaly differ from the treatment of Uranus's anomaly?",
+                options: ["Mercury's orbit perfectly matched Newton's prediction.", "The proposed planet Vulcan was observed and preserved Newton's theory.", "After Vulcan was not found, relativity explained the anomaly and Newton's theory was treated as refuted.", "Mercury's anomaly was resolved by declaring all observations irrelevant."],
+                correctIndex: 2,
+                explanation: "The attempt to preserve Newton's theory through Vulcan failed observationally, and relativity ultimately explained Mercury's motion. In the Uranus case, revision of a background assumption succeeded through Neptune."
+            },
+            {
+                question: "Why do the contrasting Neptune and Mercury cases reinforce rather than refute the Duhem-Quine thesis?",
+                options: ["They show that the same failed-prediction structure leaves a choice about whether to revise the theory or its background assumptions.", "They prove that background assumptions must always be rejected.", "They demonstrate that no mathematical prediction can succeed.", "They show that Newton's theory was never used in astronomy."],
+                correctIndex: 0,
+                explanation: "Both cases began with a mismatch between prediction and observation, but scientists revised different components. This variation illustrates that logic alone does not select the component to abandon."
+            },
+            {
+                question: "Where does the main problem lie in confirmation by induction?",
+                options: ["Only in separating a theory from its background assumptions", "In the inductive inference itself, which can lead to absurd results", "In the validity of modus tollens", "Only in the absence of observational data"],
+                correctIndex: 1,
+                explanation: "The paradoxes show that inductive generalization itself permits unacceptable confirmation results. The inability to isolate a theory is instead the application problem associated with deductive refutation."
+            },
+            {
+                question: "Where does the main problem lie in refutation by deduction?",
+                options: ["Modus tollens is logically invalid.", "Deduction always confirms rather than refutes.", "The valid inference applies to a theory-background conjunction, not an isolated hypothesis.", "Observations never contradict predictions."],
+                correctIndex: 2,
+                explanation: "There is no stated defect in modus tollens. The practical obstacle is that the observational consequence follows from a combined system, so the inference cannot uniquely refute the focal hypothesis."
+            },
+            {
+                question: "Under what condition would the simple deductive method successfully refute a single hypothesis?",
+                options: ["If the hypothesis could be isolated and tested without background assumptions", "If every examined induction had succeeded", "If the hypothesis used only entrenched terms", "If an unrelated claim were added by conjunction"],
+                correctIndex: 0,
+                explanation: "If H alone entailed e, observing not-e would validly yield not-H through modus tollens. Scientific predictions in practice depend on background assumptions, which blocks that isolation."
+            },
+            {
+                question: "What task was Popper's principle of demarcation intended to perform?",
+                options: ["Choose between a theory and each of its background assumptions", "Prove induction by deduction", "Make every observation confirm every theory", "Distinguish scientific theories from pseudo-scientific theories"],
+                correctIndex: 3,
+                explanation: "Popper sought a clear boundary between science and non-science. His proposed boundary was falsifiability, not a method for justifying induction."
+            },
+            {
+                question: "Which property makes a theory falsifiable in Popper's sense?",
+                options: ["It has already received many confirmations.", "It specifies possible observations that would refute it deductively.", "It contains only historically entrenched words.", "It can reinterpret every outcome as support."],
+                correctIndex: 1,
+                explanation: "A falsifiable theory exposes itself to possible observational refutation. Merely accumulating confirmation does not satisfy the criterion, and accommodating every outcome undermines falsifiability."
+            },
+            {
+                question: "Why did Popper classify Marxism, Freudian psychoanalysis, and Adlerian psychology as non-scientific?",
+                options: ["They relied exclusively on mathematical discovery.", "They stated too many possible refuting observations.", "They could interpret whatever occurred as confirmation and accepted no observation as a refutation.", "They were all formulations of general relativity."],
+                correctIndex: 2,
+                explanation: "Popper regarded these theories as unfalsifiable because they could accommodate any outcome. His criticism concerned their inability to specify a potentially refuting observation."
+            },
+            {
+                question: "What role did the Eddington observation play in Popper's discussion?",
+                options: ["It exemplified an observational test of relativity's prediction about deflected starlight.", "It established the reliability of all inductions.", "It confirmed card reading through a conjunction.", "It discovered Neptune by direct observation before prediction."],
+                correctIndex: 0,
+                explanation: "The test concerned the prediction that the Sun's gravity bends light from distant stars. Popper used it as an example of a theory facing a specified observational test."
+            },
+            {
+                question: "Which sequence best states the Duhem-Quine criticism of Popper's criterion?",
+                options: ["All observations are inductive; induction is axiomatic; therefore all theories are scientific.", "Scientific theories use new terms; new terms are not entrenched; therefore relativity is false.", "Every theory entails every observation; therefore no background assumptions exist.", "Failed predictions can be handled by revising background assumptions; therefore no observation definitively refutes a theory; therefore no theory is falsifiable under the strict criterion."],
+                correctIndex: 3,
+                explanation: "Duhem-Quine allows the focal theory to be preserved by revising auxiliary assumptions. If Popper requires definitive observational refutation, this means no theory meets his falsifiability condition."
+            },
+            {
+                question: "A researcher reacts to every failed prediction by modifying an auxiliary assumption while preserving the focal theory. Which thesis explains why this is always logically available in principle?",
+                options: ["Hempel's account of universal claims", "The Duhem-Quine thesis", "Hume's circular justification", "Goodman's entrenchment rule"],
+                correctIndex: 1,
+                explanation: "Duhem-Quine states that observation bears on the theory-auxiliary conjunction, leaving open which component to revise. It therefore explains the logical availability of preserving the focal theory."
+            },
+            {
+                question: "A scientist observes many objects first seen before 2050 that are both black and ravens. Which two hypotheses do those observations simultaneously support under unrestricted inductive generalization?",
+                options: ["All ravens are green and no ravens are black", "All non-ravens are black and all green things are ravens", "All ravens are black and all ravens are bleen", "No black things are ravens and all ravens are non-black"],
+                correctIndex: 2,
+                explanation: "Before 2050, a black object satisfies the first condition for being bleen. The same observed ravens therefore fit both generalizations, although the hypotheses diverge in future predictions."
+            },
+            {
+                question: "Which observation would directly violate the universal hypothesis that all ravens are black?",
+                options: ["A non-black raven", "A black raven", "A brown table", "A white shoe"],
+                correctIndex: 0,
+                explanation: "A raven that is not black is a counterexample to the universal conditional. Non-ravens do not violate it, regardless of their colors."
+            },
+            {
+                question: "Why does accepting deductive rules as axioms not directly solve the New Riddle of Induction?",
+                options: ["The riddle concerns whether Neptune exists.", "The riddle shows that modus tollens is inconsistent.", "The riddle concerns only the formulation of background assumptions.", "The difficulty is that inductive generalization supports rival future projections from the same observations."],
+                correctIndex: 3,
+                explanation: "The New Riddle concerns which predicates support legitimate inductive projection. Treating deductive rules as axioms does not decide between black and bleen generalizations."
+            },
+            {
+                question: "Suppose e follows from H, and T also follows from H. Which extra confirmation principle creates the problematic transfer used in the Tacking Paradox?",
+                options: ["If e refutes H, e confirms every rival to H.", "If e confirms H, e also confirms a consequence T of H.", "If T entails e, e deductively proves T.", "If e occurs, every conjunction containing e is false."],
+                correctIndex: 1,
+                explanation: "The transfer principle says that evidence confirming a hypothesis also confirms what follows from it. Combined with confirmation of a conjunction by one conjunct, it transfers support to an unrelated conjunct."
+            },
+            {
+                question: "Which assessment best captures the overall conclusion about the positivist instruction manual for induction?",
+                options: ["It can be mechanically followed without producing irrelevant confirmations.", "It fails only because computers cannot make observations.", "It leads to absurd formulation and confirmation results and lacks a satisfactory revision.", "It has been replaced completely by Goodman's universally accepted solution."],
+                correctIndex: 2,
+                explanation: "The inductive paradoxes show that the instructions permit unacceptable results in both formulation and confirmation. The proposed responses do not provide a fully satisfactory general revision."
+            },
+            {
+                question: "Why is the claim that no theory is scientific a consequence of combining strict Popperian falsifiability with Duhem-Quine rather than a direct claim of Duhem-Quine alone?",
+                options: ["Duhem-Quine denies definitive refutation, while Popper supplies the additional rule that only falsifiable theories are scientific.", "Duhem-Quine explicitly defines science as induction.", "Popper claims every background assumption is true.", "The combination proves that observations never occur."],
+                correctIndex: 0,
+                explanation: "Duhem-Quine challenges definitive falsification but does not itself define scientific status. The conclusion follows only after adding Popper's criterion that scientific status requires falsifiability."
+            },
+            {
+                question: "A failed prediction shows that either a focal theory or at least one auxiliary assumption is wrong. Which further conclusion is not licensed by that information alone?",
+                options: ["The complete tested package cannot remain wholly correct.", "At least one component requires reconsideration.", "Logic alone does not identify the faulty component.", "The focal theory, rather than any auxiliary assumption, must be false."],
+                correctIndex: 3,
+                explanation: "The failed prediction refutes the conjunction, not a designated member of it. Declaring the focal theory false requires more than the deductive result itself."
+            },
+            {
+                question: "Which comparison between Hempel and Goodman is most accurate?",
+                options: ["Both deny that black ravens can confirm a hypothesis.", "Hempel accepts all fitting objects as relevant to universal confirmation, while Goodman restricts confirmation to hypotheses using entrenched terms.", "Hempel rejects logical equivalence, while Goodman rejects all new observations.", "Both solve formulation and confirmation without any stated limitation."],
+                correctIndex: 1,
+                explanation: "Hempel broadens relevance by taking the universal conditional literally over all objects. Goodman instead restricts legitimate induction through historical entrenchment, which creates a conservative limitation."
+            },
+            {
+                question: "A new predicate has no history of successful use but is introduced for a potentially valuable scientific theory. What difficulty does Goodman's rule create?",
+                options: ["It automatically turns the theory into a counterexample to modus tollens.", "It makes every old observation refute the theory.", "It prevents the hypothesis from receiving inductive confirmation because the predicate is not entrenched.", "It guarantees confirmation through the Ravens Paradox."],
+                correctIndex: 2,
+                explanation: "Goodman's condition requires the terms in a confirmed hypothesis to be entrenched. A genuinely new predicate lacks the required history, even if it could become scientifically valuable."
+            },
+            {
+                question: "Which statement correctly distinguishes refutation of a package from refutation of a hypothesis?",
+                options: ["Observing not-e after the package entails e establishes that at least one package component is false, not specifically H.", "A package can be refuted only by induction.", "Refuting the package establishes that every component is false.", "Background assumptions are irrelevant once an observation occurs."],
+                correctIndex: 0,
+                explanation: "Modus tollens rejects the conjunction responsible for the prediction. A false conjunction requires at least one false component, but it does not imply that all components or the focal theory specifically are false."
+            },
+            {
+                question: "Why can the discovery of Neptune be viewed as a warning against automatically rejecting a theory after one anomalous observation?",
+                options: ["It showed that all anomalies are observational errors.", "It proved Newton's theory could never be refuted.", "It established that proposed planets always exist.", "Revising a background assumption instead of the theory led to a precise prediction and successful observation."],
+                correctIndex: 3,
+                explanation: "The anomaly arose because an auxiliary assumption omitted another planet, and revising that assumption produced Neptune's successful prediction. This does not make Newton immune to refutation, as the Mercury case demonstrates."
+            },
+            {
+                question: "A method is said to use valid deduction but still fail in scientific practice. Which diagnosis matches the account of refutation?",
+                options: ["The conclusion contradicts every premise.", "The deductive rule is valid, but the premise concerns H together with H*, so the conclusion cannot isolate H.", "The observation must first be generalized inductively into a universal law.", "The rule works only with entrenched predicates."],
+                correctIndex: 1,
+                explanation: "The logical form remains valid when applied to the full tested package. The practical failure comes from treating a consequence of H plus H* as though it followed from H alone."
+            }
+        ];
+
+        const tfData = [
+            {
+                question: "In the positivist account, induction is used primarily to confirm hypotheses and may also contribute to their formulation.",
+                answer: true,
+                explanation: "Induction generalizes from observations and is assigned both roles, although confirmation is its primary use."
+            },
+            {
+                question: "Hume's problem is solved by observing that induction has often succeeded, because this establishes its future reliability without using induction.",
+                answer: false,
+                explanation: "Moving from past success to general or future reliability is itself inductive, so the proposed justification is circular."
+            },
+            {
+                question: "The hypothesis that all ravens are black is logically equivalent to the claim that all black objects are ravens.",
+                answer: false,
+                explanation: "The equivalent claim is that all non-black objects are non-ravens. Saying that all black objects are ravens reverses the conditional."
+            },
+            {
+                question: "A non-black raven would refute both the claim that all ravens are black and its equivalent formulation concerning non-black non-ravens.",
+                answer: true,
+                explanation: "A non-black raven is a direct counterexample to both equivalent formulations."
+            },
+            {
+                question: "The Ravens Paradox arises because a non-black non-raven appears to confirm a universal claim about raven color.",
+                answer: true,
+                explanation: "Such an object fits the logically equivalent hypothesis that all non-black objects are non-ravens, creating the relevance puzzle."
+            },
+            {
+                question: "Under the definition of bleen, every object first observed before 2050 is bleen regardless of its color.",
+                answer: false,
+                explanation: "An object first observed before 2050 is bleen only if it is black."
+            },
+            {
+                question: "Before 2050, an examined black raven supplies the same observational support to the black and bleen generalizations.",
+                answer: true,
+                explanation: "A pre-2050 black raven also meets the first condition for being bleen, so it fits both hypotheses."
+            },
+            {
+                question: "The black and bleen hypotheses make identical predictions about ravens first observed from 2050 onward.",
+                answer: false,
+                explanation: "The black hypothesis predicts black ravens, whereas the bleen hypothesis predicts green ravens for objects not first observed before 2050."
+            },
+            {
+                question: "The Tacking Paradox depends on attaching an unrelated claim to an observational claim through conjunction.",
+                answer: true,
+                explanation: "The conjunction allows the observation to confirm the combined hypothesis and then transfers support to the unrelated conjunct."
+            },
+            {
+                question: "The Tacking Paradox is less serious than the Ravens Paradox because it permits only color observations to confirm color hypotheses.",
+                answer: false,
+                explanation: "It is more general because a suitable conjunction can make any observation appear to confirm any hypothesis."
+            },
+            {
+                question: "Hempel's response treats a universal statement about ravens as relevant only to objects already known to be ravens.",
+                answer: false,
+                explanation: "Hempel argues that the universal conditional applies to every object, including non-ravens."
+            },
+            {
+                question: "Hempel's proposal may answer the confirmation problem while leaving the absurd formulation of raven-color hypotheses unresolved.",
+                answer: true,
+                explanation: "It explains why fitting objects count as confirmation but does not prevent unrelated objects from supporting the formulation of incompatible generalizations."
+            },
+            {
+                question: "In Goodman's proposal, an entrenched term has been used successfully in many past generalizations.",
+                answer: true,
+                explanation: "Entrenchment is defined through a history of successful use in generalizations."
+            },
+            {
+                question: "Goodman's restriction easily accommodates every genuinely new scientific term because new terms are automatically entrenched.",
+                answer: false,
+                explanation: "New terms lack a history of successful use, which is why the proposal is criticized as too conservative."
+            },
+            {
+                question: "Modus tollens is rejected as logically invalid by the Duhem-Quine thesis.",
+                answer: false,
+                explanation: "The thesis accepts modus tollens. The problem is applying it to an isolated hypothesis when predictions depend on a larger conjunction."
+            },
+            {
+                question: "If H and H* jointly entail e and not-e is observed, deduction refutes the conjunction of H and H*.",
+                answer: true,
+                explanation: "Modus tollens establishes that the full conjunction responsible for the prediction is false."
+            },
+            {
+                question: "The falsity of the conjunction of H and H* proves that both H and H* are false.",
+                answer: false,
+                explanation: "It proves that at least one component is false, not that both are false."
+            },
+            {
+                question: "The Duhem-Quine thesis leaves open whether a failed prediction should lead scientists to revise the focal theory or a background assumption.",
+                answer: true,
+                explanation: "The observation refutes the tested package, while logic alone does not identify which component should be changed."
+            },
+            {
+                question: "Scientists responded to Uranus's anomalous orbit by immediately abandoning Newton's theory.",
+                answer: false,
+                explanation: "They preserved Newton's theory and revised a background assumption by proposing Neptune."
+            },
+            {
+                question: "Neptune was mathematically predicted, including its mass and orbit, before it was directly observed.",
+                answer: true,
+                explanation: "Le Verrier calculated the required planet's properties, and Neptune was observed afterward."
+            },
+            {
+                question: "The proposed planet Vulcan was successfully observed and thereby explained Mercury's orbit within Newton's theory.",
+                answer: false,
+                explanation: "Vulcan was not observed; relativity ultimately explained Mercury's orbital deviation."
+            },
+            {
+                question: "The Mercury case was treated as a rejection of Newton's theory rather than merely a correction to the same kind of background assumption used for Neptune.",
+                answer: true,
+                explanation: "After the Vulcan proposal failed, relativity explained the anomaly and Newton's theory was treated as the component refuted."
+            },
+            {
+                question: "The contrasting outcomes of the Uranus and Mercury cases show that every anomaly must be resolved by altering background assumptions.",
+                answer: false,
+                explanation: "Uranus led to revision of a background assumption, while Mercury led to rejection of Newton's theory; the contrast shows that either route is possible."
+            },
+            {
+                question: "The problem with inductive confirmation concerns the inference itself, whereas the problem with deductive refutation concerns its application to non-isolated hypotheses.",
+                answer: true,
+                explanation: "Inductive generalization produces paradoxical results, while modus tollens remains valid but applies only to the combined theoretical package."
+            },
+            {
+                question: "If a scientific hypothesis could be tested in complete isolation, the stated objection to deductive refutation would no longer apply.",
+                answer: true,
+                explanation: "If H alone entailed e, observing not-e would permit a direct modus tollens inference to not-H."
+            },
+            {
+                question: "Popper's demarcation principle defines a scientific theory as one that can accommodate every possible observation as confirmation.",
+                answer: false,
+                explanation: "Popper requires a scientific theory to identify possible observations that would refute it."
+            },
+            {
+                question: "Popper regarded general relativity as scientific because it faced a test involving the predicted deflection of starlight by the Sun's gravity.",
+                answer: true,
+                explanation: "The Eddington observation exemplified the kind of potentially refuting observational test central to Popper's criterion."
+            },
+            {
+                question: "Popper classified Marxism, Freudian psychoanalysis, and Adlerian psychology as pseudo-scientific because he believed they were falsifiable.",
+                answer: false,
+                explanation: "He considered them non-falsifiable because they could interpret any outcome as confirmation."
+            },
+            {
+                question: "Duhem-Quine threatens Popper's criterion because changing background assumptions can preserve a theory despite apparently refuting evidence.",
+                answer: true,
+                explanation: "If an auxiliary assumption can always be revised in principle, no observation definitively refutes the focal theory."
+            },
+            {
+                question: "The conclusion that no theory is scientific follows from Duhem-Quine alone, without adding any criterion linking science to falsifiability.",
+                answer: false,
+                explanation: "Duhem-Quine challenges definitive refutation. The further conclusion requires Popper's premise that only falsifiable theories are scientific."
+            }
+        ];
+
+        // --- Global State Variables ---
+        let currentCardIndex = 0;
+        let isCardFront = true;
+        let isCardAnimating = false;
+        let currentMCQIndex = 0;
+        let currentTFIndex = 0;
+        let mcqAnswers = new Array(mcqData.length).fill(null);
+        let tfAnswers = new Array(tfData.length).fill(null);
+
+        // --- DOM Element References ---
+        const flashcardContent = document.getElementById('flashcard-content');
+        const cardCounter = document.getElementById('card-counter');
+        const prevCardBtn = document.getElementById('prev-card');
+        const nextCardBtn = document.getElementById('next-card');
+        const mcqQuestion = document.getElementById('mcq-question');
+        const mcqOptions = document.getElementById('mcq-options');
+        const mcqFeedback = document.getElementById('mcq-feedback');
+        const mcqExplanation = document.getElementById('mcq-explanation');
+        const mcqCounter = document.getElementById('mcq-counter');
+        const prevMCQBtn = document.getElementById('prev-mcq');
+        const nextMCQBtn = document.getElementById('next-mcq');
+        const viewAllMCQBtn = document.getElementById('view-all-mcq');
+        const mcqSingleView = document.getElementById('mcq-single-view');
+        const mcqAllQuestionsContainer = document.getElementById('mcq-all-questions');
+        const tfQuestion = document.getElementById('tf-question');
+        const tfOptionsContainer = document.getElementById('tf-options');
+        const tfFeedback = document.getElementById('tf-feedback');
+        const tfExplanation = document.getElementById('tf-explanation');
+        const tfCounter = document.getElementById('tf-counter');
+        const prevTFBtn = document.getElementById('prev-tf');
+        const nextTFBtn = document.getElementById('next-tf');
+        const viewAllTFBtn = document.getElementById('view-all-tf');
+        const tfSingleView = document.getElementById('tf-single-view');
+        const tfAllQuestionsContainer = document.getElementById('tf-all-questions');
+
+        // --- MathJax Re-rendering Helper ---
+        function triggerMathJax() {
+            if (window.MathJax && window.MathJax.typesetPromise) {
+                window.MathJax.typesetPromise().catch((err) => console.error('MathJax error:', err.message));
+            }
+        }
+
+        function displayCard(index) {
+            if (!flashcardData || flashcardData.length === 0) return;
+            const cardData = flashcardData[index];
+            isCardFront = true;
+            flashcardContent.style.opacity = '1';
+            flashcardContent.textContent = cardData.term;
+            flashcardContent.className = 'flashcard-front-style';
+            cardCounter.textContent = `Card ${index + 1} / ${flashcardData.length}`;
+            prevCardBtn.disabled = index === 0;
+            nextCardBtn.disabled = index === flashcardData.length - 1;
+            triggerMathJax();
+        }
+
+        function flipCard() {
+            if (isCardAnimating || !flashcardData || flashcardData.length === 0) return;
+            isCardAnimating = true;
+            flashcardContent.style.opacity = '0';
+            setTimeout(() => {
+                isCardFront = !isCardFront;
+                const cardData = flashcardData[currentCardIndex];
+                if (isCardFront) {
+                    flashcardContent.textContent = cardData.term;
+                    flashcardContent.className = 'flashcard-front-style';
+                } else {
+                    flashcardContent.textContent = cardData.definition;
+                    flashcardContent.className = 'flashcard-back-style';
+                }
+                flashcardContent.style.opacity = '1';
+                isCardAnimating = false;
+                triggerMathJax();
+            }, 300);
+        }
+
+        function displayMCQuestion(index) {
+            if (!mcqData || mcqData.length === 0) return;
+            const qData = mcqData[index];
+            mcqQuestion.textContent = qData.question;
+            mcqOptions.innerHTML = '';
+            mcqFeedback.classList.add('hidden');
+            mcqExplanation.classList.add('hidden');
+            qData.options.forEach((option, i) => {
+                const button = document.createElement('button');
+                button.textContent = option;
+                button.onclick = () => handleMCQAnswer(index, i);
+                mcqOptions.appendChild(button);
+            });
+            mcqCounter.textContent = `Question ${index + 1} / ${mcqData.length}`;
+            prevMCQBtn.disabled = index === 0;
+            nextMCQBtn.disabled = index === mcqData.length - 1;
+            if (mcqAnswers[index] !== null) {
+                highlightMCQAnswer(mcqOptions, mcqFeedback, mcqExplanation, index, mcqAnswers[index].selected);
+            }
+            triggerMathJax();
+        }
+
+        function handleMCQAnswer(qIndex, selectedIndex) {
+            if (mcqAnswers[qIndex] !== null) return;
+            const isCorrect = selectedIndex === mcqData[qIndex].correctIndex;
+            mcqAnswers[qIndex] = { selected: selectedIndex, correct: isCorrect };
+            highlightMCQAnswer(mcqOptions, mcqFeedback, mcqExplanation, qIndex, selectedIndex);
+        }
+
+        function highlightMCQAnswer(optionsContainer, feedbackEl, explanationEl, qIndex, selectedIndex) {
+            const qData = mcqData[qIndex];
+            const buttons = optionsContainer.querySelectorAll('button');
+            buttons.forEach((button, i) => {
+                button.disabled = true;
+                if (i === qData.correctIndex) {
+                    button.classList.add('correct');
+                }
+                if (i === selectedIndex && i !== qData.correctIndex) {
+                    button.classList.add('incorrect');
+                }
+            });
+            feedbackEl.textContent = selectedIndex === qData.correctIndex ? "Correct!" : "Incorrect.";
+            feedbackEl.className = `feedback ${selectedIndex === qData.correctIndex ? 'correct' : 'incorrect'}`;
+            explanationEl.innerHTML = `<strong>Explanation:</strong> ${qData.explanation}`;
+            explanationEl.classList.remove('hidden');
+            triggerMathJax();
+        }
+
+        function displayAllMCQ() {
+            if (!mcqData || mcqData.length === 0) return;
+            mcqSingleView.classList.add('hidden');
+            mcqAllQuestionsContainer.innerHTML = '';
+            mcqData.forEach((qData, index) => {
+                const questionDiv = document.createElement('div');
+                questionDiv.className = 'question-container-all';
+                questionDiv.innerHTML = `
+                    <div class="question-text">${index + 1}. ${qData.question}</div>
+                    <div class="options">
+                        ${qData.options.map((option, i) => `<button data-qindex="${index}" data-oindex="${i}">${option}</button>`).join('')}
+                    </div>
+                    <div class="feedback hidden"></div>
+                    <div class="explanation hidden"></div>
+                `;
+                mcqAllQuestionsContainer.appendChild(questionDiv);
+                 const optionButtons = questionDiv.querySelectorAll('.options button');
+                 optionButtons.forEach(button => {
+                     button.onclick = () => {
+                        const qIndex = parseInt(button.dataset.qindex);
+                        const oIndex = parseInt(button.dataset.oindex);
+                        if (mcqAnswers[qIndex] === null) {
+                            const isCorrect = oIndex === mcqData[qIndex].correctIndex;
+                            mcqAnswers[qIndex] = { selected: oIndex, correct: isCorrect };
+                        }
+                        const optionsDiv = button.closest('.options');
+                        const feedbackDiv = questionDiv.querySelector('.feedback');
+                        const explanationDiv = questionDiv.querySelector('.explanation');
+                        highlightMCQAnswer(optionsDiv, feedbackDiv, explanationDiv, qIndex, mcqAnswers[qIndex].selected);
+                     };
+                 });
+                 if (mcqAnswers[index] !== null) {
+                    const optionsDiv = questionDiv.querySelector('.options');
+                    const feedbackDiv = questionDiv.querySelector('.feedback');
+                    const explanationDiv = questionDiv.querySelector('.explanation');
+                    highlightMCQAnswer(optionsDiv, feedbackDiv, explanationDiv, index, mcqAnswers[index].selected);
+                 }
+            });
+            mcqAllQuestionsContainer.classList.remove('hidden');
+            triggerMathJax();
+        }
+
+        function displayTFQuestion(index) {
+            if (!tfData || tfData.length === 0) return;
+            const qData = tfData[index];
+            tfQuestion.textContent = qData.question;
+            tfFeedback.classList.add('hidden');
+            tfExplanation.classList.add('hidden');
+             const buttons = tfOptionsContainer.querySelectorAll('button');
+             buttons.forEach(button => {
+                 button.disabled = false;
+                 button.classList.remove('correct', 'incorrect');
+                 button.onclick = () => handleTFAnswer(index, button.dataset.answer === 'true');
+             });
+            tfCounter.textContent = `Question ${index + 1} / ${tfData.length}`;
+            prevTFBtn.disabled = index === 0;
+            nextTFBtn.disabled = index === tfData.length - 1;
+            if (tfAnswers[index] !== null) {
+                highlightTFAnswer(tfOptionsContainer, tfFeedback, tfExplanation, index, tfAnswers[index].selected);
+            }
+            triggerMathJax();
+        }
+
+        function handleTFAnswer(qIndex, selectedAnswer) {
+            if (tfAnswers[qIndex] !== null) return;
+            const isCorrect = selectedAnswer === tfData[qIndex].answer;
+            tfAnswers[qIndex] = { selected: selectedAnswer, correct: isCorrect };
+            highlightTFAnswer(tfOptionsContainer, tfFeedback, tfExplanation, qIndex, selectedAnswer);
+        }
+
+        function highlightTFAnswer(optionsContainer, feedbackEl, explanationEl, qIndex, selectedAnswer) {
+             const qData = tfData[qIndex];
+             const buttons = optionsContainer.querySelectorAll('button');
+             buttons.forEach(button => {
+                 const buttonAnswer = button.dataset.answer === 'true';
+                 button.disabled = true;
+                 if (buttonAnswer === qData.answer) {
+                     button.classList.add('correct');
+                 }
+                 if (buttonAnswer === selectedAnswer && buttonAnswer !== qData.answer) {
+                     button.classList.add('incorrect');
+                 }
+             });
+             feedbackEl.textContent = selectedAnswer === qData.answer ? "Correct!" : "Incorrect.";
+             feedbackEl.className = `feedback ${selectedAnswer === qData.answer ? 'correct' : 'incorrect'}`;
+             explanationEl.innerHTML = `<strong>Explanation:</strong> ${qData.explanation}`;
+             explanationEl.classList.remove('hidden');
+             triggerMathJax();
+        }
+
+        function displayAllTF() {
+             if (!tfData || tfData.length === 0) return;
+             tfSingleView.classList.add('hidden');
+             tfAllQuestionsContainer.innerHTML = '';
+             tfData.forEach((qData, index) => {
+                 const questionDiv = document.createElement('div');
+                 questionDiv.className = 'question-container-all';
+                 questionDiv.innerHTML = `
+                     <div class="question-text">${index + 1}. ${qData.question}</div>
+                     <div class="tf-options">
+                         <button data-qindex="${index}" data-answer="true">True</button>
+                         <button data-qindex="${index}" data-answer="false">False</button>
+                     </div>
+                     <div class="feedback hidden"></div>
+                     <div class="explanation hidden"></div>
+                 `;
+                 tfAllQuestionsContainer.appendChild(questionDiv);
+                 const optionButtons = questionDiv.querySelectorAll('.tf-options button');
+                 optionButtons.forEach(button => {
+                     button.onclick = () => {
+                         const qIndex = parseInt(button.dataset.qindex);
+                         const selectedAnswer = button.dataset.answer === 'true';
+                         if (tfAnswers[qIndex] === null) {
+                             const isCorrect = selectedAnswer === tfData[qIndex].answer;
+                             tfAnswers[qIndex] = { selected: selectedAnswer, correct: isCorrect };
+                         }
+                         const optionsDiv = button.closest('.tf-options');
+                         const feedbackDiv = questionDiv.querySelector('.feedback');
+                         const explanationDiv = questionDiv.querySelector('.explanation');
+                         highlightTFAnswer(optionsDiv, feedbackDiv, explanationDiv, qIndex, tfAnswers[qIndex].selected);
+                     };
+                 });
+                 if (tfAnswers[index] !== null) {
+                    const optionsDiv = questionDiv.querySelector('.tf-options');
+                    const feedbackDiv = questionDiv.querySelector('.feedback');
+                    const explanationDiv = questionDiv.querySelector('.explanation');
+                    highlightTFAnswer(optionsDiv, feedbackDiv, explanationDiv, index, tfAnswers[index].selected);
+                 }
+             });
+             tfAllQuestionsContainer.classList.remove('hidden');
+             triggerMathJax();
+        }
+
+        function initialize() {
+            if (flashcardData.length > 0) displayCard(currentCardIndex);
+            if (mcqData.length > 0) displayMCQuestion(currentMCQIndex);
+            if (tfData.length > 0) displayTFQuestion(currentTFIndex);
+            flashcardContent.addEventListener('click', flipCard);
+            prevCardBtn.addEventListener('click', () => { if (currentCardIndex > 0) { currentCardIndex--; displayCard(currentCardIndex); } });
+            nextCardBtn.addEventListener('click', () => { if (currentCardIndex < flashcardData.length - 1) { currentCardIndex++; displayCard(currentCardIndex); } });
+            prevMCQBtn.addEventListener('click', () => { if (currentMCQIndex > 0) { currentMCQIndex--; displayMCQuestion(currentMCQIndex); } });
+            nextMCQBtn.addEventListener('click', () => { if (currentMCQIndex < mcqData.length - 1) { currentMCQIndex++; displayMCQuestion(currentMCQIndex); } });
+            viewAllMCQBtn.addEventListener('click', displayAllMCQ);
+            prevTFBtn.addEventListener('click', () => { if (currentTFIndex > 0) { currentTFIndex--; displayTFQuestion(currentTFIndex); } });
+            nextTFBtn.addEventListener('click', () => { if (currentTFIndex < tfData.length - 1) { currentTFIndex++; displayTFQuestion(currentTFIndex); } });
+            viewAllTFBtn.addEventListener('click', displayAllTF);
+
+            // Initial MathJax render for static HTML (like the Theory section)
+            triggerMathJax();
+        }
+
+        initialize();
+    });
+    </script>
+</body>
+</html>
