@@ -1,0 +1,1381 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kuhn, Paradigms, and Scientific Method Review</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+
+    <script>
+        window.MathJax = {
+            tex: {
+                inlineMath: [['$', '$'], ['\\(', '\\)']],
+                displayMath: [['$$', '$$'], ['\\[', '\\]']]
+            },
+            startup: {
+                typeset: false // We will trigger this manually via JS
+            }
+        };
+    </script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+    <style>
+        /* --- Root Variables for Theme --- */
+        :root {
+            --primary-bg: #0a0a0f;
+            --panel-bg: rgba(255, 255, 255, 0.03);
+            --panel-border: rgba(255, 255, 255, 0.1);
+
+            --accent-start: #6C63FF;
+            --accent-end: #A855F7;
+            --accent-gradient: linear-gradient(135deg, var(--accent-start), var(--accent-end));
+            --accent-color: #8B5CF6; /* Midpoint fallback */
+
+            --text-color: #E0E0E0;
+            --text-muted: #9ca3af;
+
+            --correct-color: rgba(16, 185, 129, 0.2);
+            --correct-border: #10b981;
+            --incorrect-color: rgba(239, 68, 68, 0.2);
+            --incorrect-border: #ef4444;
+
+            --insight-bg: rgba(168, 85, 247, 0.08);
+            --insight-border: #A855F7;
+        }
+
+        /* --- Global Styles & Glow Effects --- */
+        body {
+            background-color: var(--primary-bg);
+            background-image:
+                radial-gradient(circle at 15% 50%, rgba(108, 99, 255, 0.06), transparent 25vw),
+                radial-gradient(circle at 85% 30%, rgba(168, 85, 247, 0.06), transparent 25vw);
+            background-attachment: fixed;
+            color: var(--text-color);
+            font-family: 'Inter', sans-serif;
+            line-height: 1.6;
+            margin: 0;
+            padding: 20px;
+        }
+
+        /* --- Panel Containers (Optimized: No blur for performance) --- */
+        .container, .section, #flashcard-content, .question-container-single, .question-container-all, .explanation {
+            background: var(--panel-bg);
+            border: 1px solid var(--panel-border);
+            border-radius: 12px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+        }
+
+        .container {
+            width: 90%;
+            max-width: 1000px;
+            margin: 20px auto;
+            padding: 30px;
+        }
+
+        h1, h2 {
+            text-align: center;
+            border-bottom: 1px solid var(--panel-border);
+            padding-bottom: 15px;
+            font-weight: 700;
+            color: #fff;
+        }
+
+        .section {
+            padding: 25px;
+            margin-bottom: 30px;
+            animation: slideIn 0.5s ease-out forwards;
+        }
+
+        /* --- Theory & Key Insight Styling --- */
+        .theory-text {
+            font-size: 1.1em;
+            line-height: 1.8;
+            color: var(--text-muted);
+        }
+
+        .theory-text p, .theory-text li {
+            color: var(--text-color);
+        }
+
+        .theory-text h3 {
+            color: #fff;
+            margin-top: 25px;
+            border-bottom: none;
+            text-align: left;
+            font-size: 1.3em;
+        }
+
+        .insight-box {
+            background-color: var(--insight-bg);
+            border-left: 4px solid var(--insight-border);
+            padding: 18px;
+            margin: 25px 0;
+            border-radius: 8px;
+        }
+
+        .insight-box strong {
+            color: #fff;
+            display: block;
+            margin-bottom: 8px;
+            font-size: 1.1em;
+            text-shadow: 0 0 10px rgba(168, 85, 247, 0.4);
+        }
+
+        /* --- Study Cards Styling --- */
+        .flashcard-container {
+            height: 250px;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            perspective: 1000px;
+        }
+
+        #flashcard-content {
+            width: 100%;
+            height: 100%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            padding: 30px;
+            box-sizing: border-box;
+            transition: opacity 0.3s ease-in-out, transform 0.2s;
+        }
+
+        #flashcard-content:hover {
+            transform: translateY(-2px);
+            border-color: rgba(168, 85, 247, 0.4);
+            box-shadow: 0 10px 40px rgba(108, 99, 255, 0.15);
+        }
+
+        .flashcard-front-style {
+             font-size: 1.6em;
+             font-weight: 600;
+             font-family: 'JetBrains Mono', monospace;
+             color: var(--accent-end);
+        }
+
+        .flashcard-back-style {
+             font-size: 1.2em;
+             color: var(--text-color);
+        }
+
+        /* --- Questions Styling (MCQ & T/F) --- */
+         .question-container-single, .question-container-all {
+            margin-bottom: 20px;
+            padding: 20px;
+         }
+
+        .question-text {
+            font-weight: 600;
+            margin-bottom: 20px;
+            font-size: 1.1em;
+        }
+
+        /* Buttons & Glass Inputs */
+        .options button, .tf-options button, .nav-button, .view-all-button {
+            display: block;
+            width: 100%;
+            padding: 12px 15px;
+            margin: 8px 0;
+            background: rgba(255, 255, 255, 0.02);
+            color: var(--text-color);
+            border: 1px solid var(--panel-border);
+            border-radius: 8px;
+            cursor: pointer;
+            text-align: left;
+            font-family: 'Inter', sans-serif;
+            font-size: 1em;
+            transition: all 0.3s ease;
+        }
+
+        .nav-button, .view-all-button {
+            width: auto;
+            text-align: center;
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        .options button:hover:not(:disabled), .tf-options button:hover:not(:disabled), .nav-button:hover:not(:disabled), .view-all-button:hover {
+            background: var(--accent-gradient);
+            border-color: transparent;
+            color: #fff;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 15px rgba(108, 99, 255, 0.25);
+        }
+
+        .options button:disabled, .tf-options button:disabled, .nav-button:disabled {
+            cursor: not-allowed;
+            opacity: 0.5;
+            transform: none;
+        }
+
+        /* Correct/Incorrect States */
+        .options button.correct, .tf-options button.correct {
+            background: var(--correct-color);
+            border-color: var(--correct-border);
+            color: #fff;
+            opacity: 1;
+        }
+        .options button.incorrect, .tf-options button.incorrect {
+            background: var(--incorrect-color);
+            border-color: var(--incorrect-border);
+            color: #fff;
+            opacity: 1;
+        }
+
+        .feedback {
+            margin-top: 15px;
+            padding: 12px;
+            border-radius: 8px;
+            font-weight: 600;
+            text-align: center;
+            animation: fadeIn 0.3s ease-in;
+        }
+
+        .feedback.correct {
+            color: var(--correct-border);
+            background: var(--correct-color);
+            border: 1px solid var(--correct-border);
+        }
+
+        .feedback.incorrect {
+            color: var(--incorrect-border);
+            background: var(--incorrect-color);
+            border: 1px solid var(--incorrect-border);
+        }
+
+        .explanation {
+            margin-top: 15px;
+            font-style: italic;
+            font-size: 0.95em;
+            padding: 15px;
+            color: var(--text-muted);
+            border-left: 3px solid var(--accent-start);
+            animation: fadeIn 0.5s ease-in;
+        }
+
+        /* --- Navigation & Utility --- */
+        .navigation {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 20px;
+        }
+
+        .counter {
+            font-size: 0.9em;
+            color: var(--text-muted);
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        .view-all-container {
+            text-align: center;
+            margin-top: 25px;
+        }
+
+        .hidden { display: none !important; }
+
+        /* --- Animations --- */
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Kuhn, Paradigms, and Scientific Method Review</h1>
+
+        <div class="section">
+            <h2>Theory Summary and Key Insights</h2>
+            <div id="theory-content" class="theory-text">
+                <h3>1. The Positivist Baseline</h3>
+                <p>The positivist picture treats scientific knowledge as a structured movement between observations and theories. Hypotheses are formulated by abduction from theory-independent observations, confirmed by induction from such observations, and refuted by deduction when a predicted observation conflicts with what is observed. In the other direction, theories explain and predict observations by deductive reasoning from general laws.</p>
+                <p>The same logical ideal is applied to relations between theories. Theory T1 explains theory T2 when T2 logically follows from T1. This can be synchronic, between theories in different sciences, or diachronic, between a newer and an older theory. The example is Newtonian gravitation: from $a = GM/R^2$, the acceleration of a freely falling body near Earth can be derived as approximately 9.8 m/s2, so Newton's theory explains Galileo's law.</p>
+                <div class="insight-box">
+                    <strong>Key Insight:</strong>
+                    In the positivist model, explanation is not merely compatibility or historical succession. The decisive relation is logical derivability: the statement being explained must follow from the explaining theory together with the relevant conditions.
+                </div>
+                <p>This supports the cumulative science ideal. A new theory should explain why the old theory succeeded where it did, explain why it failed where it did, and add new explanatory power. Science is therefore pictured as a universal project that builds progressively toward truth.</p>
+                <p>When observation contradicts a theory, three responses are possible: revise the current theory, discard it and seek a completely different theory, or treat it as approximately correct and replace it with a broader theory that explains both its successes and failures. The third response best fits the cumulative ideal.</p>
+
+                <h3>2. Kuhn's Descriptive Pattern of Scientific Change</h3>
+                <p>Kuhn begins from the history of actual scientific practice. Scientists do not normally abandon a theory as soon as an anomalous observation appears. They continue working within it, refining it and solving problems. A theory is usually replaced only when a replacement theory is available, so scientific practice does not leave a theoretical vacuum.</p>
+                <p>Even a new theory may begin with observations that it cannot accommodate, yet the scientific community may still adopt it. This loss of some previously handled observations is called Kuhn loss. Major theoretical changes are also rare rather than routine.</p>
+                <p>The recurring pattern is a long period of normal science followed by a shorter scientific revolution. Normal science is stable, conservative work within a shared framework, despite unresolved anomalies. During a revolution, the established theory is replaced by a radically different one. A new period of normal science then begins.</p>
+
+                <h3>3. Description and Normativity</h3>
+                <p>The claim that science has not historically followed the positivist recipe is descriptive. By itself, it does not refute a normative method that says how science should be conducted. It could simply mean that scientists have often failed to follow the correct method.</p>
+                <p>Kuhn therefore asks a stronger question: is the historical pattern also the best and unavoidable way for science to operate? His answer is yes. Normal science is necessary to exhaust the potential of a theory through sustained investigation. Revolutions are necessary so that inquiry does not remain trapped in an exhausted framework and can move to a theory that addresses unresolved problems while opening new research possibilities.</p>
+                <div class="insight-box">
+                    <strong>Key Insight:</strong>
+                    Kuhn's challenge is not merely that scientists behave differently from the positivist ideal. He argues that the alternation between conservative normal science and disruptive revolutions is both productive and, because theories are embedded in paradigms, unavoidable in principle.
+                </div>
+
+                <h3>4. Paradigms as Worldviews</h3>
+                <p>A theory is embedded in a broader paradigm, a worldview or set of conceptual glasses through which scientists perceive and organize reality. A paradigm contains four interconnected components:</p>
+                <ul>
+                    <li><strong>Perception:</strong> the categories and conceptual framework through which observations are interpreted.</li>
+                    <li><strong>Semantics:</strong> the meanings of the terms used within the paradigm.</li>
+                    <li><strong>Methodology:</strong> the rules for conducting research and evaluating theories.</li>
+                    <li><strong>Ontology:</strong> assumptions about what exists and what the world's basic constituents are.</li>
+                </ul>
+                <p>Because a paradigm is broader than a theory, replacing a paradigm changes more than a set of equations. It changes what scientists see as relevant evidence, what their terms mean, which methods count as legitimate, and what kinds of entities they take to exist.</p>
+
+                <h3>5. Theory and Observation</h3>
+                <p>Kuhn argues that observations are theory-laden. Scientists always observe through conceptual categories supplied by a paradigm, so there are no completely neutral, theory-independent facts available to all paradigms in exactly the same form.</p>
+                <p>This challenges every positivist relation between observation and theory. Neutral observations were supposed to guide hypothesis formulation, confirmation, and refutation, and they were also supposed to be the independent targets of explanation and prediction. Without neutral observations, these processes become internal interactions between a paradigm and observations already shaped by it. Kuhn describes normal scientific work as puzzle-solving: the theory becomes better at solving problems defined within its own paradigm, but this does not establish a paradigm-independent approach to truth.</p>
+
+                <h3>6. Relations Between Theories</h3>
+                <p>The semantic component of paradigms leads to holism in meaning: a term receives its meaning from its place in the entire network of concepts. The same word can therefore have different meanings in different paradigms. The term mass in Newtonian theory and the term mass in Einsteinian theory serve as the central example.</p>
+                <p>If the terms of two theories do not retain the same meanings, one theory cannot simply be translated into and logically derived from the other. Bridge laws do not solve the problem because any bridge law is itself formulated within some paradigm. Kuhn therefore says that scientists in different paradigms operate in different worlds, and paradigm change resembles conversion rather than a step-by-step deduction.</p>
+                <div class="insight-box">
+                    <strong>Key Insight:</strong>
+                    The obstacle to inter-theoretic explanation is not only missing evidence. If meanings, observations, and standards are paradigm-dependent, then the logical comparison demanded by positivism lacks a neutral language, neutral facts, and neutral evaluation criteria.
+                </div>
+
+                <h3>7. Theory Choice and the Cumulative Ideal</h3>
+                <p>Methodological standards belong to paradigms, so there is no external criterion by which competing paradigms can be decisively compared. A crucial experiment cannot be fully neutral because both the observations and the rule for what counts as decisive are paradigm-dependent.</p>
+                <p>The transition between paradigms therefore occurs in leaps rather than as a linear accumulation. In Kuhn's strongest formulation, one paradigm does not logically explain its predecessor, theories cannot be compared from a neutral standpoint, and replacement is a change rather than demonstrable progress toward an independent truth.</p>
+
+                <h3>8. Additional Scientific-Reasoning Distinctions</h3>
+                <ul>
+                    <li><strong>Popper and falsifiability:</strong> a theory that can explain opposite outcomes is not thereby strong. Its flexibility may make it impossible to refute and therefore mark it as pseudoscientific, even though supporters can collect many apparent confirmations.</li>
+                    <li><strong>Induction:</strong> arguing that induction will work because it worked in the past uses induction to justify induction and is circular. The positivist confirmation method can also produce absurd confirmations through unusual but logically permitted descriptions.</li>
+                    <li><strong>Hume:</strong> the metaphysical argument associated with Hume's fork treats natural laws as contingent rather than logically necessary.</li>
+                    <li><strong>Explanation:</strong> defining scientific explanation by appeal to causes does not automatically clarify the issue, because the concept of cause may be no clearer than the concept of explanation. The deductive-nomological model also permits both the height-to-shadow and shadow-to-height derivations, revealing a symmetry problem.</li>
+                    <li><strong>Duhem-Quine:</strong> deduction itself is not defective, but applying deduction to refute one scientific hypothesis is difficult because tests involve a wider set of assumptions.</li>
+                    <li><strong>Laws and reduction:</strong> the Armstrong-Dretske-Tully view distinguishes a law from an accidental generalization by a connection between properties. Multiple realizability allows mental types to fail to match single brain-state types even when each mental instance has a physical instance. Reduction between sciences still requires bridge laws; shared teleological features do not remove that requirement.</li>
+                </ul>
+                <p>A scientific theory may be true or false, but the review framework denies that its truth can be known with certainty. Deductive validity is also distinct from the actual truth values of premises and conclusion: finding a case with false premises and a false conclusion does not by itself prove invalidity. For strong nondeductive arguments, true premises and a true conclusion support calling the argument reliable rather than deductively sound.</p>
+                </div>
+        </div>
+
+        <div class="section">
+            <h2>Study Cards</h2>
+            <div class="flashcard-container">
+                <div id="flashcard-content"></div>
+            </div>
+            <div class="navigation">
+                <button class="nav-button" id="prev-card">Previous</button>
+                <span class="counter" id="card-counter"></span>
+                <button class="nav-button" id="next-card">Next</button>
+            </div>
+        </div>
+
+        <div class="section">
+            <h2>Multiple-Choice Questions</h2>
+            <div id="mcq-single-view">
+                <div class="question-container-single" id="mcq-container">
+                    <div class="question-text" id="mcq-question"></div>
+                    <div class="options" id="mcq-options"></div>
+                    <div class="feedback hidden" id="mcq-feedback"></div>
+                    <div class="explanation hidden" id="mcq-explanation"></div>
+                </div>
+                <div class="navigation">
+                    <button class="nav-button" id="prev-mcq">Previous</button>
+                    <span class="counter" id="mcq-counter"></span>
+                    <button class="nav-button" id="next-mcq">Next</button>
+                </div>
+                 <div class="view-all-container">
+                     <button class="view-all-button" id="view-all-mcq">View All Questions</button>
+                 </div>
+            </div>
+            <div id="mcq-all-questions" class="hidden">
+                </div>
+        </div>
+
+        <div class="section">
+            <h2>True or False Questions</h2>
+             <div id="tf-single-view">
+                <div class="question-container-single" id="tf-container">
+                    <div class="question-text" id="tf-question"></div>
+                    <div class="tf-options" id="tf-options">
+                        <button data-answer="true">True</button>
+                        <button data-answer="false">False</button>
+                    </div>
+                    <div class="feedback hidden" id="tf-feedback"></div>
+                    <div class="explanation hidden" id="tf-explanation"></div>
+                </div>
+                <div class="navigation">
+                    <button class="nav-button" id="prev-tf">Previous</button>
+                    <span class="counter" id="tf-counter"></span>
+                    <button class="nav-button" id="next-tf">Next</button>
+                </div>
+                 <div class="view-all-container">
+                     <button class="view-all-button" id="view-all-tf">View All Questions</button>
+                 </div>
+            </div>
+             <div id="tf-all-questions" class="hidden">
+                 </div>
+        </div>
+    </div>
+
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+
+        const flashcardData = [
+            {
+                        "term": "Diachronic inter-theoretic relation",
+                        "definition": "A relation between theories from different historical periods, especially whether a newer theory can explain an older one."
+            },
+            {
+                        "term": "Synchronic inter-theoretic relation",
+                        "definition": "A relation between theories in different sciences at the same time, such as whether biology can be explained by chemistry."
+            },
+            {
+                        "term": "Positivist explanation criterion",
+                        "definition": "Theory T1 explains theory T2 when T2 logically follows from T1."
+            },
+            {
+                        "term": "Cumulative science ideal",
+                        "definition": "The view that new theories explain earlier successes and failures, add new knowledge, and move science progressively toward truth."
+            },
+            {
+                        "term": "Normal science",
+                        "definition": "A long, stable period of work within one paradigm, refining the theory and solving puzzles despite anomalies."
+            },
+            {
+                        "term": "Scientific revolution",
+                        "definition": "A short, turbulent transition in which an established theory is replaced by a radically different one."
+            },
+            {
+                        "term": "Kuhn loss",
+                        "definition": "The acceptance of a new theory even though some observations that fit the old theory do not initially fit the new one."
+            },
+            {
+                        "term": "Paradigm",
+                        "definition": "A broad scientific worldview containing perceptual categories, meanings, methods, and assumptions about what exists."
+            },
+            {
+                        "term": "Perceptual component",
+                        "definition": "The categories or conceptual glasses through which a paradigm shapes what scientists observe."
+            },
+            {
+                        "term": "Semantic component",
+                        "definition": "The meanings assigned to terms through their positions in a paradigm's conceptual network."
+            },
+            {
+                        "term": "Methodological component",
+                        "definition": "The rules a paradigm supplies for research and for evaluating scientific theories."
+            },
+            {
+                        "term": "Ontological component",
+                        "definition": "A paradigm's assumptions about what exists and what the world's basic building blocks are."
+            },
+            {
+                        "term": "Theory-laden observation",
+                        "definition": "An observation already shaped by the concepts and expectations of a paradigm rather than being fully neutral."
+            },
+            {
+                        "term": "Holism in meaning",
+                        "definition": "The view that a concept gains meaning from its relative position in the entire network of concepts."
+            },
+            {
+                        "term": "Puzzle-solving",
+                        "definition": "Normal scientific work that improves a theory's ability to solve problems defined within its own paradigm."
+            },
+            {
+                        "term": "Crucial experiment",
+                        "definition": "A supposedly decisive test between competing theories; Kuhn rejects its neutrality because observations and criteria are paradigm-dependent."
+            },
+            {
+                        "term": "Bridge laws",
+                        "definition": "Statements intended to translate terms between theories so that one theory can explain another by deduction."
+            },
+            {
+                        "term": "Falsifiability",
+                        "definition": "Popper's requirement that a scientific theory expose itself to possible refutation rather than explain every possible outcome."
+            },
+            {
+                        "term": "Duhem-Quine thesis",
+                        "definition": "The claim that deductive refutation cannot easily isolate one hypothesis because scientific tests involve additional assumptions."
+            },
+            {
+                        "term": "Multiple realizability",
+                        "definition": "The possibility that one mental-state type has different physical realizations, blocking a simple type-to-type reduction."
+            }
+];
+
+        const mcqData = [
+            {
+                        "question": "Under the positivist criterion for inter-theoretic explanation, what must be true for theory T1 to explain theory T2?",
+                        "options": [
+                                    "T1 must have been accepted later than T2.",
+                                    "T1 and T2 must fit exactly the same observations.",
+                                    "T2 must logically follow from T1.",
+                                    "Every term in T1 must have the same spelling as a term in T2."
+                        ],
+                        "correctIndex": 2,
+                        "explanation": "The positivist criterion is logical derivability: the theory being explained must follow from the explaining theory. Historical order or empirical overlap alone does not establish explanation."
+            },
+            {
+                        "question": "Which description best captures the cumulative science ideal?",
+                        "options": [
+                                    "A new theory explains the old theory's successes and failures while adding further knowledge.",
+                                    "Each new theory begins from a completely empty conceptual framework.",
+                                    "Scientific change is only a sequence of unrelated replacements.",
+                                    "A theory advances science only when it discards every result of its predecessor."
+                        ],
+                        "correctIndex": 0,
+                        "explanation": "The cumulative ideal treats science as building on earlier achievements while extending them. Mere replacement without explanation is the opposite of cumulative progress."
+            },
+            {
+                        "question": "Galileo measured free-fall acceleration near Earth as 9.8 m/s2. Newtonian gravitation yields $a = GM/R^2$, which gives the same value when Earth's mass and radius are inserted. What does this illustrate?",
+                        "options": [
+                                    "Galileo's observations logically derive Newtonian gravitation.",
+                                    "The two laws have opposite logical directions and therefore conflict.",
+                                    "Newton's law proves that no future observation can differ from 9.8 m/s2.",
+                                    "Newton's theory explains Galileo's law by allowing it to be derived."
+                        ],
+                        "correctIndex": 3,
+                        "explanation": "The more general Newtonian theory yields Galileo's result under the relevant Earth conditions, so the older law follows from the newer theory. Agreement alone would be weaker than this deductive relation."
+            },
+            {
+                        "question": "A theory faces contradictory observations, but its earlier successes remain substantial. Which response most clearly expresses the positivist ideal of cumulative progress?",
+                        "options": [
+                                    "Ignore the contradictory observations permanently.",
+                                    "Treat the old theory as approximately correct and build a new theory that explains both its successes and failures.",
+                                    "Discard all earlier results and refuse to compare the new theory with them.",
+                                    "Keep revising the old theory even after its research potential is exhausted."
+                        ],
+                        "correctIndex": 1,
+                        "explanation": "Cumulative progress is best represented when the new theory accounts for where the old theory worked and where it failed. Simply discarding the past does not explain it."
+            },
+            {
+                        "question": "A well-established theory encounters one observation that does not fit it. What response is most characteristic of Kuhn's description of actual scientific practice?",
+                        "options": [
+                                    "The community immediately abandons every part of the theory.",
+                                    "The community normally continues working within the theory and treats the mismatch as a problem to solve.",
+                                    "The community suspends all research until a neutral observation appears.",
+                                    "The community declares the observation logically impossible."
+                        ],
+                        "correctIndex": 1,
+                        "explanation": "Kuhn emphasizes persistence during normal science: anomalies do not automatically trigger abandonment. Immediate rejection would resemble the simplified positivist recipe rather than historical practice."
+            },
+            {
+                        "question": "What does Kuhn's claim that there is never a theoretical vacuum mean?",
+                        "options": [
+                                    "Every science always contains exactly one observation.",
+                                    "An old theory remains true after every revolution.",
+                                    "Scientists can work without any conceptual framework during a crisis.",
+                                    "An established theory is normally replaced only when an alternative theory is available."
+                        ],
+                        "correctIndex": 3,
+                        "explanation": "Scientists do not usually discard a framework and then operate with nothing in its place. The availability of a replacement is central to actual theory change."
+            },
+            {
+                        "question": "Which situation is an example of Kuhn loss?",
+                        "options": [
+                                    "A new theory is accepted even though some observations handled by the old theory do not yet fit the new one.",
+                                    "An old theory is retained because every observation fits it perfectly.",
+                                    "A theory is rejected only after all its terms are translated by bridge laws.",
+                                    "A scientific community loses interest in every unsolved problem."
+                        ],
+                        "correctIndex": 0,
+                        "explanation": "Kuhn loss occurs when adoption of a new theory sacrifices some earlier empirical successes, at least initially. It shows that theory choice is not a simple maximization of currently fitted observations."
+            },
+            {
+                        "question": "Why does the rarity of major theoretical shifts matter for Kuhn's critique?",
+                        "options": [
+                                    "It shows that scientific communities never encounter anomalies.",
+                                    "It proves that all established theories are true.",
+                                    "It supports a pattern of long stable periods rather than constant theory replacement after each mismatch.",
+                                    "It shows that revolutions occupy most of scientific history."
+                        ],
+                        "correctIndex": 2,
+                        "explanation": "Kuhn's historical pattern is dominated by normal science, with revolutions as exceptional episodes. If every anomaly caused immediate replacement, major shifts would be far more common."
+            },
+            {
+                        "question": "Which activity best exemplifies normal science?",
+                        "options": [
+                                    "Comparing all paradigms from a neutral external standpoint.",
+                                    "Discarding a framework whenever one prediction fails.",
+                                    "Working without shared standards or meanings.",
+                                    "Refining a shared theory and solving its puzzles despite unresolved anomalies."
+                        ],
+                        "correctIndex": 3,
+                        "explanation": "Normal science is sustained work inside a paradigm, not continuous revolutionary replacement. Its conservatism permits detailed development of the framework."
+            },
+            {
+                        "question": "What distinguishes a scientific revolution from normal science in Kuhn's cycle?",
+                        "options": [
+                                    "It is a longer period of routine refinement within the same theory.",
+                                    "It is a shorter turbulent period ending in replacement by a radically different theory.",
+                                    "It eliminates the need for any later normal science.",
+                                    "It occurs every time a single observation is recorded."
+                        ],
+                        "correctIndex": 1,
+                        "explanation": "A revolution is a disruptive change of framework, whereas normal science develops an established framework. The cycle continues because a new stable period follows the revolution."
+            },
+            {
+                        "question": "Kuhn observes that science historically did not follow the positivist recipe. Why does this descriptive claim alone not refute positivism?",
+                        "options": [
+                                    "Positivism denies that science has a history.",
+                                    "Historical facts cannot be used in philosophy.",
+                                    "Positivism can be read normatively as a claim about how science should be conducted.",
+                                    "Kuhn agrees that every observation is neutral."
+                        ],
+                        "correctIndex": 2,
+                        "explanation": "A gap between actual conduct and a proposed ideal does not by itself show that the ideal is wrong. Kuhn's stronger challenge requires showing that the historical method is better or unavoidable."
+            },
+            {
+                        "question": "Why does Kuhn regard long conservative periods as scientifically valuable?",
+                        "options": [
+                                    "They allow the potential of a theory to be thoroughly developed and tested through puzzle-solving.",
+                                    "They guarantee that the paradigm is permanently true.",
+                                    "They prevent scientists from noticing any anomaly.",
+                                    "They make revolutions logically impossible."
+                        ],
+                        "correctIndex": 0,
+                        "explanation": "Normal science provides the sustained commitment needed to extract a theory's research potential. Its value does not depend on guaranteeing final truth."
+            },
+            {
+                        "question": "Why are scientific revolutions necessary in Kuhn's normative account?",
+                        "options": [
+                                    "They prevent science from remaining trapped in an exhausted theory and open new lines of inquiry.",
+                                    "They prove that every earlier observation was false.",
+                                    "They replace research with unrestricted intuition.",
+                                    "They preserve every meaning and standard unchanged."
+                        ],
+                        "correctIndex": 0,
+                        "explanation": "Revolutions make it possible to leave a framework whose potential has been exhausted and adopt one with unresolved problems and future research space. They do not preserve all semantic and methodological commitments."
+            },
+            {
+                        "question": "What is the main reason Kuhn gives for thinking that science cannot, in principle, operate exactly as positivism requires?",
+                        "options": [
+                                    "Scientists are unwilling to learn formal logic.",
+                                    "Observations are always numerically inaccurate.",
+                                    "Every theory is embedded in a paradigm that shapes perception, meaning, method, and ontology.",
+                                    "Scientific communities never replace theories."
+                        ],
+                        "correctIndex": 2,
+                        "explanation": "The paradigm is the wider structure that makes fully neutral observations, terms, and standards unavailable. The obstacle is conceptual, not merely a lack of discipline or measurement precision."
+            },
+            {
+                        "question": "Which list contains the four components of a Kuhnian paradigm?",
+                        "options": [
+                                    "Observation, experiment, calculation, and publication",
+                                    "Perception, semantics, methodology, and ontology",
+                                    "Abduction, induction, deduction, and verification",
+                                    "Theory, data, technology, and funding"
+                        ],
+                        "correctIndex": 1,
+                        "explanation": "A paradigm includes categories of perception, meanings of terms, rules of inquiry and evaluation, and assumptions about what exists. The other lists describe narrower activities rather than the full worldview."
+            },
+            {
+                        "question": "Two scientists look at the same ambiguous pattern but categorize it differently because their conceptual frameworks differ. Which paradigm component is most directly involved?",
+                        "options": [
+                                    "Ontology, because the number of entities has changed",
+                                    "Methodology, because a research rule was violated",
+                                    "Semantics, because a dictionary definition was copied",
+                                    "Perception, because the categories through which the pattern is seen differ"
+                        ],
+                        "correctIndex": 3,
+                        "explanation": "The perceptual component supplies the categories or lenses through which reality is organized. Methodological standards concern how research is conducted and evaluated, not the immediate categorization itself."
+            },
+            {
+                        "question": "A term changes meaning because its position in the surrounding network of concepts changes. Which component of a paradigm explains this?",
+                        "options": [
+                                    "Ontology",
+                                    "Perception",
+                                    "Semantics",
+                                    "Methodology"
+                        ],
+                        "correctIndex": 2,
+                        "explanation": "Semantics concerns the meanings of terms, and Kuhn ties meaning to the term's role within a conceptual network. Ontology instead concerns what entities are assumed to exist."
+            },
+            {
+                        "question": "A scientific community changes its standards for what counts as a good experiment and an acceptable theory. Which paradigm component has changed most directly?",
+                        "options": [
+                                    "Perception",
+                                    "Semantics",
+                                    "Ontology",
+                                    "Methodology"
+                        ],
+                        "correctIndex": 3,
+                        "explanation": "Methodology includes rules for conducting research and evaluating theories. A change in standards is therefore methodological rather than merely semantic."
+            },
+            {
+                        "question": "A framework assumes that the world is built from a particular class of basic entities. Which component of the paradigm contains this assumption?",
+                        "options": [
+                                    "Ontology",
+                                    "Methodology",
+                                    "Semantics",
+                                    "Perception"
+                        ],
+                        "correctIndex": 0,
+                        "explanation": "Ontology addresses what exists and what the building blocks of the world are. Methodology concerns rules of inquiry, not the inventory of reality."
+            },
+            {
+                        "question": "What does it mean to say that observation is theory-laden?",
+                        "options": [
+                                    "Every observation is deliberately fabricated.",
+                                    "Observation is interpreted through categories supplied by a paradigm rather than being fully neutral.",
+                                    "Only theoretical terms can be observed directly.",
+                                    "A theory becomes true whenever scientists observe it."
+                        ],
+                        "correctIndex": 1,
+                        "explanation": "Theory-ladenness means that conceptual frameworks help shape what is seen and how it is described. It does not imply dishonesty or that observation has no role."
+            },
+            {
+                        "question": "Why does the absence of neutral observations threaten the positivist method as a whole?",
+                        "options": [
+                                    "It makes mathematical equations impossible to write.",
+                                    "Formulation, confirmation, refutation, explanation, and prediction all relied on theory-independent observations.",
+                                    "It shows that scientists never agree about anything.",
+                                    "It proves that every paradigm has identical evidence."
+                        ],
+                        "correctIndex": 1,
+                        "explanation": "Neutral observations were supposed to anchor both movement from observations to theory and movement from theory to observations. If observations are paradigm-shaped, they cannot perform that independent role."
+            },
+            {
+                        "question": "What does Kuhn mean by describing normal scientific activity as puzzle-solving?",
+                        "options": [
+                                    "Scientists improve a theory's ability to handle problems defined within its paradigm.",
+                                    "Scientists compare all theories by a paradigm-free measure of truth.",
+                                    "Scientists avoid every problem that lacks an immediate solution.",
+                                    "Scientists replace deduction with random guessing."
+                        ],
+                        "correctIndex": 0,
+                        "explanation": "Puzzle-solving is internal improvement within a shared framework. It need not establish convergence toward a truth independent of every paradigm."
+            },
+            {
+                        "question": "Which statement best expresses holism in meaning?",
+                        "options": [
+                                    "Every scientific term has a fixed meaning independent of all theories.",
+                                    "A term means whatever an individual scientist privately chooses.",
+                                    "Only observational terms have meanings.",
+                                    "A term's meaning depends on its relative place in the whole network of concepts."
+                        ],
+                        "correctIndex": 3,
+                        "explanation": "Semantic holism makes meaning relational rather than isolated. This is why identical words can function as different concepts in different paradigms."
+            },
+            {
+                        "question": "Why can the word mass fail to provide a straightforward translation between Newtonian and Einsteinian theories in Kuhn's account?",
+                        "options": [
+                                    "The word is absent from one of the theories.",
+                                    "Neither theory contains mathematical relations.",
+                                    "Its meaning is determined by a different conceptual network in each paradigm.",
+                                    "Both theories define it with exactly the same role."
+                        ],
+                        "correctIndex": 2,
+                        "explanation": "Using the same word does not guarantee sameness of concept when meaning is holistic and paradigm-dependent. Identical spelling is therefore insufficient for logical reduction."
+            },
+            {
+                        "question": "Why do bridge laws fail to restore positivist explanation between paradigms in Kuhn's strongest argument?",
+                        "options": [
+                                    "Bridge laws are themselves formulated within a paradigm and are not neutral translations.",
+                                    "Bridge laws can be used only in astronomy.",
+                                    "Bridge laws always make both theories empirically false.",
+                                    "Bridge laws remove every theoretical term from science."
+                        ],
+                        "correctIndex": 0,
+                        "explanation": "A proposed bridge cannot stand outside all paradigms if its own terms and standards are paradigm-dependent. The tempting idea of neutral translation therefore assumes what Kuhn denies."
+            },
+            {
+                        "question": "What is conveyed by Kuhn's statement that scientists in different paradigms operate in different worlds?",
+                        "options": [
+                                    "They necessarily live on different planets.",
+                                    "Their observations, meanings, and standards are organized by different conceptual frameworks.",
+                                    "They have identical concepts but different personalities.",
+                                    "They can translate every claim without loss."
+                        ],
+                        "correctIndex": 1,
+                        "explanation": "The phrase concerns conceptual worlds, not physical locations. Different paradigms structure perception and meaning so deeply that communication and comparison are not neutral."
+            },
+            {
+                        "question": "Why is a fully neutral crucial experiment impossible in Kuhn's account?",
+                        "options": [
+                                    "Experiments never produce observations.",
+                                    "Competing theories always make identical predictions.",
+                                    "Both the observations and the standard of decisiveness are shaped by paradigms.",
+                                    "Scientific communities refuse to perform experiments during normal science."
+                        ],
+                        "correctIndex": 2,
+                        "explanation": "A crucial experiment requires evidence and decision rules independent of the competing theories. Kuhn denies that either component is fully paradigm-free."
+            },
+            {
+                        "question": "Two paradigms use different rules for judging theoretical success. What follows in Kuhn's strongest position?",
+                        "options": [
+                                    "One rule can be selected by counting how many words each theory contains.",
+                                    "The older paradigm automatically supplies the neutral criterion.",
+                                    "The newer paradigm automatically proves its own truth.",
+                                    "There is no external criterion accepted independently of both paradigms."
+                        ],
+                        "correctIndex": 3,
+                        "explanation": "Evaluation standards are part of paradigms, so neither set of standards is automatically neutral. This blocks the positivist picture of an external decision procedure."
+            },
+            {
+                        "question": "What is the strongest implication of Kuhn's paradigm concept for the cumulative science ideal?",
+                        "options": [
+                                    "Every new theory contains all old theories as exact logical consequences.",
+                                    "Theory replacement always increases access to paradigm-independent truth.",
+                                    "Scientific change is fully linear whenever experiments are repeated.",
+                                    "Paradigms replace one another in leaps, without a neutral demonstration of cumulative progress."
+                        ],
+                        "correctIndex": 3,
+                        "explanation": "Kuhn rejects the assumption that successive paradigms can be placed on one neutral cumulative scale. The transition is a change of framework rather than a simple addition of logically preserved truths."
+            },
+            {
+                        "question": "A psychological theory explains both risking one's life to save a child and remaining passive in the same situation. What would Popper identify as the central problem?",
+                        "options": [
+                                    "The theory uses too few technical terms.",
+                                    "The theory cannot generate any inductive support.",
+                                    "Its ability to accommodate opposite outcomes makes it difficult to refute and therefore weak as science.",
+                                    "Its predictions are deductively valid and therefore certainly true."
+                        ],
+                        "correctIndex": 2,
+                        "explanation": "For Popper, explaining every possible outcome protects a theory from falsification and can mark it as pseudoscientific. Many apparent confirmations do not repair that weakness."
+            },
+            {
+                        "question": "Why is the claim that induction will work in the future because it worked in the past not an adequate justification of induction?",
+                        "options": [
+                                    "It is deductively valid but has a false conclusion.",
+                                    "It uses an inductive inference to justify the reliability of induction itself.",
+                                    "It contains no observations about the past.",
+                                    "It proves that natural laws are logically necessary."
+                        ],
+                        "correctIndex": 1,
+                        "explanation": "The argument assumes the very rule it is trying to justify, so the reasoning is circular. A large number of past successes does not remove that dependence on induction."
+            },
+            {
+                        "question": "Which Humean argument is used to claim that natural laws are contingent rather than necessary?",
+                        "options": [
+                                    "The metaphysical argument associated with Hume's fork",
+                                    "The semantic argument from paradigm change",
+                                    "The deductive-nomological argument",
+                                    "The multiple realizability argument"
+                        ],
+                        "correctIndex": 0,
+                        "explanation": "The metaphysical argument distinguishes necessary relations of ideas from contingent matters of fact. The problem of induction concerns justification, not directly the modal status of laws."
+            },
+            {
+                        "question": "What is the main difficulty with defining a scientific explanation as one that specifies the causes of a phenomenon?",
+                        "options": [
+                                    "Every scientific phenomenon has no cause.",
+                                    "Causal statements cannot contain general terms.",
+                                    "The concept of cause may be no clearer than the concept of explanation.",
+                                    "Causal explanations are always deductively invalid."
+                        ],
+                        "correctIndex": 2,
+                        "explanation": "The definition does not clarify explanation if cause is itself equally obscure. The problem is conceptual circularity or lack of added clarity, not the denial of all causes."
+            },
+            {
+                        "question": "A possible world is found in which an argument's premises are false and its conclusion is also false. What can be concluded about validity?",
+                        "options": [
+                                    "The argument may be invalid, but this case alone does not establish invalidity.",
+                                    "The argument must be valid because all statements share a truth value.",
+                                    "The argument must be sound.",
+                                    "The argument is valid in that world and invalid in every other world."
+                        ],
+                        "correctIndex": 0,
+                        "explanation": "Invalidity requires a possible case with true premises and a false conclusion. A false-premise, false-conclusion case is compatible with both valid and invalid forms, so it settles nothing by itself."
+            },
+            {
+                        "question": "A strong nondeductive argument has true premises and a true conclusion. Which evaluation is supported?",
+                        "options": [
+                                    "It is deductively sound.",
+                                    "It is reliable.",
+                                    "It is necessarily valid.",
+                                    "Its conclusion could not have been false in any possible world."
+                        ],
+                        "correctIndex": 1,
+                        "explanation": "Strength plus true premises and a true conclusion supports reliability in the course's terminology. Soundness and validity are deductive notions and do not follow merely from a strong argument."
+            },
+            {
+                        "question": "What does the deductive-nomological model imply in the flagpole example when the same laws and measurements allow derivation in either direction?",
+                        "options": [
+                                    "Neither the pole's height nor the shadow's length explains the other.",
+                                    "Only the pole's height explains the shadow's length.",
+                                    "Only the shadow's length explains the pole's height.",
+                                    "Each can count as explaining the other because each can be deductively derived."
+                        ],
+                        "correctIndex": 3,
+                        "explanation": "The model focuses on derivability and therefore treats both directions as explanations. This symmetry is precisely what makes the example problematic for the model."
+            },
+            {
+                        "question": "What does the Duhem-Quine thesis show about deductive refutation in scientific practice?",
+                        "options": [
+                                    "Deductive logic itself sometimes makes valid arguments invalid.",
+                                    "A failed prediction does not uniquely identify which hypothesis or supporting assumption should be rejected.",
+                                    "Every failed prediction confirms the tested theory.",
+                                    "Scientists can refute a theory without using any assumptions."
+                        ],
+                        "correctIndex": 1,
+                        "explanation": "The logical form of deduction remains intact, but a test involves a network of assumptions. Failure therefore does not isolate the main hypothesis as the sole target of refutation."
+            },
+            {
+                        "question": "How can observing a green sock today count as confirming the prediction that horses observed after 2050 will be blue within the positivist confirmation method?",
+                        "options": [
+                                    "By treating the sock as a blue horse observed after 2050",
+                                    "By claiming that every green object is necessarily a future horse",
+                                    "By describing it as a non-blue object that is not a horse, which confirms the contraposed form",
+                                    "By rejecting induction and using only intuition"
+                        ],
+                        "correctIndex": 2,
+                        "explanation": "The universal claim that all horses are blue is logically equivalent to saying that all non-blue objects are non-horses. A green sock fits the latter description, illustrating how formal confirmation can yield absurd-looking results."
+            },
+            {
+                        "question": "Why is the true statement whenever Lucy wears green, the team wins classified as an accidental generalization by the Armstrong-Dretske-Tully view?",
+                        "options": [
+                                    "There is no law-like connection between the property of wearing green and the property of winning.",
+                                    "The statement is false whenever it contains a proper name.",
+                                    "No law of nature can be expressed as a generalization.",
+                                    "Every true regularity is logically necessary."
+                        ],
+                        "correctIndex": 0,
+                        "explanation": "The view requires a genuine connection between properties, not merely a true pattern of co-occurrence. The presence of a proper name is not the decisive issue."
+            },
+            {
+                        "question": "Which claim best expresses multiple realizability as a challenge to reducing psychology to neuroscience?",
+                        "options": [
+                                    "No mental event can ever be physical.",
+                                    "Every mental-state type must be identical to one brain-state type.",
+                                    "Mental laws are automatically identical to physical laws without translation.",
+                                    "Each mental instance may have a physical realization even though one mental type is not identical to one physical type."
+                        ],
+                        "correctIndex": 3,
+                        "explanation": "Multiple realizability preserves possible token-level physical realization while denying a simple one-to-one identity between mental and brain-state types. That blocks straightforward translation of mental laws into one physical vocabulary."
+            }
+];
+
+        const tfData = [
+            {
+                        "question": "The positivist model treats theory-independent observations as the most solid source of knowledge about the world.",
+                        "answer": true,
+                        "explanation": "Positivism assigns neutral observations a foundational role in formulating, confirming, refuting, explaining, and predicting."
+            },
+            {
+                        "question": "In Kuhn's historical account, a theory is normally abandoned as soon as one observation conflicts with it.",
+                        "answer": false,
+                        "explanation": "Normal science usually retains the theory and treats the conflict as an anomaly or puzzle rather than an immediate reason for abandonment."
+            },
+            {
+                        "question": "Kuhn loss is the deduction of an old theory from a new theory without any empirical loss.",
+                        "answer": false,
+                        "explanation": "Kuhn loss is almost the reverse: a new theory may be accepted even though some observations handled by the old theory do not initially fit it."
+            },
+            {
+                        "question": "A scientific community may accept a replacement theory even when that theory has observations that do not fit it from the outset.",
+                        "answer": true,
+                        "explanation": "This is one of Kuhn's descriptive observations and is captured by the idea of Kuhn loss."
+            },
+            {
+                        "question": "Kuhn's account portrays major theoretical shifts as rare events separated by long stable periods.",
+                        "answer": true,
+                        "explanation": "The normal pattern is extended normal science followed by a comparatively short revolution."
+            },
+            {
+                        "question": "The descriptive claim that scientists did not follow positivism directly proves that positivism is a bad normative method.",
+                        "answer": false,
+                        "explanation": "A normative proposal can differ from actual practice. Kuhn needs the additional argument that the historical pattern is better and unavoidable."
+            },
+            {
+                        "question": "Kuhn regards normal science as necessary because sustained work is needed to exhaust a theory's potential.",
+                        "answer": true,
+                        "explanation": "Conservative commitment allows scientists to refine the framework and investigate its puzzles deeply."
+            },
+            {
+                        "question": "Scientific revolutions are unnecessary in Kuhn's normative account because normal science can develop every theory indefinitely.",
+                        "answer": false,
+                        "explanation": "Revolutions are needed when a framework is exhausted so inquiry can move to a new theory with further research potential."
+            },
+            {
+                        "question": "A paradigm is only another word for a single scientific theory and contains nothing beyond it.",
+                        "answer": false,
+                        "explanation": "A paradigm also contains perceptual categories, meanings, methodological rules, and ontological assumptions."
+            },
+            {
+                        "question": "Perception, semantics, methodology, and ontology are the four components identified within a Kuhnian paradigm.",
+                        "answer": true,
+                        "explanation": "Together they explain how a paradigm shapes observation, language, evaluation, and assumptions about reality."
+            },
+            {
+                        "question": "The semantic component of a paradigm consists primarily of rules for conducting experiments and evaluating theories.",
+                        "answer": false,
+                        "explanation": "Those rules belong to methodology. Semantics concerns the meanings of terms within the conceptual network."
+            },
+            {
+                        "question": "For Kuhn, observations are theory-laden because they are interpreted through the categories of a paradigm.",
+                        "answer": true,
+                        "explanation": "Observation is not fully neutral; the paradigm's conceptual framework shapes what is perceived and described."
+            },
+            {
+                        "question": "If neutral observations do not exist, the positivist procedures of formulation, confirmation, refutation, explanation, and prediction all lose their intended independent observational basis.",
+                        "answer": true,
+                        "explanation": "Each of those procedures relies on observations that are supposed to stand outside the theory being assessed or applied."
+            },
+            {
+                        "question": "Bridge laws solve Kuhn's semantic problem because bridge laws are formulated in a language that is independent of every paradigm.",
+                        "answer": false,
+                        "explanation": "Kuhn denies that bridge laws can be paradigm-free; their own terms and meanings belong to some conceptual framework."
+            },
+            {
+                        "question": "Holism in meaning allows the same word to express different concepts in different paradigms.",
+                        "answer": true,
+                        "explanation": "A word's meaning depends on its place in the surrounding network, so identical wording does not guarantee identical content."
+            },
+            {
+                        "question": "Scientists in different paradigms can always understand one another completely because their shared words retain neutral meanings.",
+                        "answer": false,
+                        "explanation": "Shared words may have paradigm-dependent meanings, which is why Kuhn compares paradigm change to conversion."
+            },
+            {
+                        "question": "Kuhn treats the criteria for evaluating a theory as part of the paradigm itself.",
+                        "answer": true,
+                        "explanation": "Evaluation rules belong to the methodological component rather than to a neutral standpoint outside all paradigms."
+            },
+            {
+                        "question": "In Kuhn's strongest account, the transition from one paradigm to another occurs in conceptual leaps rather than as a fully linear deduction.",
+                        "answer": true,
+                        "explanation": "Different meanings and standards block the positivist picture of straightforward cumulative derivation."
+            },
+            {
+                        "question": "Kuhn's model guarantees that every theory replacement moves science measurably closer to paradigm-independent truth.",
+                        "answer": false,
+                        "explanation": "His strongest formulation denies a neutral scale that would demonstrate such cumulative progress."
+            },
+            {
+                        "question": "A neutral crucial experiment remains possible for Kuhn because observations and standards of decisiveness are independent of paradigms.",
+                        "answer": false,
+                        "explanation": "Kuhn argues that both the evidence and the criterion for deciding are paradigm-dependent."
+            },
+            {
+                        "question": "For Popper, a theory's ability to explain two opposite outcomes can reveal weakness when no possible outcome would refute it.",
+                        "answer": true,
+                        "explanation": "Extreme explanatory flexibility can protect a theory from falsification and make apparent confirmations scientifically uninformative."
+            },
+            {
+                        "question": "Past success provides a noncircular inductive proof that induction will remain reliable in the future.",
+                        "answer": false,
+                        "explanation": "Using past success to infer future reliability already relies on induction, so it cannot independently justify induction."
+            },
+            {
+                        "question": "Hume's metaphysical argument treats natural laws as contingent rather than logically necessary.",
+                        "answer": true,
+                        "explanation": "Natural laws concern matters of fact and therefore are not necessary in the way relations of ideas are."
+            },
+            {
+                        "question": "Defining explanation in terms of causes automatically solves the problem of explanation because cause is a perfectly clear concept.",
+                        "answer": false,
+                        "explanation": "The objection is that cause may be no clearer than explanation, so the proposed definition may not add clarity."
+            },
+            {
+                        "question": "Finding a possible world with false premises and a false conclusion is sufficient to prove that an argument is invalid.",
+                        "answer": false,
+                        "explanation": "Invalidity requires true premises together with a false conclusion. The stated truth-value combination does not decide validity."
+            },
+            {
+                        "question": "The deductive-nomological model can count both the flagpole's height as explaining its shadow and the shadow's length as explaining the height.",
+                        "answer": true,
+                        "explanation": "Because the relevant relation can be used deductively in either direction, the model produces the well-known symmetry problem."
+            },
+            {
+                        "question": "The Duhem-Quine thesis claims that deductive logic itself is invalid.",
+                        "answer": false,
+                        "explanation": "The problem concerns applying deduction to isolate and refute one scientific hypothesis when auxiliary assumptions are also involved."
+            },
+            {
+                        "question": "In the Armstrong-Dretske-Tully view, a true regularity can remain accidental when there is no law-like connection between the relevant properties.",
+                        "answer": true,
+                        "explanation": "Truth and repeated co-occurrence are not sufficient; the view requires a genuine connection between properties."
+            },
+            {
+                        "question": "Multiple realizability permits each mental instance to have a physical realization while denying that one mental type must equal one physical type.",
+                        "answer": true,
+                        "explanation": "The distinction between token identity and type identity is what creates the challenge to simple reduction."
+            },
+            {
+                        "question": "Because biology and psychology can both use teleological descriptions, bridge laws are unnecessary for explaining psychology by biology.",
+                        "answer": false,
+                        "explanation": "Shared teleological features do not translate the terms of one science into the terms of another; bridge laws are still required by the reduction model."
+            }
+];
+
+        // --- Global State Variables ---
+        let currentCardIndex = 0;
+        let isCardFront = true;
+        let isCardAnimating = false;
+        let currentMCQIndex = 0;
+        let currentTFIndex = 0;
+        let mcqAnswers = new Array(mcqData.length).fill(null);
+        let tfAnswers = new Array(tfData.length).fill(null);
+
+        // --- DOM Element References ---
+        const flashcardContent = document.getElementById('flashcard-content');
+        const cardCounter = document.getElementById('card-counter');
+        const prevCardBtn = document.getElementById('prev-card');
+        const nextCardBtn = document.getElementById('next-card');
+        const mcqQuestion = document.getElementById('mcq-question');
+        const mcqOptions = document.getElementById('mcq-options');
+        const mcqFeedback = document.getElementById('mcq-feedback');
+        const mcqExplanation = document.getElementById('mcq-explanation');
+        const mcqCounter = document.getElementById('mcq-counter');
+        const prevMCQBtn = document.getElementById('prev-mcq');
+        const nextMCQBtn = document.getElementById('next-mcq');
+        const viewAllMCQBtn = document.getElementById('view-all-mcq');
+        const mcqSingleView = document.getElementById('mcq-single-view');
+        const mcqAllQuestionsContainer = document.getElementById('mcq-all-questions');
+        const tfQuestion = document.getElementById('tf-question');
+        const tfOptionsContainer = document.getElementById('tf-options');
+        const tfFeedback = document.getElementById('tf-feedback');
+        const tfExplanation = document.getElementById('tf-explanation');
+        const tfCounter = document.getElementById('tf-counter');
+        const prevTFBtn = document.getElementById('prev-tf');
+        const nextTFBtn = document.getElementById('next-tf');
+        const viewAllTFBtn = document.getElementById('view-all-tf');
+        const tfSingleView = document.getElementById('tf-single-view');
+        const tfAllQuestionsContainer = document.getElementById('tf-all-questions');
+
+        // --- MathJax Re-rendering Helper ---
+        function triggerMathJax() {
+            if (window.MathJax && window.MathJax.typesetPromise) {
+                window.MathJax.typesetPromise().catch((err) => console.error('MathJax error:', err.message));
+            }
+        }
+
+        function displayCard(index) {
+            if (!flashcardData || flashcardData.length === 0) return;
+            const cardData = flashcardData[index];
+            isCardFront = true;
+            flashcardContent.style.opacity = '1';
+            flashcardContent.textContent = cardData.term;
+            flashcardContent.className = 'flashcard-front-style';
+            cardCounter.textContent = `Card ${index + 1} / ${flashcardData.length}`;
+            prevCardBtn.disabled = index === 0;
+            nextCardBtn.disabled = index === flashcardData.length - 1;
+            triggerMathJax();
+        }
+
+        function flipCard() {
+            if (isCardAnimating || !flashcardData || flashcardData.length === 0) return;
+            isCardAnimating = true;
+            flashcardContent.style.opacity = '0';
+            setTimeout(() => {
+                isCardFront = !isCardFront;
+                const cardData = flashcardData[currentCardIndex];
+                if (isCardFront) {
+                    flashcardContent.textContent = cardData.term;
+                    flashcardContent.className = 'flashcard-front-style';
+                } else {
+                    flashcardContent.textContent = cardData.definition;
+                    flashcardContent.className = 'flashcard-back-style';
+                }
+                flashcardContent.style.opacity = '1';
+                isCardAnimating = false;
+                triggerMathJax();
+            }, 300);
+        }
+
+        function displayMCQuestion(index) {
+            if (!mcqData || mcqData.length === 0) return;
+            const qData = mcqData[index];
+            mcqQuestion.textContent = qData.question;
+            mcqOptions.innerHTML = '';
+            mcqFeedback.classList.add('hidden');
+            mcqExplanation.classList.add('hidden');
+            qData.options.forEach((option, i) => {
+                const button = document.createElement('button');
+                button.textContent = option;
+                button.onclick = () => handleMCQAnswer(index, i);
+                mcqOptions.appendChild(button);
+            });
+            mcqCounter.textContent = `Question ${index + 1} / ${mcqData.length}`;
+            prevMCQBtn.disabled = index === 0;
+            nextMCQBtn.disabled = index === mcqData.length - 1;
+            if (mcqAnswers[index] !== null) {
+                highlightMCQAnswer(mcqOptions, mcqFeedback, mcqExplanation, index, mcqAnswers[index].selected);
+            }
+            triggerMathJax();
+        }
+
+        function handleMCQAnswer(qIndex, selectedIndex) {
+            if (mcqAnswers[qIndex] !== null) return;
+            const isCorrect = selectedIndex === mcqData[qIndex].correctIndex;
+            mcqAnswers[qIndex] = { selected: selectedIndex, correct: isCorrect };
+            highlightMCQAnswer(mcqOptions, mcqFeedback, mcqExplanation, qIndex, selectedIndex);
+        }
+
+        function highlightMCQAnswer(optionsContainer, feedbackEl, explanationEl, qIndex, selectedIndex) {
+            const qData = mcqData[qIndex];
+            const buttons = optionsContainer.querySelectorAll('button');
+            buttons.forEach((button, i) => {
+                button.disabled = true;
+                if (i === qData.correctIndex) {
+                    button.classList.add('correct');
+                }
+                if (i === selectedIndex && i !== qData.correctIndex) {
+                    button.classList.add('incorrect');
+                }
+            });
+            feedbackEl.textContent = selectedIndex === qData.correctIndex ? "Correct!" : "Incorrect.";
+            feedbackEl.className = `feedback ${selectedIndex === qData.correctIndex ? 'correct' : 'incorrect'}`;
+            explanationEl.innerHTML = `<strong>Explanation:</strong> ${qData.explanation}`;
+            explanationEl.classList.remove('hidden');
+            triggerMathJax();
+        }
+
+        function displayAllMCQ() {
+            if (!mcqData || mcqData.length === 0) return;
+            mcqSingleView.classList.add('hidden');
+            mcqAllQuestionsContainer.innerHTML = '';
+            mcqData.forEach((qData, index) => {
+                const questionDiv = document.createElement('div');
+                questionDiv.className = 'question-container-all';
+                questionDiv.innerHTML = `
+                    <div class="question-text">${index + 1}. ${qData.question}</div>
+                    <div class="options">
+                        ${qData.options.map((option, i) => `<button data-qindex="${index}" data-oindex="${i}">${option}</button>`).join('')}
+                    </div>
+                    <div class="feedback hidden"></div>
+                    <div class="explanation hidden"></div>
+                `;
+                mcqAllQuestionsContainer.appendChild(questionDiv);
+                 const optionButtons = questionDiv.querySelectorAll('.options button');
+                 optionButtons.forEach(button => {
+                     button.onclick = () => {
+                        const qIndex = parseInt(button.dataset.qindex);
+                        const oIndex = parseInt(button.dataset.oindex);
+                        if (mcqAnswers[qIndex] === null) {
+                            const isCorrect = oIndex === mcqData[qIndex].correctIndex;
+                            mcqAnswers[qIndex] = { selected: oIndex, correct: isCorrect };
+                        }
+                        const optionsDiv = button.closest('.options');
+                        const feedbackDiv = questionDiv.querySelector('.feedback');
+                        const explanationDiv = questionDiv.querySelector('.explanation');
+                        highlightMCQAnswer(optionsDiv, feedbackDiv, explanationDiv, qIndex, mcqAnswers[qIndex].selected);
+                     };
+                 });
+                 if (mcqAnswers[index] !== null) {
+                    const optionsDiv = questionDiv.querySelector('.options');
+                    const feedbackDiv = questionDiv.querySelector('.feedback');
+                    const explanationDiv = questionDiv.querySelector('.explanation');
+                    highlightMCQAnswer(optionsDiv, feedbackDiv, explanationDiv, index, mcqAnswers[index].selected);
+                 }
+            });
+            mcqAllQuestionsContainer.classList.remove('hidden');
+            triggerMathJax();
+        }
+
+        function displayTFQuestion(index) {
+            if (!tfData || tfData.length === 0) return;
+            const qData = tfData[index];
+            tfQuestion.textContent = qData.question;
+            tfFeedback.classList.add('hidden');
+            tfExplanation.classList.add('hidden');
+             const buttons = tfOptionsContainer.querySelectorAll('button');
+             buttons.forEach(button => {
+                 button.disabled = false;
+                 button.classList.remove('correct', 'incorrect');
+                 button.onclick = () => handleTFAnswer(index, button.dataset.answer === 'true');
+             });
+            tfCounter.textContent = `Question ${index + 1} / ${tfData.length}`;
+            prevTFBtn.disabled = index === 0;
+            nextTFBtn.disabled = index === tfData.length - 1;
+            if (tfAnswers[index] !== null) {
+                highlightTFAnswer(tfOptionsContainer, tfFeedback, tfExplanation, index, tfAnswers[index].selected);
+            }
+            triggerMathJax();
+        }
+
+        function handleTFAnswer(qIndex, selectedAnswer) {
+            if (tfAnswers[qIndex] !== null) return;
+            const isCorrect = selectedAnswer === tfData[qIndex].answer;
+            tfAnswers[qIndex] = { selected: selectedAnswer, correct: isCorrect };
+            highlightTFAnswer(tfOptionsContainer, tfFeedback, tfExplanation, qIndex, selectedAnswer);
+        }
+
+        function highlightTFAnswer(optionsContainer, feedbackEl, explanationEl, qIndex, selectedAnswer) {
+             const qData = tfData[qIndex];
+             const buttons = optionsContainer.querySelectorAll('button');
+             buttons.forEach(button => {
+                 const buttonAnswer = button.dataset.answer === 'true';
+                 button.disabled = true;
+                 if (buttonAnswer === qData.answer) {
+                     button.classList.add('correct');
+                 }
+                 if (buttonAnswer === selectedAnswer && buttonAnswer !== qData.answer) {
+                     button.classList.add('incorrect');
+                 }
+             });
+             feedbackEl.textContent = selectedAnswer === qData.answer ? "Correct!" : "Incorrect.";
+             feedbackEl.className = `feedback ${selectedAnswer === qData.answer ? 'correct' : 'incorrect'}`;
+             explanationEl.innerHTML = `<strong>Explanation:</strong> ${qData.explanation}`;
+             explanationEl.classList.remove('hidden');
+             triggerMathJax();
+        }
+
+        function displayAllTF() {
+             if (!tfData || tfData.length === 0) return;
+             tfSingleView.classList.add('hidden');
+             tfAllQuestionsContainer.innerHTML = '';
+             tfData.forEach((qData, index) => {
+                 const questionDiv = document.createElement('div');
+                 questionDiv.className = 'question-container-all';
+                 questionDiv.innerHTML = `
+                     <div class="question-text">${index + 1}. ${qData.question}</div>
+                     <div class="tf-options">
+                         <button data-qindex="${index}" data-answer="true">True</button>
+                         <button data-qindex="${index}" data-answer="false">False</button>
+                     </div>
+                     <div class="feedback hidden"></div>
+                     <div class="explanation hidden"></div>
+                 `;
+                 tfAllQuestionsContainer.appendChild(questionDiv);
+                 const optionButtons = questionDiv.querySelectorAll('.tf-options button');
+                 optionButtons.forEach(button => {
+                     button.onclick = () => {
+                         const qIndex = parseInt(button.dataset.qindex);
+                         const selectedAnswer = button.dataset.answer === 'true';
+                         if (tfAnswers[qIndex] === null) {
+                             const isCorrect = selectedAnswer === tfData[qIndex].answer;
+                             tfAnswers[qIndex] = { selected: selectedAnswer, correct: isCorrect };
+                         }
+                         const optionsDiv = button.closest('.tf-options');
+                         const feedbackDiv = questionDiv.querySelector('.feedback');
+                         const explanationDiv = questionDiv.querySelector('.explanation');
+                         highlightTFAnswer(optionsDiv, feedbackDiv, explanationDiv, qIndex, tfAnswers[qIndex].selected);
+                     };
+                 });
+                 if (tfAnswers[index] !== null) {
+                    const optionsDiv = questionDiv.querySelector('.tf-options');
+                    const feedbackDiv = questionDiv.querySelector('.feedback');
+                    const explanationDiv = questionDiv.querySelector('.explanation');
+                    highlightTFAnswer(optionsDiv, feedbackDiv, explanationDiv, index, tfAnswers[index].selected);
+                 }
+             });
+             tfAllQuestionsContainer.classList.remove('hidden');
+             triggerMathJax();
+        }
+
+        function initialize() {
+            if (flashcardData.length > 0) displayCard(currentCardIndex);
+            if (mcqData.length > 0) displayMCQuestion(currentMCQIndex);
+            if (tfData.length > 0) displayTFQuestion(currentTFIndex);
+            flashcardContent.addEventListener('click', flipCard);
+            prevCardBtn.addEventListener('click', () => { if (currentCardIndex > 0) { currentCardIndex--; displayCard(currentCardIndex); } });
+            nextCardBtn.addEventListener('click', () => { if (currentCardIndex < flashcardData.length - 1) { currentCardIndex++; displayCard(currentCardIndex); } });
+            prevMCQBtn.addEventListener('click', () => { if (currentMCQIndex > 0) { currentMCQIndex--; displayMCQuestion(currentMCQIndex); } });
+            nextMCQBtn.addEventListener('click', () => { if (currentMCQIndex < mcqData.length - 1) { currentMCQIndex++; displayMCQuestion(currentMCQIndex); } });
+            viewAllMCQBtn.addEventListener('click', displayAllMCQ);
+            prevTFBtn.addEventListener('click', () => { if (currentTFIndex > 0) { currentTFIndex--; displayTFQuestion(currentTFIndex); } });
+            nextTFBtn.addEventListener('click', () => { if (currentTFIndex < tfData.length - 1) { currentTFIndex++; displayTFQuestion(currentTFIndex); } });
+            viewAllTFBtn.addEventListener('click', displayAllTF);
+
+            // Initial MathJax render for static HTML (like the Theory section)
+            triggerMathJax();
+        }
+
+        initialize();
+    });
+    </script>
+</body>
+</html>

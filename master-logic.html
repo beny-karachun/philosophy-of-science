@@ -1,0 +1,473 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Interactive logic exercises for History and Philosophy of Science.">
+    <title>Master Logic — Course 3240305</title>
+    <style>
+        :root {
+            --ink: #18201e;
+            --muted: #65706d;
+            --paper: #f5f1e8;
+            --surface: rgba(255, 253, 248, 0.88);
+            --green: #174f43;
+            --green-2: #226c5b;
+            --green-soft: #dbe8df;
+            --gold: #b47b38;
+            --gold-soft: #efe1ca;
+            --red: #a3473d;
+            --red-soft: #f2ded8;
+            --line: rgba(24, 32, 30, 0.12);
+            --shadow: 0 18px 55px rgba(38, 50, 46, 0.09), 0 2px 8px rgba(38, 50, 46, 0.05);
+        }
+
+        * { box-sizing: border-box; }
+        html { scroll-behavior: smooth; -webkit-font-smoothing: antialiased; }
+        body {
+            margin: 0;
+            color: var(--ink);
+            background:
+                radial-gradient(circle at 8% 6%, rgba(180, 123, 56, 0.12), transparent 28rem),
+                radial-gradient(circle at 92% 24%, rgba(23, 79, 67, 0.10), transparent 32rem),
+                var(--paper);
+            font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+            line-height: 1.55;
+        }
+
+        button, select { font: inherit; }
+        button { color: inherit; }
+        a { color: inherit; }
+
+        .shell { width: min(1180px, calc(100% - 40px)); margin: 0 auto; }
+        .site-header {
+            min-height: 72px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 20px;
+            border-bottom: 1px solid var(--line);
+        }
+        .brand, .back-link {
+            min-height: 40px;
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            text-decoration: none;
+            font-size: .8rem;
+            font-weight: 800;
+            letter-spacing: .1em;
+            text-transform: uppercase;
+        }
+        .brand-mark { width: 31px; height: 31px; display: grid; place-items: center; color: #fff; background: var(--green); border-radius: 50%; font-family: Georgia, serif; font-size: 1rem; }
+        .back-link { padding: 0 8px; color: var(--muted); border-radius: 9px; letter-spacing: 0; text-transform: none; transition-property: color, background-color, transform; transition-duration: 180ms; }
+        .back-link:hover { color: var(--green); background: rgba(255,255,255,.55); }
+        .back-link:active { transform: scale(.96); }
+
+        .hero { padding: clamp(58px, 9vw, 102px) 0 58px; }
+        .eyebrow { display: flex; align-items: center; gap: 11px; margin: 0 0 18px; color: var(--green); font-size: .73rem; font-weight: 850; letter-spacing: .15em; text-transform: uppercase; }
+        .eyebrow::before { content: ""; width: 30px; height: 2px; background: var(--gold); }
+        h1, h2, h3 { text-wrap: balance; }
+        h1 { max-width: 790px; margin: 0; font-family: Georgia, "Times New Roman", serif; font-size: clamp(3.2rem, 7.5vw, 6.6rem); font-weight: 400; letter-spacing: -.055em; line-height: .93; }
+        h1 em { color: var(--green); font-weight: 400; }
+        .hero-bottom { display: grid; grid-template-columns: 1fr minmax(280px, .55fr); gap: 50px; align-items: end; margin-top: 34px; }
+        .hero-copy { max-width: 665px; margin: 0; color: var(--muted); font-size: 1.05rem; text-wrap: pretty; }
+        .score-panel { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; padding: 8px; background: rgba(255,255,255,.48); border-radius: 20px; box-shadow: inset 0 0 0 1px var(--line); }
+        .score-item { padding: 13px 15px; background: var(--surface); border-radius: 12px; }
+        .score-item strong { display: block; color: var(--green); font-family: Georgia, serif; font-size: 1.7rem; font-weight: 400; font-variant-numeric: tabular-nums; line-height: 1; }
+        .score-item span { display: block; margin-top: 5px; color: var(--muted); font-size: .7rem; font-weight: 750; text-transform: uppercase; letter-spacing: .08em; }
+
+        .tabs-wrap { position: sticky; top: 0; z-index: 20; padding: 12px 0; background: rgba(245, 241, 232, .88); backdrop-filter: blur(12px); }
+        .tabs { display: grid; grid-template-columns: repeat(3, 1fr); gap: 7px; padding: 7px; background: rgba(255,255,255,.62); border-radius: 18px; box-shadow: inset 0 0 0 1px var(--line), 0 8px 24px rgba(38,50,46,.05); }
+        .tab { min-height: 46px; padding: 8px 12px; border: 0; border-radius: 11px; background: transparent; color: var(--muted); cursor: pointer; font-weight: 750; transition-property: color, background-color, box-shadow, transform; transition-duration: 180ms; }
+        .tab:hover { color: var(--green); }
+        .tab[aria-selected="true"] { color: #fff; background: var(--green); box-shadow: 0 7px 17px rgba(23,79,67,.18); }
+        .tab:active { transform: scale(.96); }
+
+        .lab-section { padding: 58px 0 86px; }
+        .lab-panel[hidden] { display: none; }
+        .section-head { display: grid; grid-template-columns: 1fr minmax(260px,.65fr); gap: 38px; align-items: end; margin-bottom: 30px; }
+        .section-head h2 { margin: 0; font-family: Georgia, serif; font-size: clamp(2.25rem, 4.5vw, 3.8rem); font-weight: 400; letter-spacing: -.035em; line-height: 1; }
+        .section-head p { margin: 0 0 3px; color: var(--muted); text-wrap: pretty; }
+
+        .proof-layout { display: grid; grid-template-columns: minmax(0, 1fr) 310px; gap: 18px; align-items: start; }
+        .workspace, .rulebook, .drill-card { background: var(--surface); border-radius: 26px; box-shadow: var(--shadow), inset 0 0 0 1px var(--line); }
+        .workspace { overflow: hidden; }
+        .challenge-top { display: flex; justify-content: space-between; gap: 18px; padding: 26px 28px; color: #fff; background: var(--green); }
+        .challenge-kicker { margin: 0 0 6px; color: rgba(255,255,255,.68); font-size: .7rem; font-weight: 850; letter-spacing: .12em; text-transform: uppercase; }
+        .challenge-top h3 { margin: 0; font-family: Georgia, serif; font-size: 1.65rem; font-weight: 400; }
+        .challenge-count { flex: 0 0 auto; align-self: start; padding: 6px 10px; background: rgba(255,255,255,.1); border-radius: 8px; font-size: .76rem; font-variant-numeric: tabular-nums; }
+        .workspace-body { padding: 28px; }
+        .goal-box { display: flex; justify-content: space-between; gap: 18px; align-items: center; margin-bottom: 23px; padding: 15px 17px; background: var(--gold-soft); border-radius: 13px; }
+        .goal-box span:first-child { color: #7c572b; font-size: .72rem; font-weight: 850; letter-spacing: .1em; text-transform: uppercase; }
+        .formula { font-family: "Cambria Math", Cambria, Georgia, serif; font-size: 1.17rem; letter-spacing: .01em; }
+        .goal-box .formula { font-size: 1.35rem; }
+
+        .proof-label { margin: 0 0 10px; color: var(--muted); font-size: .7rem; font-weight: 850; letter-spacing: .11em; text-transform: uppercase; }
+        .proof-lines { display: grid; gap: 7px; margin-bottom: 23px; }
+        .proof-line { width: 100%; min-height: 51px; display: grid; grid-template-columns: 28px 1fr auto 19px; gap: 12px; align-items: center; padding: 8px 13px; text-align: left; border: 0; border-radius: 12px; background: rgba(23,79,67,.045); box-shadow: inset 0 0 0 1px rgba(23,79,67,.09); cursor: pointer; transition-property: background-color, box-shadow, transform; transition-duration: 160ms; }
+        .proof-line:hover { background: rgba(23,79,67,.075); }
+        .proof-line.selected { background: var(--green-soft); box-shadow: inset 0 0 0 2px var(--green); }
+        .proof-line:active { transform: scale(.96); }
+        .line-no { color: var(--muted); font-size: .77rem; font-variant-numeric: tabular-nums; }
+        .line-reason { color: var(--muted); font-size: .7rem; }
+        .line-check { width: 19px; height: 19px; display: grid; place-items: center; color: transparent; border: 1px solid rgba(23,79,67,.28); border-radius: 5px; }
+        .selected .line-check { color: #fff; background: var(--green); border-color: var(--green); }
+
+        .derive-box { padding: 17px; background: rgba(24,32,30,.035); border-radius: 17px; }
+        .derive-row { display: grid; grid-template-columns: 1fr 1fr auto; gap: 9px; }
+        .select-wrap { position: relative; }
+        .select-wrap label { display: block; margin: 0 0 5px 2px; color: var(--muted); font-size: .67rem; font-weight: 800; text-transform: uppercase; letter-spacing: .07em; }
+        select { width: 100%; min-height: 45px; padding: 0 34px 0 12px; color: var(--ink); background: #fffdf8; border: 0; border-radius: 10px; box-shadow: inset 0 0 0 1px var(--line); cursor: pointer; }
+        .derive-button, .next-button, .choice-button, .reset-button { min-height: 45px; border: 0; border-radius: 10px; cursor: pointer; font-weight: 800; transition-property: background-color, color, transform, box-shadow; transition-duration: 170ms; }
+        .derive-button { align-self: end; padding: 0 18px; color: #fff; background: var(--green); box-shadow: 0 7px 17px rgba(23,79,67,.18); }
+        .derive-button:hover, .next-button:hover { background: #0f4137; }
+        .derive-button:active, .next-button:active, .choice-button:active, .reset-button:active { transform: scale(.96); }
+        .feedback { min-height: 24px; margin: 13px 2px 0; color: var(--muted); font-size: .82rem; text-wrap: pretty; }
+        .feedback.good { color: var(--green-2); }
+        .feedback.bad { color: var(--red); }
+        .complete-box { display: none; margin-top: 17px; padding: 17px; background: var(--green-soft); border-radius: 14px; }
+        .complete-box.show { display: flex; align-items: center; justify-content: space-between; gap: 18px; }
+        .complete-box strong { display: block; color: var(--green); }
+        .complete-box span { color: var(--muted); font-size: .78rem; }
+        .next-button { flex: 0 0 auto; padding: 0 16px; color: #fff; background: var(--green); }
+
+        .rulebook { position: sticky; top: 84px; padding: 22px; }
+        .rulebook-title { display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; }
+        .rulebook h3 { margin: 0; font-family: Georgia, serif; font-size: 1.4rem; font-weight: 400; }
+        .rule-source { color: var(--muted); font-size: .66rem; }
+        .rule-list { display: grid; gap: 6px; }
+        .rule { padding: 11px 12px; background: rgba(24,32,30,.035); border-radius: 10px; }
+        .rule-head { display: flex; justify-content: space-between; gap: 10px; margin-bottom: 3px; }
+        .rule-head strong { color: var(--green); font-size: .73rem; }
+        .rule-head span { color: var(--muted); font-size: .65rem; }
+        .rule .formula { font-size: .9rem; }
+
+        .drill-grid { display: grid; grid-template-columns: minmax(0, 1fr) 340px; gap: 18px; align-items: start; }
+        .drill-card { padding: 28px; }
+        .drill-card h3 { margin: 0 0 7px; font-family: Georgia, serif; font-size: 1.75rem; font-weight: 400; }
+        .drill-card > p { margin: 0 0 25px; color: var(--muted); }
+        .truth-prompt { display: grid; place-items: center; min-height: 205px; margin-bottom: 18px; padding: 25px; background: var(--green); border-radius: 18px; color: #fff; text-align: center; }
+        .truth-values { display: flex; gap: 11px; margin-bottom: 16px; }
+        .value-pill { padding: 7px 11px; background: rgba(255,255,255,.11); border-radius: 8px; font-size: .83rem; }
+        .truth-expression { font-family: "Cambria Math", Cambria, Georgia, serif; font-size: clamp(2.25rem, 7vw, 4.3rem); line-height: 1; }
+        .choice-row { display: grid; grid-template-columns: repeat(2, 1fr); gap: 9px; }
+        .choice-button { background: var(--surface); box-shadow: inset 0 0 0 1px var(--line); }
+        .choice-button:hover { color: var(--green); background: var(--green-soft); }
+        .truth-table { width: 100%; border-collapse: separate; border-spacing: 0; overflow: hidden; font-size: .79rem; }
+        .truth-table th, .truth-table td { padding: 11px 9px; text-align: center; border-right: 1px solid var(--line); border-bottom: 1px solid var(--line); }
+        .truth-table th { color: var(--green); background: var(--green-soft); font-size: .69rem; }
+        .truth-table tr > *:first-child { border-left: 1px solid var(--line); }
+        .truth-table tr:first-child > * { border-top: 1px solid var(--line); }
+        .truth-table tr:first-child > *:first-child { border-top-left-radius: 10px; }
+        .truth-table tr:first-child > *:last-child { border-top-right-radius: 10px; }
+        .truth-table tr:last-child > *:first-child { border-bottom-left-radius: 10px; }
+        .truth-table tr:last-child > *:last-child { border-bottom-right-radius: 10px; }
+        .table-scroll { overflow-x: auto; }
+
+        .inductive-layout { display: grid; grid-template-columns: minmax(0, 1.1fr) minmax(290px, .9fr); gap: 18px; }
+        .argument-box { min-height: 250px; display: flex; flex-direction: column; justify-content: center; padding: 26px; color: #fff; background: var(--green); border-radius: 18px; }
+        .argument-box .argument-line { margin: 4px 0; font-family: Georgia, serif; font-size: 1.15rem; }
+        .argument-box .therefore { width: 38px; margin: 10px 0 6px; padding-top: 5px; border-top: 1px solid rgba(255,255,255,.4); }
+        .pattern-choices { display: grid; grid-template-columns: repeat(2, 1fr); gap: 9px; margin-top: 18px; }
+        .pattern-choices .choice-button { padding: 11px; font-size: .78rem; }
+        .pattern-list { display: grid; gap: 9px; }
+        .pattern { padding: 15px; background: rgba(24,32,30,.035); border-radius: 12px; }
+        .pattern strong { display: block; margin-bottom: 5px; color: var(--green); font-size: .82rem; }
+        .pattern span { display: block; color: var(--muted); font-size: .76rem; text-wrap: pretty; }
+
+        .reset-row { display: flex; justify-content: flex-end; margin-top: 26px; }
+        .reset-button { padding: 0 14px; color: var(--muted); background: transparent; box-shadow: inset 0 0 0 1px var(--line); }
+        .reset-button:hover { color: var(--red); background: var(--red-soft); }
+        footer { display: flex; justify-content: space-between; gap: 18px; padding: 27px 0 38px; color: var(--muted); border-top: 1px solid var(--line); font-size: .78rem; }
+        :focus-visible { outline: 3px solid rgba(180,123,56,.55); outline-offset: 4px; }
+
+        @media (max-width: 900px) {
+            .proof-layout, .drill-grid, .inductive-layout { grid-template-columns: 1fr; }
+            .rulebook { position: static; }
+            .rule-list { grid-template-columns: repeat(2, 1fr); }
+        }
+        @media (max-width: 720px) {
+            .hero-bottom, .section-head { grid-template-columns: 1fr; gap: 26px; }
+            .derive-row { grid-template-columns: 1fr 1fr; }
+            .derive-button { grid-column: 1 / -1; }
+        }
+        @media (max-width: 540px) {
+            .shell { width: min(100% - 28px, 1180px); }
+            .brand span:last-child { display: none; }
+            .hero { padding: 55px 0 42px; }
+            h1 { font-size: clamp(3.15rem, 16vw, 4.5rem); }
+            .tabs-wrap { margin: 0 -7px; }
+            .tabs { gap: 4px; }
+            .tab { padding: 6px; font-size: .75rem; }
+            .lab-section { padding-top: 42px; }
+            .workspace, .rulebook, .drill-card { border-radius: 20px; }
+            .challenge-top, .workspace-body, .drill-card { padding: 21px; }
+            .derive-row, .rule-list, .pattern-choices { grid-template-columns: 1fr; }
+            .proof-line { grid-template-columns: 25px 1fr 19px; }
+            .line-reason { grid-column: 2; }
+            .line-check { grid-column: 3; grid-row: 1; }
+            .complete-box.show { align-items: stretch; flex-direction: column; }
+            .material-action { width: 100%; }
+            footer { flex-direction: column; gap: 4px; }
+        }
+        @media (prefers-reduced-motion: reduce) {
+            html { scroll-behavior: auto; }
+            *, *::before, *::after { transition-duration: .01ms !important; }
+        }
+    </style>
+</head>
+<body>
+    <div class="shell">
+        <header class="site-header">
+            <a class="brand" href="index.html"><span class="brand-mark">φ</span><span>Course 3240305</span></a>
+            <a class="back-link" href="index.html">← Course home</a>
+        </header>
+
+        <main>
+            <section class="hero">
+                <p class="eyebrow">Interactive practice</p>
+                <h1>Master <em>logic.</em></h1>
+                <div class="hero-bottom">
+                    <p class="hero-copy">Build proofs one justified line at a time. Select the statements you need, apply a rule of inference, and derive the target—then sharpen your instincts with truth-table and inductive-inference drills.</p>
+                    <div class="score-panel" aria-label="Progress">
+                        <div class="score-item"><strong id="solved-count">0</strong><span>Proofs solved</span></div>
+                        <div class="score-item"><strong id="streak-count">0</strong><span>Current streak</span></div>
+                    </div>
+                </div>
+            </section>
+
+            <div class="tabs-wrap">
+                <div class="tabs" role="tablist" aria-label="Logic exercise types">
+                    <button class="tab" id="tab-proofs" role="tab" aria-selected="true" aria-controls="panel-proofs">Proof builder</button>
+                    <button class="tab" id="tab-truth" role="tab" aria-selected="false" aria-controls="panel-truth" tabindex="-1">Truth tables</button>
+                    <button class="tab" id="tab-induction" role="tab" aria-selected="false" aria-controls="panel-induction" tabindex="-1">Inductive rules</button>
+                </div>
+            </div>
+
+            <section class="lab-section lab-panel" id="panel-proofs" role="tabpanel" aria-labelledby="tab-proofs">
+                <div class="section-head"><h2>Proof builder</h2><p>Choose one or two available lines, select a rule, and choose the statement that follows. A proof is complete when you derive the gold target.</p></div>
+                <div class="proof-layout">
+                    <div class="workspace">
+                        <div class="challenge-top">
+                            <div><p class="challenge-kicker" id="challenge-level">Foundation</p><h3 id="challenge-title">Modus ponens</h3></div>
+                            <span class="challenge-count" id="challenge-count">1 / 10</span>
+                        </div>
+                        <div class="workspace-body">
+                            <div class="goal-box"><span>Prove</span><strong class="formula" id="proof-goal">Q</strong></div>
+                            <p class="proof-label">Available lines · select up to two</p>
+                            <div class="proof-lines" id="proof-lines"></div>
+                            <div class="derive-box">
+                                <div class="derive-row">
+                                    <div class="select-wrap"><label for="rule-select">Rule</label><select id="rule-select"></select></div>
+                                    <div class="select-wrap"><label for="conclusion-select">Conclusion</label><select id="conclusion-select"></select></div>
+                                    <button class="derive-button" id="derive-button">Derive line</button>
+                                </div>
+                                <p class="feedback" id="proof-feedback" aria-live="polite">Select the relevant proof lines, then apply a rule.</p>
+                            </div>
+                            <div class="complete-box" id="complete-box">
+                                <div><strong>Proof complete.</strong><span id="complete-copy">The conclusion follows deductively.</span></div>
+                                <button class="next-button" id="next-proof">Next proof →</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <aside class="rulebook" aria-labelledby="rulebook-title">
+                        <div class="rulebook-title"><h3 id="rulebook-title">Rulebook</h3><span class="rule-source">Formula sheet</span></div>
+                        <div class="rule-list">
+                            <div class="rule"><div class="rule-head"><strong>MP</strong><span>Modus ponens</span></div><div class="formula">P → Q, P ⟹ Q</div></div>
+                            <div class="rule"><div class="rule-head"><strong>MT</strong><span>Modus tollens</span></div><div class="formula">P → Q, ¬Q ⟹ ¬P</div></div>
+                            <div class="rule"><div class="rule-head"><strong>HS</strong><span>Hypothetical syllogism</span></div><div class="formula">P → Q, Q → R ⟹ P → R</div></div>
+                            <div class="rule"><div class="rule-head"><strong>Trans</strong><span>Contraposition</span></div><div class="formula">P → Q ⟺ ¬Q → ¬P</div></div>
+                            <div class="rule"><div class="rule-head"><strong>Impl</strong><span>Implication</span></div><div class="formula">P → Q ⟺ ¬P ∨ Q</div></div>
+                            <div class="rule"><div class="rule-head"><strong>DS</strong><span>Disjunctive syllogism</span></div><div class="formula">P ∨ Q, ¬P ⟹ Q</div></div>
+                            <div class="rule"><div class="rule-head"><strong>Add</strong><span>Addition</span></div><div class="formula">P ⟹ P ∨ Q</div></div>
+                            <div class="rule"><div class="rule-head"><strong>Simp</strong><span>Simplification</span></div><div class="formula">P ∧ Q ⟹ P</div></div>
+                        </div>
+                    </aside>
+                </div>
+            </section>
+
+            <section class="lab-section lab-panel" id="panel-truth" role="tabpanel" aria-labelledby="tab-truth" hidden>
+                <div class="section-head"><h2>Truth-table sprint</h2><p>Evaluate the connective for the displayed values. The reference table comes directly from the sample exam’s formula sheet.</p></div>
+                <div class="drill-grid">
+                    <div class="drill-card">
+                        <h3>Is the expression true?</h3><p>Use the values of p and q, then choose T or F.</p>
+                        <div class="truth-prompt"><div><div class="truth-values"><span class="value-pill" id="p-value">p = T</span><span class="value-pill" id="q-value">q = T</span></div><div class="truth-expression" id="truth-expression">p ∧ q</div></div></div>
+                        <div class="choice-row"><button class="choice-button truth-answer" data-value="true">True</button><button class="choice-button truth-answer" data-value="false">False</button></div>
+                        <p class="feedback" id="truth-feedback" aria-live="polite">Choose a truth value.</p>
+                    </div>
+                    <div class="drill-card">
+                        <h3>Reference table</h3><p>∧ requires both; ∨ requires at least one; → is false only for T → F; ↔ requires matching values.</p>
+                        <div class="table-scroll"><table class="truth-table"><thead><tr><th>p</th><th>q</th><th>p ∧ q</th><th>p ∨ q</th><th>p → q</th><th>p ↔ q</th></tr></thead><tbody><tr><td>T</td><td>T</td><td>T</td><td>T</td><td>T</td><td>T</td></tr><tr><td>T</td><td>F</td><td>F</td><td>T</td><td>F</td><td>F</td></tr><tr><td>F</td><td>T</td><td>F</td><td>T</td><td>T</td><td>F</td></tr><tr><td>F</td><td>F</td><td>F</td><td>F</td><td>T</td><td>T</td></tr></tbody></table></div>
+                    </div>
+                </div>
+            </section>
+
+            <section class="lab-section lab-panel" id="panel-induction" role="tabpanel" aria-labelledby="tab-induction" hidden>
+                <div class="section-head"><h2>Inductive patterns</h2><p>Identify which form of inductive inference an argument instantiates. Unlike a deductive proof, a strong inductive argument makes its conclusion probable—not certain.</p></div>
+                <div class="inductive-layout">
+                    <div class="drill-card">
+                        <h3>Name the inference</h3><p>Read the argument’s structure, then select its pattern.</p>
+                        <div class="argument-box" id="argument-box"></div>
+                        <div class="pattern-choices" id="pattern-choices"></div>
+                        <p class="feedback" id="inductive-feedback" aria-live="polite">Choose the pattern that best fits.</p>
+                    </div>
+                    <aside class="drill-card">
+                        <h3>Pattern guide</h3><p>Compare the direction of each argument: from a group to a case, from cases to a group, or between similar cases.</p>
+                        <div class="pattern-list">
+                            <div class="pattern"><strong>Statistical syllogism</strong><span>Most F are G; x is F; therefore, x is probably G.</span></div>
+                            <div class="pattern"><strong>Inductive generalization</strong><span>Most examined F are G in a representative sample; therefore, most F are G.</span></div>
+                            <div class="pattern"><strong>Combined generalization</strong><span>A generalization from a sample is applied to a particular case.</span></div>
+                            <div class="pattern"><strong>Analogical inference</strong><span>x and y are similar; a relevant truth about x is projected onto y.</span></div>
+                        </div>
+                    </aside>
+                </div>
+            </section>
+
+            <div class="reset-row"><button class="reset-button" id="reset-progress">Reset saved progress</button></div>
+        </main>
+
+        <footer><span>Interactive exercises based on the 2026 sample exam formula sheet</span><span>History &amp; Philosophy of Science</span></footer>
+    </div>
+
+    <script>
+        const A = name => ({ type: 'atom', name });
+        const Not = value => ({ type: 'not', value });
+        const And = (left, right) => ({ type: 'and', left, right });
+        const Or = (left, right) => ({ type: 'or', left, right });
+        const If = (left, right) => ({ type: 'if', left, right });
+        const eq = (a, b) => JSON.stringify(a) === JSON.stringify(b);
+        const key = value => JSON.stringify(value);
+        const format = value => {
+            if (value.type === 'atom') return value.name;
+            if (value.type === 'not') return '¬' + (value.value.type === 'atom' ? format(value.value) : '(' + format(value.value) + ')');
+            const signs = { and: '∧', or: '∨', if: '→' };
+            return `${format(value.left)} ${signs[value.type]} ${format(value.right)}`;
+        };
+
+        const rules = ['MP', 'MT', 'HS', 'Trans', 'Impl', 'DS', 'Add', 'Simp'];
+        const P=A('P'), Q=A('Q'), R=A('R'), S=A('S'), T=A('T'), U=A('U'), A1=A('A'), B=A('B'), C=A('C'), D=A('D'), H=A('H'), J=A('J'), K=A('K'), Z=A('Z'), L=A('L');
+        const challenges = [
+            { level:'Foundation', title:'Modus ponens', premises:[If(P,Q),P], goal:Q, pool:[Q,Not(Q),If(Q,P)] },
+            { level:'Foundation', title:'Modus tollens', premises:[If(P,Q),Not(Q)], goal:Not(P), pool:[Not(P),P,Q] },
+            { level:'Foundation', title:'A conditional chain', premises:[If(P,Q),If(Q,R)], goal:If(P,R), pool:[If(P,R),If(R,P),R] },
+            { level:'Foundation', title:'Either way', premises:[Or(P,Q),Not(P)], goal:Q, pool:[Q,Not(Q),P] },
+            { level:'Foundation', title:'Simplify a conjunction', premises:[And(H,J)], goal:J, pool:[H,J,Or(H,J)] },
+            { level:'Transformation', title:'Rewrite implication', premises:[If(S,T)], goal:Or(Not(S),T), pool:[Or(Not(S),T),Or(S,T),If(T,S)] },
+            { level:'Transformation', title:'Take the contrapositive', premises:[If(P,Q)], goal:If(Not(Q),Not(P)), pool:[If(Not(Q),Not(P)),If(Not(P),Not(Q)),If(Q,P)] },
+            { level:'Transformation', title:'Add a disjunct', premises:[K], goal:Or(K,Z), pool:[Or(K,Z),And(K,Z),If(K,Z)] },
+            { level:'Multi-step', title:'Carry the implication', premises:[If(A1,B),If(B,C),A1], goal:C, pool:[If(A1,C),C,B,Not(C)] },
+            { level:'Multi-step', title:'Refute the first link', premises:[If(P,Q),If(Q,R),Not(R)], goal:Not(P), pool:[If(P,R),Not(Q),Not(P),R] }
+        ];
+
+        const state = {
+            proofIndex: 0,
+            lines: [],
+            selected: [],
+            solved: new Set(JSON.parse(localStorage.getItem('logicSolved') || '[]')),
+            streak: Number(localStorage.getItem('logicStreak') || 0),
+            truth: null,
+            inductive: 0
+        };
+
+        const els = {
+            solved: document.getElementById('solved-count'), streak: document.getElementById('streak-count'),
+            title: document.getElementById('challenge-title'), level: document.getElementById('challenge-level'), count: document.getElementById('challenge-count'), goal: document.getElementById('proof-goal'), lines: document.getElementById('proof-lines'),
+            rule: document.getElementById('rule-select'), conclusion: document.getElementById('conclusion-select'), feedback: document.getElementById('proof-feedback'), complete: document.getElementById('complete-box')
+        };
+
+        function saveProgress() {
+            localStorage.setItem('logicSolved', JSON.stringify([...state.solved]));
+            localStorage.setItem('logicStreak', String(state.streak));
+            els.solved.textContent = state.solved.size;
+            els.streak.textContent = state.streak;
+        }
+
+        function applyRule(rule, selected, candidate) {
+            const one = selected[0], two = selected[1];
+            const pairs = two ? [[one,two],[two,one]] : [];
+            if (rule === 'MP') return pairs.some(([x,y]) => x.type === 'if' && eq(x.left,y) && eq(x.right,candidate));
+            if (rule === 'MT') return pairs.some(([x,y]) => x.type === 'if' && y.type === 'not' && eq(x.right,y.value) && candidate.type === 'not' && eq(candidate.value,x.left));
+            if (rule === 'HS') return pairs.some(([x,y]) => x.type === 'if' && y.type === 'if' && eq(x.right,y.left) && candidate.type === 'if' && eq(candidate.left,x.left) && eq(candidate.right,y.right));
+            if (rule === 'Trans' && selected.length === 1) {
+                const x=one;
+                if (x.type !== 'if' || candidate.type !== 'if') return false;
+                return candidate.left.type === 'not' && candidate.right.type === 'not' && eq(candidate.left.value,x.right) && eq(candidate.right.value,x.left);
+            }
+            if (rule === 'Impl' && selected.length === 1) {
+                const x=one;
+                if (x.type === 'if' && candidate.type === 'or') return candidate.left.type === 'not' && eq(candidate.left.value,x.left) && eq(candidate.right,x.right);
+                if (x.type === 'or' && x.left.type === 'not' && candidate.type === 'if') return eq(candidate.left,x.left.value) && eq(candidate.right,x.right);
+                return false;
+            }
+            if (rule === 'DS') return pairs.some(([x,y]) => x.type === 'or' && y.type === 'not' && ((eq(x.left,y.value) && eq(candidate,x.right)) || (eq(x.right,y.value) && eq(candidate,x.left))));
+            if (rule === 'Add' && selected.length === 1) return candidate.type === 'or' && (eq(candidate.left,one) || eq(candidate.right,one));
+            if (rule === 'Simp' && selected.length === 1) return one.type === 'and' && (eq(candidate,one.left) || eq(candidate,one.right));
+            return false;
+        }
+
+        function renderProof() {
+            const c = challenges[state.proofIndex];
+            state.lines = c.premises.map((formula, i) => ({ formula, reason:`Premise ${i+1}` }));
+            state.selected = [];
+            els.title.textContent = c.title; els.level.textContent = c.level; els.count.textContent = `${state.proofIndex+1} / ${challenges.length}`; els.goal.textContent = format(c.goal);
+            els.rule.innerHTML = '<option value="">Choose a rule…</option>' + rules.map(r => `<option value="${r}">${r}</option>`).join('');
+            els.conclusion.innerHTML = '<option value="">Choose a conclusion…</option>' + c.pool.map((f,i) => `<option value="${i}">${format(f)}</option>`).join('');
+            els.feedback.className='feedback'; els.feedback.textContent='Select the relevant proof lines, then apply a rule.'; els.complete.classList.remove('show');
+            renderLines();
+        }
+
+        function renderLines() {
+            els.lines.innerHTML = '';
+            state.lines.forEach((line,i) => {
+                const button=document.createElement('button'); button.className='proof-line'+(state.selected.includes(i)?' selected':''); button.type='button'; button.setAttribute('aria-pressed',String(state.selected.includes(i)));
+                button.innerHTML=`<span class="line-no">${i+1}.</span><span class="formula">${format(line.formula)}</span><span class="line-reason">${line.reason}</span><span class="line-check" aria-hidden="true">✓</span>`;
+                button.addEventListener('click',()=>{ const at=state.selected.indexOf(i); if(at>=0) state.selected.splice(at,1); else { if(state.selected.length===2) state.selected.shift(); state.selected.push(i); } renderLines(); });
+                els.lines.appendChild(button);
+            });
+        }
+
+        document.getElementById('derive-button').addEventListener('click',()=>{
+            const c=challenges[state.proofIndex], rule=els.rule.value, conclusionValue=els.conclusion.value;
+            if(!rule || conclusionValue === '' || !state.selected.length){ els.feedback.className='feedback bad'; els.feedback.textContent='Select at least one line, a rule, and a proposed conclusion.'; return; }
+            const candidate=c.pool[Number(conclusionValue)];
+            const selected=state.selected.map(i=>state.lines[i].formula);
+            if(!applyRule(rule,selected,candidate)){ state.streak=0; saveProgress(); els.feedback.className='feedback bad'; els.feedback.textContent=`That conclusion does not follow from the selected line${selected.length>1?'s':''} by ${rule}. Try a different selection.`; return; }
+            const duplicate=state.lines.some(line=>eq(line.formula,candidate));
+            if(!duplicate) state.lines.push({formula:candidate, reason:`${rule}, lines ${state.selected.map(i=>i+1).join(', ')}`});
+            state.selected=[]; renderLines(); els.feedback.className='feedback good'; els.feedback.textContent=`Valid: ${format(candidate)} follows by ${rule}.`;
+            if(eq(candidate,c.goal)){ state.solved.add(state.proofIndex); state.streak++; saveProgress(); document.getElementById('complete-copy').textContent=`You reached ${format(c.goal)} in ${state.lines.length-c.premises.length} derived step${state.lines.length-c.premises.length===1?'':'s'}.`; els.complete.classList.add('show'); }
+        });
+        document.getElementById('next-proof').addEventListener('click',()=>{ state.proofIndex=(state.proofIndex+1)%challenges.length; renderProof(); window.scrollTo({top:document.getElementById('panel-proofs').offsetTop-70,behavior:'smooth'}); });
+
+        const tabButtons=[...document.querySelectorAll('[role="tab"]')];
+        tabButtons.forEach((tab,index)=>tab.addEventListener('click',()=>{
+            tabButtons.forEach(t=>{const active=t===tab;t.setAttribute('aria-selected',String(active));t.tabIndex=active?0:-1;document.getElementById(t.getAttribute('aria-controls')).hidden=!active;});
+            if(index===1 && !state.truth) nextTruth();
+        }));
+        document.querySelector('.tabs').addEventListener('keydown',e=>{ if(!['ArrowLeft','ArrowRight'].includes(e.key))return; const current=tabButtons.indexOf(document.activeElement); const next=(current+(e.key==='ArrowRight'?1:-1)+tabButtons.length)%tabButtons.length; tabButtons[next].click();tabButtons[next].focus(); });
+
+        const truthOps=[
+            {symbol:'p ∧ q',name:'conjunction',test:(p,q)=>p&&q}, {symbol:'p ∨ q',name:'disjunction',test:(p,q)=>p||q},
+            {symbol:'p → q',name:'conditional',test:(p,q)=>!p||q}, {symbol:'p ↔ q',name:'biconditional',test:(p,q)=>p===q}
+        ];
+        function nextTruth(){ const op=truthOps[Math.floor(Math.random()*truthOps.length)],p=Math.random()>.5,q=Math.random()>.5;state.truth={op,p,q};document.getElementById('p-value').textContent=`p = ${p?'T':'F'}`;document.getElementById('q-value').textContent=`q = ${q?'T':'F'}`;document.getElementById('truth-expression').textContent=op.symbol;const f=document.getElementById('truth-feedback');f.className='feedback';f.textContent='Choose a truth value.'; }
+        document.querySelectorAll('.truth-answer').forEach(b=>b.addEventListener('click',()=>{ const answer=b.dataset.value==='true',correct=state.truth.op.test(state.truth.p,state.truth.q),f=document.getElementById('truth-feedback');if(answer===correct){state.streak++;saveProgress();f.className='feedback good';f.textContent=`Correct. The ${state.truth.op.name} is ${correct?'true':'false'} here. Loading another…`;setTimeout(nextTruth,850);}else{state.streak=0;saveProgress();f.className='feedback bad';f.textContent=`Not quite. Check the ${state.truth.op.name} column in the reference table.`;} }));
+
+        const patterns=['Statistical syllogism','Inductive generalization','Combined generalization','Analogical inference'];
+        const inductiveItems=[
+            {answer:0,lines:['Most metals conduct electricity.','Copper is a metal.','Copper probably conducts electricity.']},
+            {answer:1,lines:['Most swans in a large representative sample are white.','The sample covers varied habitats.','Most swans are probably white.']},
+            {answer:2,lines:['Most examined medicine recipients improved.','The sample was representative.','Dana received the medicine.','Dana will probably improve.']},
+            {answer:3,lines:['Earth and Kepler-452b share several relevant features.','Earth supports liquid water.','Kepler-452b may support liquid water.']},
+            {answer:0,lines:['Most peer-reviewed studies use controls.','This paper is peer-reviewed.','This paper probably uses controls.']},
+            {answer:1,lines:['A representative sample of copper wires conducted electricity.','The sample was sufficiently large.','Most copper wires conduct electricity.']}
+        ];
+        function renderInductive(){ const item=inductiveItems[state.inductive];const box=document.getElementById('argument-box');box.innerHTML=item.lines.map((line,i)=>`${i===item.lines.length-1?'<span class="therefore">∴</span>':''}<p class="argument-line">${i+1}. ${line}</p>`).join('');document.getElementById('pattern-choices').innerHTML=patterns.map((p,i)=>`<button class="choice-button" data-pattern="${i}">${p}</button>`).join('');const f=document.getElementById('inductive-feedback');f.className='feedback';f.textContent='Choose the pattern that best fits.';document.querySelectorAll('[data-pattern]').forEach(b=>b.addEventListener('click',()=>{if(Number(b.dataset.pattern)===item.answer){state.streak++;saveProgress();f.className='feedback good';f.textContent=`Correct: ${patterns[item.answer]}. Loading another…`;setTimeout(()=>{state.inductive=(state.inductive+1)%inductiveItems.length;renderInductive();},950);}else{state.streak=0;saveProgress();f.className='feedback bad';f.textContent='Not this pattern. Ask: does the argument move from a population, a sample, or a similar case?';}})); }
+
+        document.getElementById('reset-progress').addEventListener('click',()=>{ if(!confirm('Reset solved proofs and the current streak?'))return;localStorage.removeItem('logicSolved');localStorage.removeItem('logicStreak');state.solved.clear();state.streak=0;saveProgress();renderProof(); });
+        saveProgress(); renderProof(); renderInductive();
+    </script>
+</body>
+</html>
