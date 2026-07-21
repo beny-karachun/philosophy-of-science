@@ -96,7 +96,12 @@
         .challenge-top { display: flex; justify-content: space-between; gap: 18px; padding: 26px 28px; color: #fff; background: var(--green); }
         .challenge-kicker { margin: 0 0 6px; color: rgba(255,255,255,.68); font-size: .7rem; font-weight: 850; letter-spacing: .12em; text-transform: uppercase; }
         .challenge-top h3 { margin: 0; font-family: Georgia, serif; font-size: 1.65rem; font-weight: 400; }
-        .challenge-count { flex: 0 0 auto; align-self: start; padding: 6px 10px; background: rgba(255,255,255,.1); border-radius: 8px; font-size: .76rem; font-variant-numeric: tabular-nums; }
+        .challenge-nav { flex: 0 0 auto; align-self: start; display: flex; align-items: center; gap: 5px; padding: 5px; background: rgba(255,255,255,.1); border-radius: 12px; }
+        .challenge-count { min-width: 54px; text-align: center; font-size: .76rem; font-variant-numeric: tabular-nums; }
+        .nav-arrow { width: 40px; height: 40px; display: grid; place-items: center; padding: 0; color: #fff; background: rgba(255,255,255,.08); border: 0; border-radius: 8px; cursor: pointer; font-size: 1rem; transition-property: background-color, opacity, transform; transition-duration: 170ms; }
+        .nav-arrow:hover:not(:disabled) { background: rgba(255,255,255,.2); }
+        .nav-arrow:active:not(:disabled) { transform: scale(.96); }
+        .nav-arrow:disabled { opacity: .32; cursor: not-allowed; }
         .workspace-body { padding: 28px; }
         .goal-box { display: flex; justify-content: space-between; gap: 18px; align-items: center; margin-bottom: 23px; padding: 15px 17px; background: var(--gold-soft); border-radius: 13px; }
         .goal-box span:first-child { color: #7c572b; font-size: .72rem; font-weight: 850; letter-spacing: .1em; text-transform: uppercase; }
@@ -123,6 +128,7 @@
         .derive-button { align-self: end; padding: 0 18px; color: #fff; background: var(--green); box-shadow: 0 7px 17px rgba(23,79,67,.18); }
         .derive-button:hover, .next-button:hover { background: #0f4137; }
         .derive-button:active, .next-button:active, .choice-button:active, .reset-button:active { transform: scale(.96); }
+        .next-button:disabled { opacity: .45; cursor: not-allowed; }
         .feedback { min-height: 24px; margin: 13px 2px 0; color: var(--muted); font-size: .82rem; text-wrap: pretty; }
         .feedback.good { color: var(--green-2); }
         .feedback.bad { color: var(--red); }
@@ -168,7 +174,15 @@
         .inductive-layout { display: grid; grid-template-columns: minmax(0, 1.1fr) minmax(290px, .9fr); gap: 18px; }
         .argument-box { min-height: 250px; display: flex; flex-direction: column; justify-content: center; padding: 26px; color: #fff; background: var(--green); border-radius: 18px; }
         .argument-box .argument-line { margin: 4px 0; font-family: Georgia, serif; font-size: 1.15rem; }
+        .argument-count { margin: 0 0 17px; color: rgba(255,255,255,.66); font-size: .69rem; font-weight: 850; letter-spacing: .1em; text-transform: uppercase; font-variant-numeric: tabular-nums; }
         .argument-box .therefore { width: 38px; margin: 10px 0 6px; padding-top: 5px; border-top: 1px solid rgba(255,255,255,.4); }
+        .exercise-nav { display: grid; grid-template-columns: 1fr auto 1fr; gap: 9px; align-items: center; margin-bottom: 12px; }
+        .exercise-nav span { color: var(--muted); text-align: center; font-size: .76rem; font-weight: 800; font-variant-numeric: tabular-nums; }
+        .exercise-nav button { min-height: 42px; padding: 0 13px; color: var(--green); background: var(--green-soft); border: 0; border-radius: 9px; cursor: pointer; font-size: .76rem; font-weight: 800; transition-property: background-color, opacity, transform; transition-duration: 170ms; }
+        .exercise-nav button:last-child { justify-self: end; }
+        .exercise-nav button:hover:not(:disabled) { background: #cbded2; }
+        .exercise-nav button:active:not(:disabled) { transform: scale(.96); }
+        .exercise-nav button:disabled { opacity: .4; cursor: not-allowed; }
         .pattern-choices { display: grid; grid-template-columns: repeat(2, 1fr); gap: 9px; margin-top: 18px; }
         .pattern-choices .choice-button { padding: 11px; font-size: .78rem; }
         .pattern-list { display: grid; gap: 9px; }
@@ -203,6 +217,9 @@
             .lab-section { padding-top: 42px; }
             .workspace, .rulebook, .drill-card { border-radius: 20px; }
             .challenge-top, .workspace-body, .drill-card { padding: 21px; }
+            .challenge-top { align-items: stretch; flex-direction: column; }
+            .challenge-nav { width: 100%; align-self: stretch; justify-content: space-between; margin-top: 4px; }
+            .challenge-count { min-width: 43px; }
             .derive-row, .rule-list, .pattern-choices { grid-template-columns: 1fr; }
             .proof-line { grid-template-columns: 25px 1fr 19px; }
             .line-reason { grid-column: 2; }
@@ -231,7 +248,7 @@
                 <div class="hero-bottom">
                     <p class="hero-copy">Build proofs one justified line at a time. Select the statements you need, apply a rule of inference, and derive the target—then sharpen your instincts with truth-table and inductive-inference drills.</p>
                     <div class="score-panel" aria-label="Progress">
-                        <div class="score-item"><strong id="solved-count">0</strong><span>Proofs solved</span></div>
+                        <div class="score-item"><strong id="solved-count">0 / 50</strong><span>Proofs solved</span></div>
                         <div class="score-item"><strong id="streak-count">0</strong><span>Current streak</span></div>
                     </div>
                 </div>
@@ -246,12 +263,16 @@
             </div>
 
             <section class="lab-section lab-panel" id="panel-proofs" role="tabpanel" aria-labelledby="tab-proofs">
-                <div class="section-head"><h2>Proof builder</h2><p>Choose one or two available lines, select a rule, and choose the statement that follows. A proof is complete when you derive the gold target.</p></div>
+                <div class="section-head"><h2>Proof builder</h2><p>Work through 50 proofs: focused practice with each rule, followed by multi-step conditional chains. A proof is complete when you derive the gold target.</p></div>
                 <div class="proof-layout">
                     <div class="workspace">
                         <div class="challenge-top">
                             <div><p class="challenge-kicker" id="challenge-level">Foundation</p><h3 id="challenge-title">Modus ponens</h3></div>
-                            <span class="challenge-count" id="challenge-count">1 / 10</span>
+                            <div class="challenge-nav" aria-label="Proof navigation">
+                                <button class="nav-arrow" id="previous-proof" type="button" aria-label="Previous proof">←</button>
+                                <span class="challenge-count" id="challenge-count">1 / 50</span>
+                                <button class="nav-arrow" id="browse-next-proof" type="button" aria-label="Next proof">→</button>
+                            </div>
                         </div>
                         <div class="workspace-body">
                             <div class="goal-box"><span>Prove</span><strong class="formula" id="proof-goal">Q</strong></div>
@@ -305,10 +326,15 @@
             </section>
 
             <section class="lab-section lab-panel" id="panel-induction" role="tabpanel" aria-labelledby="tab-induction" hidden>
-                <div class="section-head"><h2>Inductive patterns</h2><p>Identify which form of inductive inference an argument instantiates. Unlike a deductive proof, a strong inductive argument makes its conclusion probable—not certain.</p></div>
+                <div class="section-head"><h2>Inductive patterns</h2><p>Classify 50 varied arguments across the four formula-sheet patterns. Unlike a deductive proof, a strong inductive argument makes its conclusion probable—not certain.</p></div>
                 <div class="inductive-layout">
                     <div class="drill-card">
                         <h3>Name the inference</h3><p>Read the argument’s structure, then select its pattern.</p>
+                        <div class="exercise-nav" aria-label="Inductive exercise navigation">
+                            <button id="previous-inductive" type="button">← Previous</button>
+                            <span id="inductive-count">1 / 50</span>
+                            <button id="next-inductive" type="button">Next →</button>
+                        </div>
                         <div class="argument-box" id="argument-box"></div>
                         <div class="pattern-choices" id="pattern-choices"></div>
                         <p class="feedback" id="inductive-feedback" aria-live="polite">Choose the pattern that best fits.</p>
@@ -347,28 +373,64 @@
         };
 
         const rules = ['MP', 'MT', 'HS', 'Trans', 'Impl', 'DS', 'Add', 'Simp'];
-        const P=A('P'), Q=A('Q'), R=A('R'), S=A('S'), T=A('T'), U=A('U'), A1=A('A'), B=A('B'), C=A('C'), D=A('D'), H=A('H'), J=A('J'), K=A('K'), Z=A('Z'), L=A('L');
-        const challenges = [
-            { level:'Foundation', title:'Modus ponens', premises:[If(P,Q),P], goal:Q, pool:[Q,Not(Q),If(Q,P)] },
-            { level:'Foundation', title:'Modus tollens', premises:[If(P,Q),Not(Q)], goal:Not(P), pool:[Not(P),P,Q] },
-            { level:'Foundation', title:'A conditional chain', premises:[If(P,Q),If(Q,R)], goal:If(P,R), pool:[If(P,R),If(R,P),R] },
-            { level:'Foundation', title:'Either way', premises:[Or(P,Q),Not(P)], goal:Q, pool:[Q,Not(Q),P] },
-            { level:'Foundation', title:'Simplify a conjunction', premises:[And(H,J)], goal:J, pool:[H,J,Or(H,J)] },
-            { level:'Transformation', title:'Rewrite implication', premises:[If(S,T)], goal:Or(Not(S),T), pool:[Or(Not(S),T),Or(S,T),If(T,S)] },
-            { level:'Transformation', title:'Take the contrapositive', premises:[If(P,Q)], goal:If(Not(Q),Not(P)), pool:[If(Not(Q),Not(P)),If(Not(P),Not(Q)),If(Q,P)] },
-            { level:'Transformation', title:'Add a disjunct', premises:[K], goal:Or(K,Z), pool:[Or(K,Z),And(K,Z),If(K,Z)] },
-            { level:'Multi-step', title:'Carry the implication', premises:[If(A1,B),If(B,C),A1], goal:C, pool:[If(A1,C),C,B,Not(C)] },
-            { level:'Multi-step', title:'Refute the first link', premises:[If(P,Q),If(Q,R),Not(R)], goal:Not(P), pool:[If(P,R),Not(Q),Not(P),R] }
+        const symbolSets = [
+            ['P','Q','R','S'], ['A','B','C','D'], ['L','M','N','U'], ['W','X','Y','Z'], ['F','G','H','J']
         ];
+        const foundation = [];
+        symbolSets.slice(0,2).forEach((names,index)=>{
+            const [a,b,c]=names.map(A), suffix=index+1;
+            foundation.push(
+                {level:'Foundation',title:`Conditional consequence · ${suffix}`,premises:[If(a,b),a],goal:b,pool:[b,Not(b),If(b,a)]},
+                {level:'Foundation',title:`Deny the result · ${suffix}`,premises:[If(a,b),Not(b)],goal:Not(a),pool:[Not(a),a,b]},
+                {level:'Foundation',title:`Bridge two conditions · ${suffix}`,premises:[If(a,b),If(b,c)],goal:If(a,c),pool:[If(a,c),If(c,a),c]},
+                {level:'Foundation',title:`Eliminate a disjunct · ${suffix}`,premises:[Or(a,b),Not(a)],goal:b,pool:[b,Not(b),a]},
+                {level:'Foundation',title:`Unpack a conjunction · ${suffix}`,premises:[And(a,b)],goal:index?b:a,pool:[a,b,Or(a,b)]},
+                {level:'Transformation',title:`Rewrite a conditional · ${suffix}`,premises:[If(a,b)],goal:Or(Not(a),b),pool:[Or(Not(a),b),Or(a,b),If(b,a)]},
+                {level:'Transformation',title:`Take the contrapositive · ${suffix}`,premises:[If(a,b)],goal:If(Not(b),Not(a)),pool:[If(Not(b),Not(a)),If(Not(a),Not(b)),If(b,a)]}
+            );
+        });
+        {
+            const [a,b]=symbolSets[2].map(A);
+            foundation.push({level:'Transformation',title:'Introduce an alternative',premises:[a],goal:Or(a,b),pool:[Or(a,b),And(a,b),If(a,b)]});
+        }
+
+        const intermediate = [];
+        symbolSets.forEach((names,index)=>{
+            const [a,b,c,d]=names.map(A), suffix=index+1;
+            intermediate.push(
+                {level:'Multi-step',title:`Connect and conclude · ${suffix}`,premises:[If(a,b),If(b,c),a],goal:c,pool:[If(a,c),b,c,Not(c)]},
+                {level:'Multi-step',title:`Trace a failure backward · ${suffix}`,premises:[If(a,b),If(b,c),Not(c)],goal:Not(a),pool:[If(a,c),Not(b),Not(a),c]},
+                {level:'Multi-step',title:`Build a longer conditional · ${suffix}`,premises:[If(a,b),If(b,c),If(c,d)],goal:If(a,d),pool:[If(a,c),If(b,d),If(a,d),d]},
+                {level:'Multi-step',title:`Open the package · ${suffix}`,premises:[And(If(a,b),a)],goal:b,pool:[If(a,b),a,b,Not(b)]}
+            );
+        });
+
+        const advanced = [];
+        symbolSets.forEach((names,index)=>{
+            const [a,b,c,d]=names.map(A), suffix=index+1;
+            advanced.push(
+                {level:'Advanced',title:`Extract, eliminate, conclude · ${suffix}`,premises:[And(Or(a,b),Not(a))],goal:b,pool:[Or(a,b),Not(a),b,a]},
+                {level:'Advanced',title:`Four-link forward proof · ${suffix}`,premises:[If(a,b),If(b,c),If(c,d),a],goal:d,pool:[b,c,d,If(a,c),If(b,d),If(a,d),Not(d)]},
+                {level:'Advanced',title:`Four-link refutation · ${suffix}`,premises:[If(a,b),If(b,c),If(c,d),Not(d)],goal:Not(a),pool:[Not(c),Not(b),Not(a),If(a,c),If(b,d),If(a,d),d]}
+            );
+        });
+
+        const challenges = [
+            foundation[0], intermediate[0], foundation[6], advanced[0], foundation[1],
+            intermediate[2], foundation[3], advanced[1], foundation[5], foundation[14]
+        ];
+        [...foundation,...intermediate,...advanced].forEach(challenge=>{
+            if(!challenges.includes(challenge))challenges.push(challenge);
+        });
 
         const state = {
-            proofIndex: 0,
+            proofIndex: Math.min(Number(localStorage.getItem('logicProofIndex50') || 0), challenges.length-1),
             lines: [],
             selected: [],
-            solved: new Set(JSON.parse(localStorage.getItem('logicSolved') || '[]')),
+            solved: new Set(JSON.parse(localStorage.getItem('logicSolved50v2') || '[]')),
             streak: Number(localStorage.getItem('logicStreak') || 0),
             truth: null,
-            inductive: 0
+            inductive: Math.min(Number(localStorage.getItem('logicInductiveIndex50') || 0), 49)
         };
 
         const els = {
@@ -378,9 +440,11 @@
         };
 
         function saveProgress() {
-            localStorage.setItem('logicSolved', JSON.stringify([...state.solved]));
+            localStorage.setItem('logicSolved50v2', JSON.stringify([...state.solved]));
             localStorage.setItem('logicStreak', String(state.streak));
-            els.solved.textContent = state.solved.size;
+            localStorage.setItem('logicProofIndex50', String(state.proofIndex));
+            localStorage.setItem('logicInductiveIndex50', String(state.inductive));
+            els.solved.textContent = `${state.solved.size} / ${challenges.length}`;
             els.streak.textContent = state.streak;
         }
 
@@ -412,6 +476,10 @@
             state.lines = c.premises.map((formula, i) => ({ formula, reason:`Premise ${i+1}` }));
             state.selected = [];
             els.title.textContent = c.title; els.level.textContent = c.level; els.count.textContent = `${state.proofIndex+1} / ${challenges.length}`; els.goal.textContent = format(c.goal);
+            document.getElementById('previous-proof').disabled=state.proofIndex===0;
+            document.getElementById('browse-next-proof').disabled=state.proofIndex===challenges.length-1;
+            document.getElementById('next-proof').disabled=state.proofIndex===challenges.length-1;
+            document.getElementById('next-proof').textContent=state.proofIndex===challenges.length-1?'Final proof':'Next proof →';
             els.rule.innerHTML = '<option value="">Choose a rule…</option>' + rules.map(r => `<option value="${r}">${r}</option>`).join('');
             els.conclusion.innerHTML = '<option value="">Choose a conclusion…</option>' + c.pool.map((f,i) => `<option value="${i}">${format(f)}</option>`).join('');
             els.feedback.className='feedback'; els.feedback.textContent='Select the relevant proof lines, then apply a rule.'; els.complete.classList.remove('show');
@@ -439,7 +507,15 @@
             state.selected=[]; renderLines(); els.feedback.className='feedback good'; els.feedback.textContent=`Valid: ${format(candidate)} follows by ${rule}.`;
             if(eq(candidate,c.goal)){ state.solved.add(state.proofIndex); state.streak++; saveProgress(); document.getElementById('complete-copy').textContent=`You reached ${format(c.goal)} in ${state.lines.length-c.premises.length} derived step${state.lines.length-c.premises.length===1?'':'s'}.`; els.complete.classList.add('show'); }
         });
-        document.getElementById('next-proof').addEventListener('click',()=>{ state.proofIndex=(state.proofIndex+1)%challenges.length; renderProof(); window.scrollTo({top:document.getElementById('panel-proofs').offsetTop-70,behavior:'smooth'}); });
+        function moveProof(delta){
+            const next=Math.max(0,Math.min(challenges.length-1,state.proofIndex+delta));
+            if(next===state.proofIndex)return;
+            state.proofIndex=next;saveProgress();renderProof();
+            window.scrollTo({top:document.getElementById('panel-proofs').offsetTop-70,behavior:'smooth'});
+        }
+        document.getElementById('previous-proof').addEventListener('click',()=>moveProof(-1));
+        document.getElementById('browse-next-proof').addEventListener('click',()=>moveProof(1));
+        document.getElementById('next-proof').addEventListener('click',()=>moveProof(1));
 
         const tabButtons=[...document.querySelectorAll('[role="tab"]')];
         tabButtons.forEach((tab,index)=>tab.addEventListener('click',()=>{
@@ -456,17 +532,101 @@
         document.querySelectorAll('.truth-answer').forEach(b=>b.addEventListener('click',()=>{ const answer=b.dataset.value==='true',correct=state.truth.op.test(state.truth.p,state.truth.q),f=document.getElementById('truth-feedback');if(answer===correct){state.streak++;saveProgress();f.className='feedback good';f.textContent=`Correct. The ${state.truth.op.name} is ${correct?'true':'false'} here. Loading another…`;setTimeout(nextTruth,850);}else{state.streak=0;saveProgress();f.className='feedback bad';f.textContent=`Not quite. Check the ${state.truth.op.name} column in the reference table.`;} }));
 
         const patterns=['Statistical syllogism','Inductive generalization','Combined generalization','Analogical inference'];
-        const inductiveItems=[
-            {answer:0,lines:['Most metals conduct electricity.','Copper is a metal.','Copper probably conducts electricity.']},
-            {answer:1,lines:['Most swans in a large representative sample are white.','The sample covers varied habitats.','Most swans are probably white.']},
-            {answer:2,lines:['Most examined medicine recipients improved.','The sample was representative.','Dana received the medicine.','Dana will probably improve.']},
-            {answer:3,lines:['Earth and Kepler-452b share several relevant features.','Earth supports liquid water.','Kepler-452b may support liquid water.']},
-            {answer:0,lines:['Most peer-reviewed studies use controls.','This paper is peer-reviewed.','This paper probably uses controls.']},
-            {answer:1,lines:['A representative sample of copper wires conducted electricity.','The sample was sufficiently large.','Most copper wires conduct electricity.']}
-        ];
-        function renderInductive(){ const item=inductiveItems[state.inductive];const box=document.getElementById('argument-box');box.innerHTML=item.lines.map((line,i)=>`${i===item.lines.length-1?'<span class="therefore">∴</span>':''}<p class="argument-line">${i+1}. ${line}</p>`).join('');document.getElementById('pattern-choices').innerHTML=patterns.map((p,i)=>`<button class="choice-button" data-pattern="${i}">${p}</button>`).join('');const f=document.getElementById('inductive-feedback');f.className='feedback';f.textContent='Choose the pattern that best fits.';document.querySelectorAll('[data-pattern]').forEach(b=>b.addEventListener('click',()=>{if(Number(b.dataset.pattern)===item.answer){state.streak++;saveProgress();f.className='feedback good';f.textContent=`Correct: ${patterns[item.answer]}. Loading another…`;setTimeout(()=>{state.inductive=(state.inductive+1)%inductiveItems.length;renderInductive();},950);}else{state.streak=0;saveProgress();f.className='feedback bad';f.textContent='Not this pattern. Ask: does the argument move from a population, a sample, or a similar case?';}})); }
+        const makeItems = (answer, sets) => sets.map(lines => ({answer,lines}));
+        const statisticalItems = makeItems(0, [
+            ['Most metals conduct electricity.','Copper is a metal.','Copper probably conducts electricity.'],
+            ['Most peer-reviewed studies report their methods.','This paper is peer-reviewed.','This paper probably reports its methods.'],
+            ['Most migratory birds use celestial cues.','This tagged tern is a migratory bird.','This tern probably uses celestial cues.'],
+            ['Most vaccinated patients develop antibodies.','Mira is a vaccinated patient.','Mira probably develops antibodies.'],
+            ['Most mature stars produce heavy elements.','Sirius is a mature star.','Sirius probably produces heavy elements.'],
+            ['Most coastal cities have a port.','Haifa is a coastal city.','Haifa probably has a port.'],
+            ['Most randomized trials use a control group.','This study is a randomized trial.','This study probably uses a control group.'],
+            ['Most flowering plants produce seeds.','This orchid is a flowering plant.','This orchid probably produces seeds.'],
+            ['Most graduate programs require research work.','This program is a graduate program.','This program probably requires research work.'],
+            ['Most volcanic rocks contain silicate minerals.','This specimen is volcanic rock.','This specimen probably contains silicate minerals.'],
+            ['Most research laboratories calibrate their instruments.','Lab 7 is a research laboratory.','Lab 7 probably calibrates its instruments.'],
+            ['Most antibiotics inhibit bacterial growth.','This compound is an antibiotic.','This compound probably inhibits bacterial growth.'],
+            ['Most democratic elections have multiple candidates.','This vote is a democratic election.','This vote probably has multiple candidates.']
+        ]);
+        const generalizationItems = makeItems(1, [
+            ['Most copper wires examined from several factories conducted electricity.','The sample was large and representative.','Most copper wires probably conduct electricity.'],
+            ['Most swans examined across varied wetlands were white.','The sample was large and representative.','Most swans are probably white.'],
+            ['Most seeds tested from many packets germinated.','The sample was large and representative.','Most seeds of this variety probably germinate.'],
+            ['Most patients sampled across several clinics improved.','The sample was large and representative.','Most patients receiving the treatment probably improve.'],
+            ['Most observed planets in the survey had stable orbits.','The survey sample was large and representative.','Most planets in that population probably have stable orbits.'],
+            ['Most journal articles sampled cited primary sources.','The sample covered journals and fields representatively.','Most articles in those journals probably cite primary sources.'],
+            ['Most bridges inspected across all districts passed inspection.','The inspected set was large and representative.','Most bridges in the region probably pass inspection.'],
+            ['Most lake samples from varied locations contained microplastics.','The locations formed a representative sample.','Most lakes in the region probably contain microplastics.'],
+            ['Most solar panels tested at varied sites retained their output.','The tested panels were a representative sample.','Most panels of that model probably retain their output.'],
+            ['Most fossils examined across several formations showed symmetry.','The collection was large and representative.','Most fossils of this species probably show symmetry.'],
+            ['Most batteries tested from many production batches held a charge.','The batteries formed a representative sample.','Most batteries of this type probably hold a charge.'],
+            ['Most lectures sampled across departments used visual aids.','The lectures were sampled representatively.','Most lectures at the institution probably use visual aids.'],
+            ['Most algorithms tested on a broad benchmark beat the baseline.','The benchmark was large and representative.','Most algorithms in this family probably beat the baseline.']
+        ]);
+        const combinedItems = makeItems(2, [
+            ['Most sampled copper wires conducted electricity.','The sample was large and representative.','Wire A is a copper wire.','Wire A probably conducts electricity.'],
+            ['Most sampled seedlings grew under blue light.','The sample was large and representative.','Seedling B belongs to the sampled species.','Seedling B will probably grow under blue light.'],
+            ['Most examined patients responded to the therapy.','The patients formed a representative sample.','Noa is receiving the therapy.','Noa will probably respond to the therapy.'],
+            ['Most tested sensors detected the low signal.','The sensors formed a representative sample.','Sensor C is of the tested type.','Sensor C will probably detect the low signal.'],
+            ['Most sampled ravens were black.','The sample was large and representative.','Bird D is a raven.','Bird D is probably black.'],
+            ['Most surveyed commuters used public transport.','The survey was large and representative.','Eli is a commuter in that city.','Eli probably uses public transport.'],
+            ['Most tested alloys resisted corrosion.','The tested alloys were a representative sample.','Sample F is that kind of alloy.','Sample F probably resists corrosion.'],
+            ['Most observed pulsars emitted regular pulses.','The observations formed a representative sample.','Object G is a pulsar.','Object G probably emits regular pulses.'],
+            ['Most sampled papers included an abstract.','The papers formed a representative sample.','Paper H is from that population.','Paper H probably includes an abstract.'],
+            ['Most tested programs terminated on this input class.','The tests formed a representative sample.','Program J belongs to that class.','Program J will probably terminate.'],
+            ['Most surveyed households recycled glass.','The households formed a representative sample.','Household K is in that population.','Household K probably recycles glass.'],
+            ['Most measured crystals had a regular lattice.','The crystals formed a representative sample.','Crystal L is of that type.','Crystal L probably has a regular lattice.']
+        ]);
+        const analogyItems = makeItems(3, [
+            ['Earth and Kepler-452b share several relevant planetary features.','Earth supports liquid water.','Kepler-452b may support liquid water.'],
+            ['Drug A and Drug B have closely related molecular structures.','Drug A blocks the target receptor.','Drug B may block the target receptor.'],
+            ['Mice and rats share relevant mammalian physiology.','This treatment lowers blood pressure in mice.','The treatment may lower blood pressure in rats.'],
+            ['Lake Alpha and Lake Beta have similar depth, climate, and nutrients.','Lake Alpha develops an algae bloom in summer.','Lake Beta may develop an algae bloom in summer.'],
+            ['Alloy C and Alloy D have similar compositions and crystal structures.','Alloy C resists corrosion.','Alloy D may resist corrosion.'],
+            ['Language X and Language Y share syntax and a common ancestor.','Language X places verbs at the end of subordinate clauses.','Language Y may do the same.'],
+            ['Bridge A and Bridge B use the same design and materials.','Bridge A resonates under this wind pattern.','Bridge B may resonate under this wind pattern.'],
+            ['Cell type E and Cell type F share the relevant membrane proteins.','Cell type E absorbs the compound.','Cell type F may absorb the compound.'],
+            ['Market G and Market H have similar regulation and demand.','The policy reduced prices in Market G.','The policy may reduce prices in Market H.'],
+            ['Star J and Star K have similar mass, age, and composition.','Star J has an orbiting gas giant.','Star K may have an orbiting gas giant.'],
+            ['Algorithm L and Algorithm M use closely related architectures.','Algorithm L performs well on noisy images.','Algorithm M may perform well on noisy images.'],
+            ['Ancient site N and Ancient site P share construction methods and artifacts.','Site N was used for trade.','Site P may also have been used for trade.']
+        ]);
+        const inductiveItems=[];
+        for(let i=0;i<13;i++){
+            if(statisticalItems[i]) inductiveItems.push(statisticalItems[i]);
+            if(generalizationItems[i]) inductiveItems.push(generalizationItems[i]);
+            if(combinedItems[i]) inductiveItems.push(combinedItems[i]);
+            if(analogyItems[i]) inductiveItems.push(analogyItems[i]);
+        }
+        function renderInductive(){
+            const item=inductiveItems[state.inductive],box=document.getElementById('argument-box');
+            document.getElementById('inductive-count').textContent=`${state.inductive+1} / ${inductiveItems.length}`;
+            document.getElementById('previous-inductive').disabled=state.inductive===0;
+            document.getElementById('next-inductive').disabled=state.inductive===inductiveItems.length-1;
+            box.innerHTML=item.lines.map((line,i)=>`${i===item.lines.length-1?'<span class="therefore">∴</span>':''}<p class="argument-line">${i+1}. ${line}</p>`).join('');
+            document.getElementById('pattern-choices').innerHTML=patterns.map((p,i)=>`<button class="choice-button" data-pattern="${i}">${p}</button>`).join('');
+            const f=document.getElementById('inductive-feedback');f.className='feedback';f.textContent='Choose the pattern that best fits.';
+            document.querySelectorAll('[data-pattern]').forEach(b=>b.addEventListener('click',()=>{
+                if(Number(b.dataset.pattern)===item.answer){
+                    state.streak++;f.className='feedback good';
+                    const answeredIndex=state.inductive,isLast=answeredIndex===inductiveItems.length-1;
+                    f.textContent=isLast?`Correct: ${patterns[item.answer]}. You reached the final exercise.`:`Correct: ${patterns[item.answer]}. Loading another…`;
+                    if(!isLast)setTimeout(()=>{if(state.inductive===answeredIndex)moveInductive(1);},950);
+                }
+                else{state.streak=0;saveProgress();f.className='feedback bad';f.textContent='Not this pattern. Ask: does the argument move from a population, a sample, or a similar case?';}
+                saveProgress();
+            }));
+        }
 
-        document.getElementById('reset-progress').addEventListener('click',()=>{ if(!confirm('Reset solved proofs and the current streak?'))return;localStorage.removeItem('logicSolved');localStorage.removeItem('logicStreak');state.solved.clear();state.streak=0;saveProgress();renderProof(); });
+        function moveInductive(delta){
+            const next=Math.max(0,Math.min(inductiveItems.length-1,state.inductive+delta));
+            if(next===state.inductive)return;
+            state.inductive=next;saveProgress();renderInductive();
+        }
+        document.getElementById('previous-inductive').addEventListener('click',()=>moveInductive(-1));
+        document.getElementById('next-inductive').addEventListener('click',()=>moveInductive(1));
+
+        document.getElementById('reset-progress').addEventListener('click',()=>{ if(!confirm('Reset solved proofs, exercise positions, and the current streak?'))return;localStorage.removeItem('logicSolved50v2');localStorage.removeItem('logicProofIndex50');localStorage.removeItem('logicInductiveIndex50');localStorage.removeItem('logicStreak');state.solved.clear();state.streak=0;state.proofIndex=0;state.inductive=0;saveProgress();renderProof();renderInductive(); });
         saveProgress(); renderProof(); renderInductive();
     </script>
 </body>
