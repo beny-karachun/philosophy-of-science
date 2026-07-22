@@ -221,6 +221,10 @@
         .logic-feature .arrow { color: var(--green); background: #fffdf8; }
         .logic-feature:hover .arrow { color: var(--green); background: #fffdf8; transform: translateX(2px); }
 
+        .logic-feature.review-feature { background: #825d30; box-shadow: 0 16px 38px rgba(87, 57, 24, 0.16); }
+        .logic-feature.review-feature:hover { background: #714e25; box-shadow: 0 22px 46px rgba(87, 57, 24, 0.22); }
+        .logic-feature.review-feature .logic-symbol, .logic-feature.review-feature .arrow { color: #825d30; }
+
         .lesson-card {
             counter-increment: lesson;
             min-height: 134px;
@@ -386,6 +390,7 @@
                 <span>Course 3240305</span>
             </a>
             <nav class="header-nav" aria-label="Page navigation">
+                <a href="summary-exercises.html">Final review</a>
                 <a href="#lessons">Lessons</a>
                 <a href="#materials">Materials</a>
             </nav>
@@ -411,6 +416,12 @@
                     <h2 id="lessons-title">Course lessons</h2>
                     <p>Move from the ideal scientific method to the philosophical problems that test it. Each lesson includes a summary, study cards, and practice questions.</p>
                 </div>
+
+                <a class="logic-feature review-feature" href="summary-exercises.html">
+                    <span class="logic-symbol" aria-hidden="true">✓</span>
+                    <div><h3>Final Review — 320 Explained Questions</h3><p>Work through all 32 course-summary slides, then answer ten exam-style checks after each one with instant explanations and saved progress.</p></div>
+                    <span class="arrow" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span>
+                </a>
 
                 <a class="logic-feature" href="master-logic.html">
                     <span class="logic-symbol" aria-hidden="true">⊢</span>

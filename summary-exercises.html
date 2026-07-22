@@ -1,0 +1,934 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Slide-by-slide final review with 320 explained practice questions for History and Philosophy of Science.">
+    <title>Final Review — History &amp; Philosophy of Science</title>
+    <style>
+        :root {
+            --ink: #17201e;
+            --muted: #65706d;
+            --paper: #f4efe5;
+            --card: #fffdf8;
+            --green: #174f43;
+            --green-dark: #0f4137;
+            --green-soft: #dce9e1;
+            --gold: #b47b38;
+            --gold-soft: #f1e4d0;
+            --red: #9b4039;
+            --red-soft: #f4dfdc;
+            --line: rgba(23, 32, 30, 0.12);
+            --shadow: 0 0 0 1px rgba(0, 0, 0, 0.055), 0 2px 4px rgba(38, 50, 46, 0.05), 0 18px 55px rgba(38, 50, 46, 0.08);
+            --shadow-hover: 0 0 0 1px rgba(0, 0, 0, 0.08), 0 3px 7px rgba(38, 50, 46, 0.07), 0 22px 58px rgba(38, 50, 46, 0.11);
+        }
+
+        * { box-sizing: border-box; }
+
+        html {
+            scroll-behavior: smooth;
+            scroll-padding-top: 104px;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+
+        body {
+            margin: 0;
+            color: var(--ink);
+            background:
+                radial-gradient(circle at 8% 3%, rgba(180, 123, 56, 0.12), transparent 32rem),
+                radial-gradient(circle at 92% 11%, rgba(23, 79, 67, 0.10), transparent 34rem),
+                var(--paper);
+            font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+            line-height: 1.55;
+        }
+
+        button, select { font: inherit; }
+        button { color: inherit; }
+        a { color: inherit; }
+        img { display: block; max-width: 100%; }
+        h1, h2, h3 { text-wrap: balance; }
+        p, li { text-wrap: pretty; }
+
+        .shell { width: min(1220px, calc(100% - 40px)); margin: 0 auto; }
+
+        .site-header {
+            min-height: 72px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 24px;
+            border-bottom: 1px solid var(--line);
+        }
+
+        .brand {
+            display: inline-flex;
+            align-items: center;
+            gap: 11px;
+            font-size: 0.76rem;
+            font-weight: 800;
+            letter-spacing: 0.13em;
+            text-decoration: none;
+            text-transform: uppercase;
+        }
+
+        .brand-mark {
+            width: 32px;
+            height: 32px;
+            display: grid;
+            place-items: center;
+            color: #fffdf8;
+            background: var(--green);
+            border-radius: 50%;
+            font-family: Georgia, serif;
+            font-size: 1rem;
+            font-weight: 400;
+        }
+
+        .header-link {
+            min-height: 42px;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 0 13px;
+            color: var(--muted);
+            border-radius: 10px;
+            font-size: 0.86rem;
+            font-weight: 700;
+            text-decoration: none;
+            transition-property: color, background-color, scale;
+            transition-duration: 180ms;
+        }
+
+        .header-link:hover { color: var(--green); background: rgba(255, 255, 255, 0.58); }
+        .header-link:active { scale: 0.96; }
+
+        .hero {
+            display: grid;
+            grid-template-columns: minmax(0, 1.38fr) minmax(310px, 0.62fr);
+            gap: clamp(44px, 8vw, 100px);
+            align-items: end;
+            padding: clamp(68px, 10vw, 118px) 0 64px;
+        }
+
+        .eyebrow {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin: 0 0 20px;
+            color: var(--green);
+            font-size: 0.74rem;
+            font-weight: 850;
+            letter-spacing: 0.16em;
+            text-transform: uppercase;
+        }
+
+        .eyebrow::before { content: ""; width: 32px; height: 2px; background: var(--gold); }
+
+        h1 {
+            max-width: 790px;
+            margin: 0;
+            font-family: Georgia, "Times New Roman", serif;
+            font-size: clamp(3.5rem, 7.5vw, 6.8rem);
+            font-weight: 400;
+            letter-spacing: -0.055em;
+            line-height: 0.92;
+        }
+
+        h1 em { color: var(--green); font-weight: 400; }
+
+        .hero-copy { padding-bottom: 5px; }
+        .hero-copy > p { margin: 0 0 24px; color: var(--muted); font-size: 1.03rem; }
+
+        .hero-stats {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 8px;
+            margin: 0;
+        }
+
+        .hero-stats div {
+            min-width: 0;
+            padding: 14px 12px;
+            background: rgba(255, 253, 248, 0.62);
+            border-radius: 14px;
+            box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.05);
+        }
+
+        .hero-stats dt { color: var(--muted); font-size: 0.68rem; font-weight: 800; letter-spacing: 0.09em; text-transform: uppercase; }
+        .hero-stats dd { margin: 2px 0 0; color: var(--green); font-family: Georgia, serif; font-size: 1.55rem; font-variant-numeric: tabular-nums; }
+
+        .progress-dock {
+            position: sticky;
+            top: 12px;
+            z-index: 20;
+            display: grid;
+            grid-template-columns: minmax(180px, 0.45fr) minmax(280px, 1fr) auto;
+            gap: 22px;
+            align-items: center;
+            margin-bottom: 54px;
+            padding: 13px 16px;
+            background: rgba(255, 253, 248, 0.9);
+            border-radius: 18px;
+            box-shadow: var(--shadow);
+            backdrop-filter: blur(16px);
+        }
+
+        .progress-copy { display: flex; align-items: baseline; gap: 8px; min-width: 0; }
+        .progress-copy strong { color: var(--green); font-size: 0.85rem; }
+        .progress-copy span { color: var(--muted); font-size: 0.78rem; font-variant-numeric: tabular-nums; white-space: nowrap; }
+
+        .progress-track { height: 8px; overflow: hidden; background: #e3ded3; border-radius: 999px; }
+        .progress-fill { width: 0; height: 100%; background: linear-gradient(90deg, var(--gold), var(--green)); border-radius: inherit; transition-property: width; transition-duration: 260ms; transition-timing-function: cubic-bezier(0.2, 0, 0, 1); }
+
+        .dock-actions { display: flex; gap: 8px; }
+
+        .compact-button, .jump-select {
+            min-height: 42px;
+            border: 0;
+            border-radius: 10px;
+            background: #f2ede3;
+            box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.06);
+            font-size: 0.78rem;
+            font-weight: 750;
+            transition-property: background-color, box-shadow, scale;
+            transition-duration: 160ms;
+        }
+
+        .compact-button { padding: 0 13px; cursor: pointer; }
+        .jump-select { width: 112px; padding: 0 30px 0 11px; color: var(--ink); cursor: pointer; }
+        .compact-button:hover, .jump-select:hover { background: #ebe3d6; box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.09); }
+        .compact-button:active { scale: 0.96; }
+
+        .chapter-divider {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            margin: 76px 0 24px;
+            color: var(--green);
+            font-size: 0.73rem;
+            font-weight: 850;
+            letter-spacing: 0.14em;
+            text-transform: uppercase;
+        }
+
+        .chapter-divider::after { content: ""; height: 1px; flex: 1; background: var(--line); }
+
+        .slide-section { margin-bottom: 82px; }
+
+        .slide-heading {
+            display: grid;
+            grid-template-columns: 64px minmax(0, 1fr) auto;
+            gap: 18px;
+            align-items: center;
+            margin-bottom: 18px;
+        }
+
+        .slide-number {
+            width: 64px;
+            height: 64px;
+            display: grid;
+            place-items: center;
+            color: #fffdf8;
+            background: var(--green);
+            border-radius: 18px;
+            font-family: Georgia, serif;
+            font-size: 1.35rem;
+            font-variant-numeric: tabular-nums;
+            box-shadow: 0 10px 24px rgba(23, 79, 67, 0.17);
+        }
+
+        .slide-heading h2 { margin: 0; font-family: Georgia, serif; font-size: clamp(1.7rem, 3vw, 2.45rem); font-weight: 400; letter-spacing: -0.025em; line-height: 1.05; }
+        .slide-heading p { margin: 5px 0 0; color: var(--muted); font-size: 0.83rem; }
+
+        .slide-score {
+            min-width: 84px;
+            padding: 9px 12px;
+            color: var(--muted);
+            background: rgba(255, 253, 248, 0.66);
+            border-radius: 11px;
+            text-align: center;
+            font-size: 0.76rem;
+            font-weight: 750;
+            font-variant-numeric: tabular-nums;
+            box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.05);
+        }
+
+        .slide-frame {
+            position: relative;
+            overflow: hidden;
+            background: #fff;
+            border-radius: 24px;
+            box-shadow: var(--shadow);
+        }
+
+        .slide-frame img {
+            width: 100%;
+            height: auto;
+            aspect-ratio: 16 / 9;
+            object-fit: cover;
+            outline: 1px solid rgba(0, 0, 0, 0.1);
+            outline-offset: -1px;
+        }
+
+        .slide-frame a {
+            position: absolute;
+            right: 13px;
+            bottom: 13px;
+            min-height: 42px;
+            display: inline-flex;
+            align-items: center;
+            gap: 7px;
+            padding: 0 13px;
+            color: #fff;
+            background: rgba(15, 28, 25, 0.78);
+            border-radius: 10px;
+            font-size: 0.75rem;
+            font-weight: 750;
+            text-decoration: none;
+            backdrop-filter: blur(10px);
+            transition-property: background-color, scale;
+            transition-duration: 160ms;
+        }
+
+        .slide-frame a:hover { background: rgba(15, 28, 25, 0.92); }
+        .slide-frame a:active { scale: 0.96; }
+
+        .exercise-label {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin: 28px 0 13px;
+            color: var(--green);
+            font-size: 0.73rem;
+            font-weight: 850;
+            letter-spacing: 0.12em;
+            text-transform: uppercase;
+        }
+
+        .exercise-label::before { content: ""; width: 22px; height: 2px; background: var(--gold); }
+
+        .question-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; }
+
+        .question-card {
+            display: flex;
+            flex-direction: column;
+            min-height: 100%;
+            padding: 22px;
+            background: var(--card);
+            border-radius: 20px;
+            box-shadow: var(--shadow);
+            transition-property: box-shadow, transform;
+            transition-duration: 180ms;
+        }
+
+        .question-card:hover { box-shadow: var(--shadow-hover); transform: translateY(-2px); }
+        .question-card.is-correct { box-shadow: 0 0 0 2px rgba(23, 79, 67, 0.38), 0 16px 40px rgba(23, 79, 67, 0.08); }
+        .question-card.is-wrong { box-shadow: 0 0 0 2px rgba(155, 64, 57, 0.34), 0 16px 40px rgba(155, 64, 57, 0.07); }
+
+        .question-meta { display: flex; justify-content: space-between; align-items: center; gap: 12px; margin-bottom: 12px; }
+        .question-index { color: var(--muted); font-size: 0.7rem; font-weight: 800; letter-spacing: 0.09em; text-transform: uppercase; font-variant-numeric: tabular-nums; }
+
+        .question-type {
+            padding: 4px 7px;
+            color: var(--green);
+            background: var(--green-soft);
+            border-radius: 6px;
+            font-size: 0.64rem;
+            font-weight: 850;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+        }
+
+        .question-text { margin: 0 0 17px; font-size: 1rem; font-weight: 720; line-height: 1.45; }
+        .options { display: grid; gap: 8px; }
+        .options.binary { grid-template-columns: 1fr 1fr; }
+
+        .option {
+            position: relative;
+            width: 100%;
+            min-height: 46px;
+            display: grid;
+            grid-template-columns: 27px minmax(0, 1fr);
+            gap: 10px;
+            align-items: center;
+            padding: 9px 12px;
+            border: 0;
+            border-radius: 12px;
+            background: #f3eee5;
+            box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.065);
+            text-align: left;
+            cursor: pointer;
+            transition-property: background-color, box-shadow, scale;
+            transition-duration: 160ms;
+        }
+
+        .option:hover:not(:disabled) { background: #ede5d9; box-shadow: 0 0 0 1px rgba(23, 79, 67, 0.25); }
+        .option:active:not(:disabled) { scale: 0.96; }
+        .option:disabled { cursor: default; }
+        .option-letter { width: 27px; height: 27px; display: grid; place-items: center; color: var(--muted); background: rgba(255, 255, 255, 0.7); border-radius: 7px; font-size: 0.7rem; font-weight: 850; }
+        .option-copy { font-size: 0.82rem; line-height: 1.35; }
+        .option.is-answer { color: var(--green-dark); background: var(--green-soft); box-shadow: 0 0 0 1px rgba(23, 79, 67, 0.3); }
+        .option.is-answer .option-letter { color: #fff; background: var(--green); }
+        .option.is-selected-wrong { color: var(--red); background: var(--red-soft); box-shadow: 0 0 0 1px rgba(155, 64, 57, 0.3); }
+        .option.is-selected-wrong .option-letter { color: #fff; background: var(--red); }
+        .option.is-muted { opacity: 0.52; }
+
+        .feedback {
+            display: none;
+            margin-top: 15px;
+            padding: 15px;
+            border-radius: 13px;
+            background: var(--green-soft);
+        }
+
+        .question-card.is-wrong .feedback { background: var(--red-soft); }
+        .feedback.is-visible { display: block; animation: reveal 260ms ease-out both; }
+        .feedback strong { display: flex; align-items: center; gap: 8px; margin-bottom: 5px; color: var(--green-dark); font-size: 0.82rem; }
+        .question-card.is-wrong .feedback strong { color: var(--red); }
+        .feedback p { margin: 0; color: #43504d; font-size: 0.79rem; line-height: 1.5; }
+
+        @keyframes reveal {
+            from { opacity: 0; transform: translateY(8px); filter: blur(4px); }
+            to { opacity: 1; transform: translateY(0); filter: blur(0); }
+        }
+
+        .finish-card {
+            display: grid;
+            grid-template-columns: 1fr auto;
+            gap: 28px;
+            align-items: center;
+            margin: 18px 0 80px;
+            padding: 36px;
+            color: #fffdf8;
+            background: var(--green);
+            border-radius: 28px;
+            box-shadow: 0 20px 52px rgba(23, 79, 67, 0.2);
+        }
+
+        .finish-card h2 { margin: 0 0 8px; font-family: Georgia, serif; font-size: clamp(2rem, 4vw, 3.3rem); font-weight: 400; line-height: 1; }
+        .finish-card p { max-width: 690px; margin: 0; color: rgba(255, 255, 255, 0.72); }
+        .finish-score { min-width: 140px; text-align: center; }
+        .finish-score strong { display: block; font-family: Georgia, serif; font-size: 3rem; font-weight: 400; line-height: 1; font-variant-numeric: tabular-nums; }
+        .finish-score span { color: rgba(255, 255, 255, 0.68); font-size: 0.7rem; font-weight: 800; letter-spacing: 0.1em; text-transform: uppercase; }
+
+        footer { display: flex; justify-content: space-between; gap: 20px; padding: 28px 0 38px; color: var(--muted); border-top: 1px solid var(--line); font-size: 0.78rem; }
+
+        .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border: 0; }
+        :focus-visible { outline: 3px solid rgba(180, 123, 56, 0.58); outline-offset: 3px; }
+
+        @media (max-width: 850px) {
+            .hero { grid-template-columns: 1fr; align-items: start; gap: 32px; }
+            .hero-copy { max-width: 600px; }
+            .progress-dock { grid-template-columns: 1fr auto; gap: 12px; }
+            .progress-track { grid-column: 1 / -1; grid-row: 2; }
+            .question-grid { grid-template-columns: 1fr; }
+        }
+
+        @media (max-width: 560px) {
+            .shell { width: min(100% - 26px, 1220px); }
+            .site-header { min-height: 66px; }
+            .header-link span { display: none; }
+            .hero { padding: 58px 0 46px; }
+            h1 { font-size: clamp(3.2rem, 16vw, 4.6rem); }
+            .hero-stats div { padding: 12px 8px; }
+            .hero-stats dt { font-size: 0.59rem; }
+            .hero-stats dd { font-size: 1.32rem; }
+            .progress-dock { top: 7px; margin-bottom: 42px; padding: 11px; border-radius: 15px; }
+            .dock-actions { gap: 6px; }
+            .compact-button { padding: 0 10px; }
+            .jump-select { width: 96px; }
+            .slide-section { margin-bottom: 64px; }
+            .slide-heading { grid-template-columns: 52px 1fr; gap: 13px; }
+            .slide-number { width: 52px; height: 52px; border-radius: 15px; font-size: 1.1rem; }
+            .slide-score { grid-column: 2; width: fit-content; min-width: 0; margin-top: -8px; }
+            .slide-frame { border-radius: 16px; }
+            .slide-frame a { right: 8px; bottom: 8px; min-height: 40px; }
+            .question-card { padding: 18px; border-radius: 17px; }
+            .finish-card { grid-template-columns: 1fr; padding: 28px; border-radius: 22px; }
+            .finish-score { text-align: left; }
+            footer { flex-direction: column; gap: 4px; }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            html { scroll-behavior: auto; }
+            *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
+        }
+    </style>
+</head>
+<body>
+    <div class="shell">
+        <header class="site-header">
+            <a class="brand" href="index.html" aria-label="Course home">
+                <span class="brand-mark">φ</span>
+                <span>Course 3240305</span>
+            </a>
+            <a class="header-link" href="Course Summary.pdf" target="_blank" rel="noopener">
+                <span>Open source PDF</span>
+                <svg width="17" height="17" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M7 17 17 7M8 7h9v9"/></svg>
+            </a>
+        </header>
+
+        <main>
+            <section class="hero" aria-labelledby="page-title">
+                <div>
+                    <p class="eyebrow">Final review · Slide by slide</p>
+                    <h1 id="page-title">See it. Test it. <em>Know it.</em></h1>
+                </div>
+                <div class="hero-copy">
+                    <p>Every summary slide is followed by ten exam-style checks. Choose an answer to unlock the explanation; your progress and score stay saved on this device.</p>
+                    <dl class="hero-stats">
+                        <div><dt>Slides</dt><dd>32</dd></div>
+                        <div><dt>Questions</dt><dd id="questionTotal">320</dd></div>
+                        <div><dt>Target</dt><dd>85%</dd></div>
+                    </dl>
+                </div>
+            </section>
+
+            <div class="progress-dock" aria-label="Review progress">
+                <div class="progress-copy"><strong>Review progress</strong><span id="progressText">0 / 320 answered</span></div>
+                <div class="progress-track" aria-hidden="true"><div class="progress-fill" id="progressFill"></div></div>
+                <div class="dock-actions">
+                    <label class="sr-only" for="slideJump">Jump to slide</label>
+                    <select class="jump-select" id="slideJump"><option value="">Jump…</option></select>
+                    <button class="compact-button" id="resetButton" type="button">Reset</button>
+                </div>
+            </div>
+
+            <div id="review"></div>
+
+            <section class="finish-card" aria-labelledby="finish-title">
+                <div>
+                    <h2 id="finish-title">Ready for the exam?</h2>
+                    <p>A strong target is at least 85% correct without guessing. Reset the page for a clean second pass, or revisit the red cards and explain the right answer aloud.</p>
+                </div>
+                <div class="finish-score"><strong id="finalScore">—</strong><span>Current score</span></div>
+            </section>
+        </main>
+
+        <footer>
+            <span>Selected Issues in History &amp; Philosophy of Science</span>
+            <span>Course summary · <span id="footerTotal">320</span> explained checks</span>
+        </footer>
+    </div>
+
+    <script src="summary-extras-01-11.js"></script>
+    <script src="summary-extras-12-22.js"></script>
+    <script src="summary-extras-23-32.js"></script>
+    <script>
+        const m = (q, options, answer, explanation) => ({ type: "mcq", q, options, answer, explanation });
+        const y = (q, answerYes, explanation) => ({ type: "yesno", q, options: ["Yes", "No"], answer: answerYes ? 0 : 1, explanation });
+
+        const slides = [
+            {
+                page: 1, chapter: "Orientation", title: "Science and Its Critics", subtitle: "Start with the course's central problem.", questions: [
+                    m("What is the main object of criticism in this course?", ["Scientific results only", "The present scientific method and its limits", "Laboratory technology", "The history of universities"], 1, "The course evaluates the present scientific method: what it instructs scientists to do and the philosophical challenges facing those instructions."),
+                    y("Does criticizing scientific method amount to claiming that science is worthless?", false, "No. The course ends by defending science as our best tool while insisting that its method has genuine limitations."),
+                    m("Which pair best captures science's foundational practical aims in the course?", ["Explanation and prediction", "Popularity and consensus", "Publication and funding", "Certainty and infallibility"], 0, "Reliable explanations and predictions are treated as the core aims that also make scientific technology possible."),
+                    y("Can a method be criticized even when scientists using it often succeed?", true, "Yes. Scientists may compensate for flaws through judgment and experience; practical success does not prove that the formal method is flawless.")
+                ]
+            },
+            {
+                page: 2, title: "Course Summary", subtitle: "Know what the review is designed to connect.", questions: [
+                    m("Which description best fits an ideal scientific method?", ["A report of how scientists happen to behave", "A set of normative instructions for doing science well", "A list of accepted theories", "A history of discoveries"], 1, "A method is normative: it tells scientists how they ought to formulate, evaluate, and use theories."),
+                    y("Would an algorithm-like scientific method need to guide theory formation, evaluation, application, and relations between theories?", true, "Yes. A complete guide must cover all four areas rather than only testing or prediction."),
+                    m("An intrinsic flaw in a method is best described as…", ["A scientist ignoring a sound instruction", "A problem in the instructions even when followed correctly", "A failed instrument", "A false observation"], 1, "An intrinsic problem remains when the method is executed properly; it belongs to the guide rather than to careless execution."),
+                    y("Has a universally accepted, flawless replacement for logical positivism been adopted?", false, "No. The course presents major foundational criticisms without a fully satisfactory replacement method.")
+                ]
+            },
+            {
+                page: 3, title: "Logical Empiricism: The Course Map", subtitle: "Observation and logic are the official sources of knowledge.", questions: [
+                    m("Which two sources of knowledge does logical empiricism officially permit?", ["Observation and logic", "Intuition and authority", "Tradition and consensus", "Revelation and memory"], 0, "Logical empiricism—also called logical positivism here—restricts the scientific method to observations and logic."),
+                    y("Is logic alone sufficient for logical empiricism's account of scientific knowledge?", false, "No. Logic organizes and extends claims, but empirical propositions ultimately connect the account to observation."),
+                    m("Which part occupied most of the course?", ["The history of instruments", "Critiques of the scientific method", "Biographies of scientists", "Formal mathematics alone"], 1, "The review divides the course into general principles, logical arguments and their scientific uses, and—most extensively—critiques."),
+                    y("Does logical empiricism treat a scientific theory as a network of propositions?", true, "Yes. Both theories and observational reports are formulated propositionally so logical relations between them can be examined.")
+                ]
+            },
+            {
+                page: 4, chapter: "Theory & observation", title: "Four Scientific Tasks", subtitle: "Map each stage to the right job before adding the logic.", questions: [
+                    m("Which task belongs to the formulation stage?", ["Generating a hypothesis", "Refuting a hypothesis", "Predicting from a law", "Reducing chemistry to physics"], 0, "Formulation begins with an observation needing explanation and proposes a hypothesis."),
+                    y("Do confirmation and refutation both belong to theory evaluation?", true, "Yes. They assess an already proposed hypothesis, although they use different forms of inference."),
+                    m("Which task belongs to the application stage?", ["Choosing vocabulary", "Prediction and explanation of observations", "Creating bridge laws only", "Replacing every old theory"], 1, "Application uses a theory to derive observations—prospectively as prediction or retrospectively as explanation."),
+                    y("Are synchronous and diachronic inter-theoretic relations identical to the theory–observation tasks on this slide?", false, "No. They concern relations between theories, whereas this slide maps relations between theory and observation.")
+                ]
+            },
+            {
+                page: 5, title: "Formulation by Abduction", subtitle: "Observation → best explanation → hypothesis.", questions: [
+                    m("Which argument is abductive?", ["If H then e; not-e; therefore not-H", "e; H is the best explanation of e; therefore H", "Most F are G; x is F; therefore x is G", "H and I; therefore e"], 1, "Abduction proposes a hypothesis because it would best explain the observation."),
+                    y("Does a good abductive argument guarantee that its hypothesis is true?", false, "No. Even the best available explanation may be false, and competing explanations may fit the same evidence."),
+                    m("Two different theories both explain the same observation. What does this show?", ["Abduction can underdetermine theory choice", "Both theories are deductively true", "The observation is false", "Deduction has refuted both"], 0, "An observation may have multiple plausible explanations, so abduction is not a mechanical rule that uniquely produces the true theory."),
+                    y("Can abduction introduce unobservable mechanisms not already contained in the observational vocabulary?", true, "Yes. This is why it is needed beyond simple inductive generalization of observable predicates.")
+                ]
+            },
+            {
+                page: 6, title: "Confirmation by Induction", subtitle: "A successful consequence supports—but does not prove—the theory.", questions: [
+                    m("If H implies e and e is observed, what follows in the positivist method?", ["H is deductively proven", "H receives probable inductive support", "Every rival is refuted", "not-H follows"], 1, "The form resembles affirming the consequent and is not deductively valid. It is treated as inductive confirmation only."),
+                    y("Can a true predicted observation establish with certainty that the predicting theory is true?", false, "No. Different theories may entail the same observation, so confirmation falls short of proof."),
+                    m("Why is a risky prediction especially useful?", ["It is likely under every theory", "Its occurrence is comparatively unlikely unless the theory is right", "It avoids observation", "It makes induction deductive"], 1, "A surprising consequence can discriminate more strongly because it would have been less likely without the hypothesis."),
+                    y("Is the main problem with confirmation simply that it cannot prove a theory's truth?", false, "No. The deeper critiques show that unrestricted induction can confirm or formulate absurd alternatives, as in the ravens and Goodman cases.")
+                ]
+            },
+            {
+                page: 7, title: "Refutation by Deduction", subtitle: "The textbook form is modus tollens.", questions: [
+                    m("Which form is modus tollens?", ["If H then e; e; therefore H", "If H then e; not-e; therefore not-H", "H; therefore H or e", "e; therefore H"], 1, "Modus tollens is valid: if H requires e and e is false, H cannot be true—provided H is the only relevant premise."),
+                    y("Is the deductive form of modus tollens itself logically defective?", false, "No. The later Duhem–Quine problem concerns applying it to real tests that include background assumptions."),
+                    m("What kind of case proves a deductive argument invalid?", ["True premises and a false conclusion", "False premises and a false conclusion", "False premises and a true conclusion", "True premises and a true conclusion"], 0, "Validity rules out every possible case with true premises and a false conclusion. Other truth-value combinations do not settle validity."),
+                    y("If a possible world has false premises and a false conclusion, does that alone show the argument is invalid?", false, "No. A valid argument may have false premises and a false conclusion; invalidity requires true premises with a false conclusion.")
+                ]
+            },
+            {
+                page: 8, title: "Prediction and the D–N Model", subtitle: "Law + initial conditions ⟹ observation.", questions: [
+                    m("What are the premises of a deductive-nomological explanation?", ["Only the observation", "A law or theory plus initial conditions", "A rival theory and a vote", "A sample and an analogy"], 1, "The explanandum is deduced from at least one law-like statement together with relevant initial conditions."),
+                    y("Can the same deductive structure serve both prediction and explanation?", true, "Yes. If e is not yet known it is predicted; if e is already known, deriving it is intended to explain it."),
+                    m("What principally distinguishes prediction from explanation in this model?", ["The inference rule", "Whether the observation is already known", "Whether logic is used", "The number of laws"], 1, "Both use the same entailment. Their temporal/epistemic relation to the observation differs."),
+                    y("Does every valid deduction of an observation automatically provide a satisfactory explanation?", false, "No. Direction, relevance, and causal concerns later show that derivability alone is too permissive.")
+                ]
+            },
+            {
+                page: 9, chapter: "Theory & theory", title: "Inter-Theoretic Relations", subtitle: "Separate relations across levels from relations across time.", questions: [
+                    m("A relation between physics and chemistry at the same historical time is…", ["Diachronic", "Synchronous", "Abductive only", "A confirmation relation"], 1, "Synchronous relations connect theories at different scientific levels or disciplines at a given time."),
+                    y("Does a diachronic relation connect older and newer theories within a field?", true, "Yes. Diachronic means across time and concerns replacement or explanation of an old theory by a new one."),
+                    m("Which contrast is correct?", ["Synchronous = across levels; diachronic = across time", "Synchronous = across time; diachronic = across levels", "Both mean confirmation", "Both mean prediction"], 0, "This distinction organizes the two ideals: unity across sciences and accumulation across theory change."),
+                    y("Are inter-theoretic relations optional if the method already explains observations?", false, "No. A complete scientific method must also say how sciences and successive theories relate to one another.")
+                ]
+            },
+            {
+                page: 10, title: "Synchronous Reduction and Unity", subtitle: "A more basic theory should explain a higher-level theory.", questions: [
+                    m("In the course's hierarchy, which theory is more basic?", ["Psychology than biology", "Chemistry than physics", "Physics than chemistry", "Sociology than psychology"], 2, "The reductionist ordering runs roughly physics → chemistry → biology → psychology → sociology."),
+                    y("Does the Unity of Science ideal require higher-level theories to be derivable from lower-level theories?", true, "Yes. The more basic theory is intended to explain the higher-level theory by deduction."),
+                    m("Which example is synchronous?", ["Einstein explains Newton under low speeds", "Physics plus bridges explains chemistry", "A new theory replaces an old one", "An eclipse confirms relativity"], 1, "Physics and chemistry occupy different levels at the same time, so their proposed reduction is synchronous."),
+                    y("Does 'higher' here mean more fundamental?", false, "No. The slide uses the higher-level theory for the less basic science; the lower-level theory is the more fundamental explainer.")
+                ]
+            },
+            {
+                page: 11, title: "Bridge Laws", subtitle: "Translation makes cross-level deduction possible.", questions: [
+                    m("Why are bridge laws needed in synchronous reduction?", ["To add more observations", "To translate terms between theoretical vocabularies", "To replace deduction with induction", "To choose a new paradigm"], 1, "Without connecting terms across levels, the higher-level theory will not logically follow from premises stated only in the basic theory's vocabulary."),
+                    y("Can physics alone deductively explain chemistry if their relevant terms remain logically unconnected?", false, "No. Bridge statements are needed to connect the distinct vocabularies."),
+                    m("What is the intended deductive pattern?", ["Higher theory → basic theory", "Basic theory + bridge laws → higher theory", "Observation → bridge law", "Old theory → new theory"], 1, "The basic theory and bridge statements jointly entail the theory to be explained."),
+                    y("Do bridge laws function somewhat like a dictionary between sciences?", true, "Yes. They connect expressions that refer to corresponding states or properties across theoretical languages.")
+                ]
+            },
+            {
+                page: 12, title: "Diachronic Replacement", subtitle: "The simple recipe: refute the old, abduct the new.", questions: [
+                    m("What does the simple positivist recipe do after an old theory is refuted?", ["Stop science", "Formulate a new theory by abduction", "Declare the observation false", "Reduce physics to sociology"], 1, "The simplified picture has no direct relation between old and new: reject one, then propose the best explanation of the anomalous evidence."),
+                    y("In this simple replacement model, must the new theory logically contain the old theory?", false, "No. That stronger requirement belongs to the later cumulative ideal, not replacement by discarding."),
+                    m("Which relation is diachronic?", ["Gas laws and statistical mechanics", "Newtonian and Einsteinian mechanics", "A law and its initial conditions", "A sample and a population"], 1, "Newtonian and Einsteinian mechanics are successive theories in the same domain."),
+                    y("Can complete discarding preserve all explanatory achievements of the old theory?", false, "Not by itself. Preserving and explaining those successes requires a cumulative reduction relation.")
+                ]
+            },
+            {
+                page: 13, title: "From Anomaly to a New Theory", subtitle: "Deductive rejection and abductive proposal play different roles.", questions: [
+                    m("H₁ predicts not-e₁, but e₁ is observed. What follows in the simplified account?", ["H₁ is confirmed", "not-H₁ by deduction", "H₂ is proven", "e₁ is invalid"], 1, "The observation contradicts H₁'s consequence, so modus tollens rejects H₁ in the simplified isolated-test picture."),
+                    y("Does refuting H₁ deductively prove that a proposed H₂ is true?", false, "No. H₂ is supported abductively as an explanation of e₁ and remains fallible."),
+                    m("Which sequence is correct?", ["Abduction refutes H₁; deduction proves H₂", "Deduction refutes H₁; abduction proposes H₂", "Induction proves both", "Bridge laws refute e₁"], 1, "The two stages use different inferences: deductive rejection followed by abductive formation."),
+                    y("Can more than one candidate H₂ explain the anomalous observation?", true, "Yes. Abduction can leave several rivals, so further evaluation is required.")
+                ]
+            },
+            {
+                page: 14, title: "Competition and Cumulative Progress", subtitle: "Test rivals, then ask the winner to explain the past.", questions: [
+                    m("What is a decisive experiment designed to do?", ["Produce an outcome on which rival theories disagree", "Confirm every rival", "Avoid risky predictions", "Translate two vocabularies"], 0, "A useful crucial test seeks e where H₁ predicts e and H₂ predicts not-e, allowing the result to discriminate."),
+                    y("Is explaining an old theory by a new theory a synchronous relation?", false, "No. It is diachronic because the theories belong to different stages in the history of the same field."),
+                    m("What does the cumulative science ideal demand of a better theory?", ["Only novelty", "Explanation of the old theory's restricted success plus new knowledge", "No shared predictions", "Immediate rejection after one anomaly"], 1, "Cumulative progress preserves earlier achievements by showing why the old theory worked where it did."),
+                    y("Does a newer date alone make a theory scientifically better?", false, "No. The relevant ideal concerns explanatory and predictive relations, not mere chronology.")
+                ]
+            },
+            {
+                page: 15, title: "The Decisive Experiment", subtitle: "Refutation is deductive; favorable support remains inductive.", questions: [
+                    m("H₁ predicts e₁, H₂ predicts not-e₁, and e₁ occurs. What follows?", ["H₁ is deductively proven", "H₂ is refuted; H₁ is probably supported", "Both are refuted", "Neither is affected"], 1, "e₁ contradicts H₂ deductively, while agreement with H₁ only confirms H₁ inductively."),
+                    y("Is the logical strength of the result symmetrical for H₁ and H₂?", false, "No. In the simplified model, the unfavorable result refutes H₂ deductively; the favorable result supports H₁ only probabilistically."),
+                    m("Which sample-exam skill does this most directly test?", ["Separating deduction from induction", "Defining consciousness", "Identifying rigid designators", "Calculating a truth table only"], 0, "Exam questions often hinge on whether a result is deductive, inductive, or abductive and what strength of conclusion follows."),
+                    y("Would e₁ still prove H₁ if a third theory H₃ also predicted e₁?", false, "No. Shared successful predictions reinforce why confirmation cannot amount to deductive proof.")
+                ]
+            },
+            {
+                page: 16, title: "New Theory Explains Old Theory", subtitle: "Newton appears as a restricted result of Einstein.", questions: [
+                    m("Why is deriving Newtonian relative velocity from Einstein's formula important?", ["It proves the formulas identical everywhere", "It explains the older theory's success at low velocities", "It refutes relativity", "It is an inductive sample"], 1, "The newer theory yields the older result under limited conditions, supporting a cumulative rather than purely destructive picture."),
+                    y("Must a reduced old theory remain exactly correct under every condition?", false, "No. It may be recovered as an approximation or special case within a restricted domain."),
+                    m("Galileo's 9.8 m/s² result follows from Newton's gravitation using Earth's mass and radius. This illustrates…", ["Newton explains Galileo's law", "Galileo proves Newton", "Opposite logical directions", "Abduction from one observation"], 0, "The broader Newtonian law plus relevant conditions yields Galileo's local law, so the later/general theory explains the older result."),
+                    y("Does mere agreement between two laws automatically establish that one explains the other?", false, "No. The explanatory relation requires the relevant derivation, not just matching numbers.")
+                ]
+            },
+            {
+                page: 17, title: "The Whole Positivist Algorithm", subtitle: "Six tasks, their premises, inference rules, and conclusions.", questions: [
+                    m("Which row is correctly matched?", ["Formulation—deduction—observation", "Confirmation—induction—theory", "Refutation—abduction—theory", "Prediction—induction—observation"], 1, "Confirmation moves inductively from observational success toward probable support for a theory."),
+                    y("Do all three forms of inter-theoretic explanation use deduction in the summary table?", true, "Yes. Observation application, diachronic explanation, and synchronous explanation are all presented as deductive tasks."),
+                    m("A strong non-deductive argument has true premises and a true conclusion. In the course's terminology it is…", ["Sound", "Reliable", "Necessarily valid", "A contradiction"], 1, "Soundness is reserved for valid deductive arguments with true premises; reliability is the corresponding favorable assessment for a strong non-deductive argument."),
+                    y("Can we know with certainty that a scientific theory is true merely because the method strongly supports it?", false, "No. The course permits that a theory is true, but fallible induction and underdetermination block certainty from ordinary support.")
+                ]
+            },
+            {
+                page: 18, chapter: "Critiques: observation", title: "The Baseline Before Criticism", subtitle: "Be able to reconstruct the method before diagnosing it.", questions: [
+                    m("Which stage uses observation e as the starting point and ends with H?", ["Formulation", "Refutation", "Prediction", "Synchronous reduction"], 0, "Abductive formulation begins from an observed phenomenon and proposes a theory that would explain it."),
+                    y("Does prediction begin with a law or theory plus initial conditions?", true, "Yes. Those premises deductively yield an observational consequence."),
+                    m("Which task uses the valid form if H then e; not-e; therefore not-H?", ["Confirmation", "Refutation", "Formulation", "Explanation of an old theory"], 1, "This is modus tollens, the simplified deductive pattern for refutation."),
+                    y("Is confirmation the deductive inverse of prediction?", false, "No. Reversing from a consequence to the theory is not deductively valid; it is treated as induction.")
+                ]
+            },
+            {
+                page: 19, title: "The First Crack: Formulation", subtitle: "Abduction labels a task but does not mechanically solve it.", questions: [
+                    m("Why is abduction described as 'not exactly a method'?", ["It is always invalid syntax", "It does not supply an objective algorithm for choosing the best explanation", "It uses no observation", "It can formulate only laws"], 1, "Calling H the 'best explanation' still leaves open how candidates are generated and ranked."),
+                    y("Can two good abductive arguments reach different theories from observations?", true, "Yes. Different observations or rival explanations can support different conclusions; abduction does not guarantee uniqueness."),
+                    m("Which outcome is impossible for a genuinely good abductive argument as defined?", ["A false theory", "Two rival theories", "A theory that does not explain its premise observation", "The same theory explaining different observations"], 2, "If H does not explain e at all, the argument cannot satisfy its own claim that H is e's best explanation. A best explanation may still be false."),
+                    y("Does calling a hypothesis intuitive convert intuition into an explicit positivist algorithm?", false, "No. Intuition may help real scientists, but it is not one of the method's formal sources or instructions.")
+                ]
+            },
+            {
+                page: 20, title: "Three Problems of Induction", subtitle: "Hume, the ravens, and Goodman's new riddle.", questions: [
+                    m("Why is 'induction worked before, so it will work again' circular?", ["It uses deduction", "It uses induction to justify induction", "It contains no conclusion", "It is a bridge law"], 1, "The defense already assumes that past regularity supports future reliability—the very inductive principle needing justification."),
+                    y("Can a white shoe count as confirming 'all ravens are black' under unrestricted confirmation?", true, "Yes. It is a non-black non-raven and thus fits the contraposed, logically equivalent formulation."),
+                    m("What does Goodman's new riddle show?", ["Past evidence can fit incompatible future projections under different predicates", "All ravens are green", "Deduction is circular", "Only direct observations matter"], 0, "Predicates such as black and bleen agree on past cases yet diverge after the cutoff date."),
+                    y("Does observing a green sock today literally prove that a future horse will be blue?", false, "No. The example exposes how permissive confirmation rules and artificial descriptions can generate absurd-looking support, not deductive proof.")
+                ]
+            },
+            {
+                page: 21, title: "Duhem–Quine and Refutation", subtitle: "A failed prediction targets a conjunction, not one isolated claim.", questions: [
+                    m("If H and background assumptions A jointly imply e, but not-e occurs, what is refuted?", ["H alone necessarily", "A alone necessarily", "The conjunction H and A", "Deduction itself"], 2, "Modus tollens rejects the total premise package. Logic does not identify which member of the package should be abandoned."),
+                    y("Does Duhem–Quine show that modus tollens is invalid?", false, "No. It shows a practical problem in isolating the tested hypothesis from auxiliary assumptions."),
+                    m("Why did Popper criticize theories that explain opposite possible outcomes?", ["They are too mathematical", "They resist falsification", "They use deduction", "They contain observations"], 1, "If every outcome can be accommodated, no risky result can refute the theory; Popper treats that as a mark of pseudoscience."),
+                    y("Can Duhem–Quine make strict falsifiability difficult to apply to every scientific theory?", true, "Yes. Because predictions rely on auxiliary assumptions, almost any theory can be shielded by revising part of the surrounding package.")
+                ]
+            },
+            {
+                page: 22, title: "Natural Laws vs. Accidents", subtitle: "Prediction needs more than a true regularity.", questions: [
+                    m("Why is 'Whenever Lucy wears green, the team wins' accidental on the Armstrong–Dretske–Tully view?", ["It contains a name", "No genuine connection links the properties", "It is logically necessary", "It is false by definition"], 1, "A true co-occurrence is not enough; lawhood requires a real relation between the relevant properties."),
+                    y("Is every true generalization suitable as a law in a D–N prediction?", false, "No. Accidental regularities can be true without supporting explanation or counterfactual prediction."),
+                    m("Which Humean argument classifies natural laws as contingent matters of fact?", ["The metaphysical argument using Hume's fork", "The problem of induction", "Multiple realizability", "Kuhn loss"], 0, "Hume's fork reserves necessity for relations of ideas; empirical laws fall among contingent matters of fact."),
+                    y("Does the Armstrong–Dretske–Tully account explain laws through necessary relations between properties?", true, "Yes. It proposes nomological necessity between properties, though critics ask whether naming that relation genuinely explains it.")
+                ]
+            },
+            {
+                page: 23, title: "Why the D–N Model Misfires", subtitle: "It is both too weak and too strong as a model of explanation.", questions: [
+                    m("What does the flagpole–shadow case reveal?", ["Deduction is invalid", "Derivability can run in a direction that is not explanatory", "All shadows are laws", "Initial conditions are unnecessary"], 1, "The shadow length can help derive pole height, but it does not thereby explain why the pole has that height; explanation is asymmetric."),
+                    y("Does the D–N model count both directions in the flagpole calculation as explanations?", true, "Yes. That symmetric result is one reason the purely logical model is too strong."),
+                    m("Why is 'an explanation is scientific only if it specifies causes' not yet a satisfactory definition?", ["No events have causes", "Cause may be no clearer than explanation", "It is too deductive", "It excludes physics"], 1, "Replacing one unclear notion with another does not provide the requested analysis of explanation."),
+                    y("Can a model be too weak by excluding genuine explanations and too strong by including non-explanations?", true, "Yes. A good definition must include the genuine cases and exclude impostors; the D–N model struggles in both directions.")
+                ]
+            },
+            {
+                page: 24, chapter: "Critiques: theories", title: "The Baseline for Theory Relations", subtitle: "Reduction across levels; replacement across time.", questions: [
+                    m("Which relation requires bridge laws?", ["Inductive confirmation", "Synchronous reduction", "Abductive formulation", "Simple refutation"], 1, "Cross-level theories use different vocabularies, so bridge statements are added to make deduction possible."),
+                    y("Is simply formulating H₂ after H₁ fails already a cumulative explanation of H₁?", false, "No. Abductive replacement alone creates no deductive relation showing why H₁ once worked."),
+                    m("For chemistry to explain biology in the unity ideal, what is normally required?", ["Bridge laws linking chemical and biological terms", "A time-dependent predicate", "A crucial experiment only", "No vocabulary connection"], 0, "Synchronous reduction requires translation between the levels before biological claims can follow from chemical ones."),
+                    y("Does the scarcity of strict biological laws create a challenge for reductions that rely on deriving higher-level laws?", true, "Yes. If biology supplies few genuine laws, the proposed chain from physics through biology to psychology and sociology becomes harder to construct.")
+                ]
+            },
+            {
+                page: 25, title: "Challenges to Unity of Science", subtitle: "Social science, mind, access, experience—and Kuhn's semantics.", questions: [
+                    m("What does multiple realizability claim?", ["One mental-state type may have many physical realizations", "No mental token is physical", "Every brain is identical", "Bridge laws are observations"], 0, "Token mental events may each be physically realized while one mental type fails to equal a single physical type, blocking simple type reduction."),
+                    y("Does token identity automatically guarantee a type-to-type bridge law between psychology and neuroscience?", false, "No. Multiple physical realizations of one mental type undermine a simple universal type identity."),
+                    m("Which pair names arguments that challenge physical reduction through first-person phenomena?", ["Searle's consciousness and Jackson's experience", "Hume's fork and modus tollens", "Ravens and bleen", "Kuhn loss and crucial experiments"], 0, "Searle emphasizes consciousness; Jackson's knowledge argument emphasizes what experience can add beyond complete physical information."),
+                    y("According to Kuhn, can neutral bridge laws easily translate theories whose term meanings are paradigm-dependent?", false, "No. If meanings arise from different conceptual networks, the proposed bridge is itself not paradigm-neutral.")
+                ]
+            },
+            {
+                page: 26, title: "Kuhn on Theory Replacement", subtitle: "Do not discard too early—and expect some loss.", questions: [
+                    m("What usually happens when an established theory meets one anomaly, according to Kuhn?", ["Immediate abandonment", "Normal science works on the puzzle", "All research stops", "The anomaly deductively proves a rival"], 1, "Scientists normally preserve the framework and investigate the anomaly rather than abandoning a productive theory at once."),
+                    y("Is persistence with an anomalous theory always irrational in Kuhn's account?", false, "No. Conservative normal science is necessary to develop and exhaust a theory's research potential."),
+                    m("What is Kuhn loss?", ["Forgetting logic", "A new paradigm initially fails to retain some successes of the old", "Losing every observation", "A failed induction"], 1, "Theory choice can involve sacrificing some previous problem-solutions, undermining a simple always-additive picture of progress."),
+                    y("Does Kuhn think scientists normally operate in a theoretical vacuum after rejecting a paradigm?", false, "No. An established framework is generally abandoned only when an alternative is available.")
+                ]
+            },
+            {
+                page: 27, title: "The Positivist Diachronic Ideal", subtitle: "Neutral experiments and cumulative derivations—before Kuhn's objections.", questions: [
+                    m("What must a crucial experiment have to compare H₁ and H₂?", ["An outcome they predict differently", "A bridge from physics to biology", "No observation", "Only an old theory"], 0, "The experiment needs a discriminating consequence: evidence favoring one prediction over its incompatible rival."),
+                    y("Does deriving the old theory as a restricted case support cumulative science?", true, "Yes. It allows the new theory to preserve and explain the old theory's successful domain."),
+                    m("Which premise-conclusion direction represents diachronic reduction?", ["New theory → old theory under conditions", "Old theory → new theory without conditions", "Observation → law by deduction", "Higher science → lower science"], 0, "The more encompassing new theory yields the older approximation in the domain where the latter succeeded."),
+                    y("Is the positivist ideal committed to neutral standards for judging competing theories?", true, "Yes. Kuhn's next critique attacks exactly this assumption by placing standards inside paradigms.")
+                ]
+            },
+            {
+                page: 28, title: "Methodology Is Paradigm-Dependent", subtitle: "The rules of evaluation are part of what is being compared.", questions: [
+                    m("Why can rival paradigms be difficult to compare by one method?", ["They may include different standards of evaluation", "They contain no theories", "They make no predictions", "Logic has no rules"], 0, "For Kuhn, methodology belongs to the paradigm, so there may be no external criterion accepted independently by both sides."),
+                    y("Can one paradigm's evaluation rule automatically serve as a neutral judge between paradigms?", false, "No. Using it would already privilege one of the competing frameworks."),
+                    m("Which paradigm component includes standards for good experiments and theories?", ["Perception", "Semantics", "Methodology", "Ontology"], 2, "Methodology contains the rules for research and theory evaluation."),
+                    y("Does this critique target the diachronic positivist ideal of a decisive experiment?", true, "Yes. A decisive experiment presumes shared standards for evidence and decision that Kuhn argues may be paradigm-bound.")
+                ]
+            },
+            {
+                page: 29, title: "Semantic Holism", subtitle: "Meaning depends on a term's place in the whole conceptual network.", questions: [
+                    m("Why might 'mass' resist direct translation between Newtonian and Einsteinian theories?", ["It has different spellings", "Its conceptual role and meaning differ across paradigms", "Neither theory uses mathematics", "It is an observation only"], 1, "Identical words do not guarantee identical concepts when their relations to the surrounding theory change."),
+                    y("Does semantic holism treat each term's meaning as fixed independently of the theory around it?", false, "No. Meaning is relational: it depends on the term's position in the wider conceptual network."),
+                    m("What does incommensurability threaten most directly here?", ["Neutral translation and deduction between paradigms", "The existence of instruments", "All arithmetic", "The passage of time"], 0, "If key terms do not preserve meaning, the bridge needed to derive the old theory from the new may be unavailable."),
+                    y("Can bridge laws simply solve semantic incommensurability if the bridges themselves use paradigm-bound meanings?", false, "No. That solution presupposes the neutral translation that the semantic critique denies.")
+                ]
+            },
+            {
+                page: 30, title: "Kuhn's Full Challenge", subtitle: "No neutral meanings, standards, or observations.", questions: [
+                    m("What does it mean to say observation is theory-laden?", ["Observations are fabricated", "A paradigm shapes how observations are categorized and described", "Only theories can be seen", "Every observation is false"], 1, "The claim concerns conceptual interpretation, not dishonesty: paradigms supply categories through which experience becomes an observation."),
+                    y("If observations are paradigm-dependent, is only theory comparison affected?", false, "No. Formulation, confirmation, refutation, prediction, and explanation all relied on observations serving as a neutral anchor."),
+                    m("Which component is NOT among Kuhn's four paradigm components in this course?", ["Perception", "Semantics", "Methodology", "Induction"], 3, "The four are perception, semantics, methodology, and ontology. Induction is a form of inference whose accepted use may be governed by methodology."),
+                    y("Does Kuhn's challenge undermine the entire simple positivist method, not just one step?", true, "Yes. If observation, meaning, and standards are all paradigm-shaped, every major positivist relation loses its purportedly neutral basis.")
+                ]
+            },
+            {
+                page: 31, chapter: "Working conclusion", title: "How We Proceed", subtitle: "Keep the method, but use it with philosophical awareness.", questions: [
+                    m("What practical response does the course recommend?", ["Abandon science", "Continue with the positivist method while accounting for its difficulties", "Treat every theory as equally true", "Use intuition alone"], 1, "With no better complete method, we retain the best available framework but apply it critically rather than mechanically."),
+                    y("When a prediction fails, should we ask whether an auxiliary assumption or instrument is responsible?", true, "Yes. This is the practical lesson of Duhem–Quine: inspect the full premise package."),
+                    m("Why should scientists be sensitive to how an observation is described?", ["Descriptions may carry theoretical assumptions", "Only long descriptions are true", "Logic bans ordinary language", "Descriptions replace evidence"], 0, "Theory-ladenness means that vocabulary and categorization can already reflect a paradigm."),
+                    y("Does acknowledging philosophical problems erase science's exceptional explanatory and technological success?", false, "No. The conclusion explicitly maintains that science remains by far our best tool for explaining, predicting, and producing technology.")
+                ]
+            },
+            {
+                page: 32, title: "Final Exam Check", subtitle: "A last mixed set in the style of the sample exam.", questions: [
+                    m("A strong argument has true premises. What can be concluded?", ["It is sound", "It may still be unreliable if its conclusion is false", "It is deductively valid", "Its conclusion is necessary"], 1, "Strength plus true premises does not alone ensure a true conclusion. Reliability additionally requires that the conclusion actually be true."),
+                    y("Can the claim 'all people will be 10 cm taller tomorrow' receive formal inductive confirmation under a Goodman-style time-dependent predicate?", true, "Yes. The new riddle shows that artificial predicates can make present observations support bizarre future projections, exposing a flaw in unrestricted confirmation."),
+                    m("Which claim about multiple realizability is correct?", ["Every mental type must equal one brain type", "Mental tokens may be physical even when mental types lack one-to-one physical identities", "No mental token can be physical", "It eliminates all mental laws"], 1, "Multiple realizability targets type identity and simple bridge laws; it need not deny that each particular mental event has some physical realization."),
+                    y("Is the best overall conclusion that science is infallible because no replacement method exists?", false, "No. The mature conclusion is fallibilist: continue using science as the best available tool while remaining alert to the method's limits.")
+                ]
+            }
+        ];
+
+        const extras = Object.assign({}, window.summaryExtrasA || {}, window.summaryExtrasB || {}, window.summaryExtrasC || {});
+        slides.forEach((slide) => slide.questions.push(...(extras[slide.page] || [])));
+        const TOTAL_QUESTIONS = slides.reduce((sum, slide) => sum + slide.questions.length, 0);
+
+        const STORAGE_KEY = "hps-summary-review-v2";
+        const state = loadState();
+        const review = document.getElementById("review");
+        const progressText = document.getElementById("progressText");
+        const progressFill = document.getElementById("progressFill");
+        const finalScore = document.getElementById("finalScore");
+        const slideJump = document.getElementById("slideJump");
+
+        function questionId(page, index) { return `p${page}-q${index + 1}`; }
+
+        function loadState() {
+            try { return JSON.parse(localStorage.getItem(STORAGE_KEY)) || {}; }
+            catch (error) { return {}; }
+        }
+
+        function saveState() {
+            try { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); }
+            catch (error) { /* Progress still works for the current visit. */ }
+        }
+
+        function render() {
+            let previousChapter = "";
+            document.getElementById("questionTotal").textContent = TOTAL_QUESTIONS;
+            document.getElementById("footerTotal").textContent = TOTAL_QUESTIONS;
+
+            slides.forEach((slide) => {
+                if (slide.chapter && slide.chapter !== previousChapter) {
+                    const divider = document.createElement("div");
+                    divider.className = "chapter-divider";
+                    divider.textContent = slide.chapter;
+                    review.appendChild(divider);
+                    previousChapter = slide.chapter;
+                }
+
+                const section = document.createElement("section");
+                section.className = "slide-section";
+                section.id = `slide-${slide.page}`;
+                section.innerHTML = `
+                    <header class="slide-heading">
+                        <span class="slide-number">${String(slide.page).padStart(2, "0")}</span>
+                        <div><h2>${slide.title}</h2><p>${slide.subtitle}</p></div>
+                        <span class="slide-score" id="slideScore-${slide.page}">0 / ${slide.questions.length} correct</span>
+                    </header>
+                    <div class="slide-frame">
+                        <img src="assets/course-summary/slide-${String(slide.page).padStart(2, "0")}.jpg" alt="Course Summary slide ${slide.page}: ${slide.title}" loading="lazy" width="1440" height="810">
+                        <a href="Course Summary.pdf#page=${slide.page}" target="_blank" rel="noopener">Open slide <span aria-hidden="true">↗</span></a>
+                    </div>
+                    <p class="exercise-label">Check your understanding</p>
+                    <div class="question-grid"></div>`;
+
+                const grid = section.querySelector(".question-grid");
+                slide.questions.forEach((question, index) => grid.appendChild(renderQuestion(slide.page, index, question)));
+                review.appendChild(section);
+
+                const option = document.createElement("option");
+                option.value = String(slide.page);
+                option.textContent = `Slide ${slide.page}`;
+                slideJump.appendChild(option);
+            });
+            updateProgress();
+        }
+
+        function renderQuestion(page, index, question) {
+            const id = questionId(page, index);
+            const saved = state[id];
+            const card = document.createElement("article");
+            card.className = "question-card";
+            card.dataset.questionId = id;
+            card.innerHTML = `
+                <div class="question-meta">
+                    <span class="question-index">Slide ${page} · Q${index + 1}</span>
+                    <span class="question-type">${question.type === "yesno" ? "Yes / No" : "MCQ"}</span>
+                </div>
+                <h3 class="question-text">${question.q}</h3>
+                <div class="options ${question.type === "yesno" ? "binary" : ""}"></div>
+                <div class="feedback" role="status"><strong></strong><p>${question.explanation}</p></div>`;
+
+            const options = card.querySelector(".options");
+            question.options.forEach((optionText, optionIndex) => {
+                const button = document.createElement("button");
+                button.type = "button";
+                button.className = "option";
+                button.innerHTML = `<span class="option-letter">${question.type === "yesno" ? (optionIndex === 0 ? "Y" : "N") : String.fromCharCode(65 + optionIndex)}</span><span class="option-copy">${optionText}</span>`;
+                button.addEventListener("click", () => answerQuestion(page, index, question, optionIndex, card));
+                options.appendChild(button);
+            });
+
+            if (saved) applyAnswer(card, question, saved.selected);
+            return card;
+        }
+
+        function answerQuestion(page, index, question, selected, card) {
+            const id = questionId(page, index);
+            if (state[id]) return;
+            state[id] = { selected, correct: selected === question.answer };
+            saveState();
+            applyAnswer(card, question, selected);
+            updateProgress();
+        }
+
+        function applyAnswer(card, question, selected) {
+            const correct = selected === question.answer;
+            card.classList.add(correct ? "is-correct" : "is-wrong");
+            const buttons = [...card.querySelectorAll(".option")];
+            buttons.forEach((button, index) => {
+                button.disabled = true;
+                if (index === question.answer) button.classList.add("is-answer");
+                else if (index === selected) button.classList.add("is-selected-wrong");
+                else button.classList.add("is-muted");
+            });
+            const feedback = card.querySelector(".feedback");
+            feedback.querySelector("strong").textContent = correct ? "✓ Correct" : "× Not quite";
+            feedback.classList.add("is-visible");
+        }
+
+        function updateProgress() {
+            const answered = Object.keys(state).filter((key) => key.startsWith("p") && state[key]).length;
+            const correct = Object.values(state).filter((entry) => entry && entry.correct).length;
+            const total = TOTAL_QUESTIONS;
+            const percent = total ? (answered / total) * 100 : 0;
+            progressText.textContent = `${answered} / ${total} answered · ${correct} correct`;
+            progressFill.style.width = `${percent}%`;
+            finalScore.textContent = answered ? `${Math.round((correct / answered) * 100)}%` : "—";
+
+            slides.forEach((slide) => {
+                let slideCorrect = 0;
+                slide.questions.forEach((question, index) => {
+                    if (state[questionId(slide.page, index)]?.correct) slideCorrect += 1;
+                });
+                const score = document.getElementById(`slideScore-${slide.page}`);
+                if (score) score.textContent = `${slideCorrect} / ${slide.questions.length} correct`;
+            });
+        }
+
+        slideJump.addEventListener("change", (event) => {
+            if (!event.target.value) return;
+            document.getElementById(`slide-${event.target.value}`)?.scrollIntoView({ behavior: "smooth", block: "start" });
+            event.target.value = "";
+        });
+
+        document.getElementById("resetButton").addEventListener("click", () => {
+            if (!window.confirm(`Reset all ${TOTAL_QUESTIONS} answers and start again?`)) return;
+            try { localStorage.removeItem(STORAGE_KEY); } catch (error) { /* Ignore storage restrictions. */ }
+            window.location.reload();
+        });
+
+        render();
+    </script>
+</body>
+</html>
