@@ -260,7 +260,7 @@
         }
 
         .route-node strong { color: var(--green); font-family: Georgia, serif; font-size: 1.42rem; font-weight: 400; line-height: 1; }
-        .route-node small { margin-top: 5px; color: var(--muted); font-size: 0.59rem; font-weight: 750; line-height: 1.15; }
+        .route-node small { margin-top: 5px; color: var(--muted); font-size: 0.65rem; font-weight: 750; line-height: 1.15; }
 
         .route-arrow {
             color: #e3bd78;
@@ -354,8 +354,172 @@
             text-align: center;
         }
 
-        .task-key strong { display: block; color: #e6c78d; font-size: 0.62rem; letter-spacing: 0.06em; text-transform: uppercase; }
-        .task-key span { display: block; margin-top: 3px; color: rgba(255, 255, 255, 0.7); font-size: 0.62rem; line-height: 1.25; }
+        .task-key strong { display: block; color: #e6c78d; font-size: 0.64rem; letter-spacing: 0.06em; text-transform: uppercase; }
+        .task-key span { display: block; margin-top: 3px; color: rgba(255, 255, 255, 0.7); font-size: 0.66rem; line-height: 1.25; }
+
+        .argument-guide {
+            margin-bottom: 28px;
+            padding: clamp(25px, 4vw, 42px);
+            background: #ded0b8;
+            border-radius: 30px;
+            box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.05), 0 18px 52px rgba(81, 60, 34, 0.11);
+        }
+
+        .argument-intro {
+            display: grid;
+            grid-template-columns: minmax(0, 1.1fr) minmax(270px, 0.7fr);
+            gap: 42px;
+            align-items: end;
+            margin-bottom: 24px;
+        }
+
+        .argument-kicker {
+            margin: 0 0 10px;
+            color: #76501f;
+            font-size: 0.7rem;
+            font-weight: 850;
+            letter-spacing: 0.15em;
+            text-transform: uppercase;
+        }
+
+        .argument-intro h2 {
+            max-width: 760px;
+            margin: 0;
+            font-family: Georgia, "Times New Roman", serif;
+            font-size: clamp(2rem, 4.1vw, 3.5rem);
+            font-weight: 400;
+            letter-spacing: -0.035em;
+            line-height: 0.98;
+        }
+
+        .argument-intro > p { margin: 0 0 3px; color: #655b4d; font-size: 0.9rem; }
+
+        .quality-grid {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 12px;
+        }
+
+        .quality-card {
+            min-width: 0;
+            padding: 20px;
+            background: rgba(255, 253, 248, 0.77);
+            border-radius: 19px;
+            box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.065), 0 3px 9px rgba(81, 60, 34, 0.04);
+        }
+
+        .quality-head {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 14px;
+            margin-bottom: 16px;
+        }
+
+        .quality-head h3 { margin: 0; font-family: Georgia, serif; font-size: 1.45rem; font-weight: 400; }
+
+        .quality-label {
+            padding: 5px 8px;
+            color: #fff;
+            background: var(--green);
+            border-radius: 7px;
+            font-size: 0.61rem;
+            font-weight: 850;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            white-space: nowrap;
+        }
+
+        .quality-card.nondeductive .quality-label { color: #fffdf8; background: #8a5d26; }
+
+        .quality-flow {
+            display: grid;
+            grid-template-columns: minmax(0, 1fr) 22px minmax(0, 0.82fr) 22px minmax(0, 0.82fr);
+            gap: 6px;
+            align-items: stretch;
+            margin-bottom: 14px;
+        }
+
+        .quality-step {
+            min-height: 83px;
+            display: grid;
+            place-items: center;
+            align-content: center;
+            padding: 10px 8px;
+            color: var(--ink);
+            background: #f6f0e5;
+            border-radius: 11px;
+            text-align: center;
+            box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.06);
+        }
+
+        .quality-step strong { color: var(--green); font-family: Georgia, serif; font-size: 1.08rem; font-weight: 400; line-height: 1.05; }
+        .quality-card.nondeductive .quality-step strong { color: #7a511f; }
+        .quality-step small { margin-top: 6px; color: var(--muted); font-size: 0.64rem; font-weight: 750; line-height: 1.2; }
+
+        .quality-step.result { color: #fffdf8; background: var(--green); }
+        .quality-card.nondeductive .quality-step.result { background: #8a5d26; }
+        .quality-step.result strong, .quality-card.nondeductive .quality-step.result strong { color: #fffdf8; }
+        .quality-step.result small { color: rgba(255, 255, 255, 0.7); }
+
+        .quality-operator { display: grid; place-items: center; color: #8a5d26; font-family: Georgia, serif; font-size: 1.35rem; }
+
+        .quality-definition {
+            margin: 0 0 12px;
+            color: #4f554f;
+            font-size: 0.77rem;
+            line-height: 1.5;
+        }
+
+        .quality-definition strong { color: var(--ink); }
+
+        .counterexample-test {
+            display: grid;
+            grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+            gap: 8px;
+            align-items: center;
+            margin-bottom: 12px;
+            padding: 11px;
+            background: var(--red-soft);
+            border-radius: 11px;
+            text-align: center;
+        }
+
+        .counterexample-test span { color: #70443f; font-size: 0.68rem; font-weight: 750; }
+        .counterexample-test strong { color: var(--red); font-family: Georgia, serif; font-size: 1rem; font-weight: 400; }
+        .counterexample-test.strength-test { background: var(--green-soft); }
+        .counterexample-test.strength-test span { color: #49635c; }
+        .counterexample-test.strength-test strong { color: var(--green); }
+
+        .quality-example {
+            margin: 0;
+            padding: 12px;
+            color: #5a554c;
+            background: rgba(222, 208, 184, 0.58);
+            border-radius: 11px;
+            font-size: 0.76rem;
+            line-height: 1.45;
+        }
+
+        .quality-example strong { color: #76501f; }
+
+        .argument-traps {
+            display: grid;
+            grid-template-columns: repeat(4, minmax(0, 1fr));
+            gap: 7px;
+            margin-top: 12px;
+        }
+
+        .argument-traps div {
+            padding: 10px;
+            color: #5b5348;
+            background: rgba(255, 253, 248, 0.57);
+            border-radius: 10px;
+            font-size: 0.7rem;
+            line-height: 1.35;
+        }
+
+        .argument-traps strong { display: block; margin-bottom: 3px; color: var(--red); font-size: 0.61rem; letter-spacing: 0.06em; text-transform: uppercase; }
 
         .progress-dock {
             position: sticky;
@@ -626,6 +790,10 @@
             .refutation-lane { grid-template-columns: 1fr; }
             .refutation-formula { justify-content: flex-start; flex-wrap: wrap; }
             .task-key { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+            .argument-intro { grid-template-columns: 1fr; gap: 17px; }
+            .argument-intro > p { max-width: 620px; }
+            .quality-grid { grid-template-columns: 1fr; }
+            .argument-traps { grid-template-columns: repeat(2, minmax(0, 1fr)); }
             .progress-dock { grid-template-columns: 1fr auto; gap: 12px; }
             .progress-track { grid-column: 1 / -1; grid-row: 2; }
             .question-grid { grid-template-columns: 1fr; }
@@ -646,6 +814,13 @@
             .inference-route { grid-template-columns: minmax(62px, 1fr) 38px minmax(62px, 1fr); }
             .refutation-lane { padding: 16px; border-radius: 16px; }
             .task-key { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+            .argument-guide { padding: 21px; border-radius: 22px; }
+            .argument-intro { margin-bottom: 21px; }
+            .quality-card { padding: 15px; border-radius: 16px; }
+            .quality-flow { grid-template-columns: 1fr; }
+            .quality-step { min-height: 70px; }
+            .quality-operator { min-height: 24px; }
+            .argument-traps { grid-template-columns: 1fr; }
             .progress-dock { top: 7px; margin-bottom: 42px; padding: 11px; border-radius: 15px; }
             .dock-actions { gap: 6px; }
             .compact-button { padding: 0 10px; }
@@ -771,6 +946,67 @@
                     <div><strong>Predict / explain e</strong><span>Deduction</span></div>
                     <div><strong>Reduce sciences</strong><span>Deduction + bridges</span></div>
                     <div><strong>Explain old theory</strong><span>Deduction + limits</span></div>
+                </div>
+            </section>
+
+            <section class="argument-guide" aria-labelledby="argument-title">
+                <header class="argument-intro">
+                    <div>
+                        <p class="argument-kicker">How good is the argument?</p>
+                        <h2 id="argument-title">Use the right test for the right kind.</h2>
+                    </div>
+                    <p>First ask whether the argument claims certainty or only probability; then evaluate its inferential support before checking whether its premises are actually true.</p>
+                </header>
+
+                <div class="quality-grid">
+                    <article class="quality-card">
+                        <div class="quality-head">
+                            <h3>Deductive argument</h3>
+                            <span class="quality-label">All or nothing</span>
+                        </div>
+                        <div class="quality-flow" aria-label="A valid deductive argument with true premises is sound">
+                            <span class="quality-step"><strong>Valid</strong><small>No possible true-premise, false-conclusion case</small></span>
+                            <span class="quality-operator" aria-hidden="true">+</span>
+                            <span class="quality-step"><strong>True premises</strong><small>The starting claims match reality</small></span>
+                            <span class="quality-operator" aria-hidden="true">=</span>
+                            <span class="quality-step result"><strong>Sound</strong><small>Therefore the conclusion is true</small></span>
+                        </div>
+                        <p class="quality-definition"><strong>Validity tests the connection, not the facts:</strong> a valid argument may contain false premises; it becomes sound only when every premise is true.</p>
+                        <div class="counterexample-test" aria-label="The single counterexample pattern that proves invalidity">
+                            <span>All premises<br><strong>TRUE</strong></span>
+                            <strong aria-hidden="true">+</strong>
+                            <span>Conclusion<br><strong>FALSE</strong></span>
+                        </div>
+                        <p class="quality-example"><strong>Example:</strong> “All planets are cheese; Earth is a planet; therefore Earth is cheese” is valid but unsound—the form works, but its first premise is false.</p>
+                    </article>
+
+                    <article class="quality-card nondeductive">
+                        <div class="quality-head">
+                            <h3>Non-deductive argument</h3>
+                            <span class="quality-label">A matter of degree</span>
+                        </div>
+                        <div class="quality-flow" aria-label="A strong non-deductive argument with true premises is reliable">
+                            <span class="quality-step"><strong>Strong</strong><small>The conclusion is more likely true than false</small></span>
+                            <span class="quality-operator" aria-hidden="true">+</span>
+                            <span class="quality-step"><strong>True premises</strong><small>The evidence really is correct</small></span>
+                            <span class="quality-operator" aria-hidden="true">=</span>
+                            <span class="quality-step result"><strong>Reliable</strong><small>Still not a guarantee</small></span>
+                        </div>
+                        <p class="quality-definition"><strong>Strength measures probability:</strong> the premises make the conclusion more likely than not, but unlike validity they do not make a false conclusion impossible.</p>
+                        <div class="counterexample-test strength-test" aria-label="A conclusion probability above one half counts as strong">
+                            <span>Weak<br><strong>P(c) ≤ 0.5</strong></span>
+                            <strong aria-hidden="true">→</strong>
+                            <span>Strong<br><strong>P(c) &gt; 0.5</strong></span>
+                        </div>
+                        <p class="quality-example"><strong>Example:</strong> “Most ravens are black; this bird is a raven; therefore it is probably black” can be strong and reliable even if this particular raven happens to be a rare albino.</p>
+                    </article>
+                </div>
+
+                <div class="argument-traps" aria-label="Common exam traps about argument evaluation">
+                    <div><strong>Exam trap 1</strong>A false premise does not make a deductive argument invalid; it prevents soundness.</div>
+                    <div><strong>Exam trap 2</strong>A true conclusion does not repair an invalid inference or prove the premises supported it.</div>
+                    <div><strong>Exam trap 3</strong>False premises with a false conclusion tell you nothing by themselves about validity.</div>
+                    <div><strong>Word categories</strong>Sentences are true or false; arguments are valid, sound, strong, weak, or reliable.</div>
                 </div>
             </section>
 
@@ -1059,7 +1295,7 @@
             },
             {
                 page: 32, title: "Final Exam Check", subtitle: "A last mixed set in the style of the sample exam.", questions: [
-                    m("A strong argument has true premises. What can be concluded?", ["It is sound", "It may still be unreliable if its conclusion is false", "It is deductively valid", "Its conclusion is necessary"], 1, "Strength plus true premises does not alone ensure a true conclusion. Reliability additionally requires that the conclusion actually be true."),
+                    m("A strong non-deductive argument has true premises. What can be concluded?", ["It is sound", "It is reliable", "It is deductively valid", "Its conclusion is necessary"], 1, "In the course's terminology, reliability requires a strong non-deductive inference and true premises. The conclusion remains probable rather than necessary and could still turn out false."),
                     y("Can the claim 'all people will be 10 cm taller tomorrow' receive formal inductive confirmation under a Goodman-style time-dependent predicate?", true, "Yes. The new riddle shows that artificial predicates can make present observations support bizarre future projections, exposing a flaw in unrestricted confirmation."),
                     m("Which claim about multiple realizability is correct?", ["Every mental type must equal one brain type", "Mental tokens may be physical even when mental types lack one-to-one physical identities", "No mental token can be physical", "It eliminates all mental laws"], 1, "Multiple realizability targets type identity and simple bridge laws; it need not deny that each particular mental event has some physical realization."),
                     y("Is the best overall conclusion that science is infallible because no replacement method exists?", false, "No. The mature conclusion is fallibilist: continue using science as the best available tool while remaining alert to the method's limits.")
