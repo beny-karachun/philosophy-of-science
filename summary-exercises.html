@@ -158,6 +158,205 @@
         .hero-stats dt { color: var(--muted); font-size: 0.68rem; font-weight: 800; letter-spacing: 0.09em; text-transform: uppercase; }
         .hero-stats dd { margin: 2px 0 0; color: var(--green); font-family: Georgia, serif; font-size: 1.55rem; font-variant-numeric: tabular-nums; }
 
+        .reasoning-guide {
+            margin-bottom: 28px;
+            padding: clamp(25px, 4vw, 42px);
+            color: #fffdf8;
+            background:
+                radial-gradient(circle at 92% 7%, rgba(222, 194, 143, 0.15), transparent 24rem),
+                var(--green);
+            border-radius: 30px;
+            box-shadow: 0 20px 56px rgba(23, 79, 67, 0.2);
+        }
+
+        .reasoning-intro {
+            display: grid;
+            grid-template-columns: minmax(0, 1.2fr) minmax(260px, 0.8fr);
+            gap: 42px;
+            align-items: end;
+            margin-bottom: 26px;
+        }
+
+        .reasoning-kicker {
+            margin: 0 0 10px;
+            color: #e3bd78;
+            font-size: 0.7rem;
+            font-weight: 850;
+            letter-spacing: 0.15em;
+            text-transform: uppercase;
+        }
+
+        .reasoning-intro h2 {
+            max-width: 720px;
+            margin: 0;
+            font-family: Georgia, "Times New Roman", serif;
+            font-size: clamp(2rem, 4.3vw, 3.65rem);
+            font-weight: 400;
+            letter-spacing: -0.035em;
+            line-height: 0.98;
+        }
+
+        .reasoning-intro > p {
+            margin: 0 0 3px;
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 0.92rem;
+        }
+
+        .inference-grid {
+            display: grid;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            gap: 12px;
+        }
+
+        .inference-card {
+            min-width: 0;
+            padding: 19px;
+            background: rgba(255, 255, 255, 0.085);
+            border-radius: 18px;
+            box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.1);
+        }
+
+        .inference-card-head {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            margin-bottom: 15px;
+        }
+
+        .inference-card h3 { margin: 0; font-family: Georgia, serif; font-size: 1.35rem; font-weight: 400; }
+
+        .certainty-badge {
+            padding: 5px 8px;
+            color: #fffdf8;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 7px;
+            font-size: 0.61rem;
+            font-weight: 850;
+            letter-spacing: 0.07em;
+            text-transform: uppercase;
+            white-space: nowrap;
+        }
+
+        .inference-route {
+            display: grid;
+            grid-template-columns: minmax(64px, 1fr) 45px minmax(64px, 1fr);
+            gap: 7px;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .route-node {
+            min-height: 73px;
+            display: grid;
+            place-items: center;
+            align-content: center;
+            padding: 9px 7px;
+            color: var(--ink);
+            background: #fffaf1;
+            border-radius: 12px;
+            text-align: center;
+            box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.08);
+        }
+
+        .route-node strong { color: var(--green); font-family: Georgia, serif; font-size: 1.42rem; font-weight: 400; line-height: 1; }
+        .route-node small { margin-top: 5px; color: var(--muted); font-size: 0.59rem; font-weight: 750; line-height: 1.15; }
+
+        .route-arrow {
+            color: #e3bd78;
+            font-family: Georgia, serif;
+            font-size: 1.9rem;
+            line-height: 1;
+            text-align: center;
+        }
+
+        .inference-question {
+            min-height: 43px;
+            margin: 0 0 12px;
+            color: rgba(255, 255, 255, 0.72);
+            font-size: 0.78rem;
+            line-height: 1.4;
+        }
+
+        .inference-question strong { color: #fffdf8; }
+
+        .inference-example {
+            margin: 0;
+            padding: 12px;
+            color: rgba(255, 255, 255, 0.76);
+            background: rgba(4, 31, 25, 0.24);
+            border-radius: 11px;
+            font-size: 0.74rem;
+            line-height: 1.45;
+        }
+
+        .inference-example strong { color: #e8c88f; }
+
+        .refutation-lane {
+            display: grid;
+            grid-template-columns: minmax(190px, 0.65fr) minmax(260px, 1fr) minmax(250px, 0.85fr);
+            gap: 18px;
+            align-items: center;
+            margin-top: 12px;
+            padding: 18px 19px;
+            background: rgba(4, 31, 25, 0.31);
+            border-radius: 18px;
+            box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.1);
+        }
+
+        .refutation-title { display: flex; align-items: center; gap: 11px; }
+
+        .refutation-icon {
+            width: 42px;
+            height: 42px;
+            flex: 0 0 auto;
+            display: grid;
+            place-items: center;
+            color: var(--green);
+            background: #e6c78d;
+            border-radius: 12px;
+            font-family: Georgia, serif;
+            font-size: 1.15rem;
+        }
+
+        .refutation-title h3 { margin: 0; font-family: Georgia, serif; font-size: 1.25rem; font-weight: 400; }
+        .refutation-title p { margin: 2px 0 0; color: rgba(255, 255, 255, 0.6); font-size: 0.65rem; font-weight: 800; letter-spacing: 0.07em; text-transform: uppercase; }
+
+        .refutation-formula {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 9px;
+            color: #fff;
+            font-family: Georgia, serif;
+            font-size: clamp(1rem, 1.8vw, 1.24rem);
+            text-align: center;
+        }
+
+        .formula-piece { padding: 8px 10px; background: rgba(255, 255, 255, 0.08); border-radius: 9px; }
+        .formula-arrow { color: #e6c78d; font-size: 1.35rem; }
+
+        .refutation-note { margin: 0; color: rgba(255, 255, 255, 0.7); font-size: 0.73rem; line-height: 1.45; }
+        .refutation-note strong { color: #fffdf8; }
+
+        .task-key {
+            display: grid;
+            grid-template-columns: repeat(6, minmax(0, 1fr));
+            gap: 7px;
+            margin-top: 12px;
+        }
+
+        .task-key div {
+            min-width: 0;
+            padding: 9px 8px;
+            background: rgba(255, 255, 255, 0.075);
+            border-radius: 10px;
+            text-align: center;
+        }
+
+        .task-key strong { display: block; color: #e6c78d; font-size: 0.62rem; letter-spacing: 0.06em; text-transform: uppercase; }
+        .task-key span { display: block; margin-top: 3px; color: rgba(255, 255, 255, 0.7); font-size: 0.62rem; line-height: 1.25; }
+
         .progress-dock {
             position: sticky;
             top: 12px;
@@ -420,6 +619,13 @@
         @media (max-width: 850px) {
             .hero { grid-template-columns: 1fr; align-items: start; gap: 32px; }
             .hero-copy { max-width: 600px; }
+            .reasoning-intro { grid-template-columns: 1fr; gap: 17px; }
+            .reasoning-intro > p { max-width: 620px; }
+            .inference-grid { grid-template-columns: 1fr; }
+            .inference-question { min-height: 0; }
+            .refutation-lane { grid-template-columns: 1fr; }
+            .refutation-formula { justify-content: flex-start; flex-wrap: wrap; }
+            .task-key { grid-template-columns: repeat(3, minmax(0, 1fr)); }
             .progress-dock { grid-template-columns: 1fr auto; gap: 12px; }
             .progress-track { grid-column: 1 / -1; grid-row: 2; }
             .question-grid { grid-template-columns: 1fr; }
@@ -434,6 +640,12 @@
             .hero-stats div { padding: 12px 8px; }
             .hero-stats dt { font-size: 0.59rem; }
             .hero-stats dd { font-size: 1.32rem; }
+            .reasoning-guide { padding: 21px; border-radius: 22px; }
+            .reasoning-intro { margin-bottom: 21px; }
+            .inference-card { padding: 15px; border-radius: 16px; }
+            .inference-route { grid-template-columns: minmax(62px, 1fr) 38px minmax(62px, 1fr); }
+            .refutation-lane { padding: 16px; border-radius: 16px; }
+            .task-key { grid-template-columns: repeat(2, minmax(0, 1fr)); }
             .progress-dock { top: 7px; margin-bottom: 42px; padding: 11px; border-radius: 15px; }
             .dock-actions { gap: 6px; }
             .compact-button { padding: 0 10px; }
@@ -482,6 +694,83 @@
                         <div><dt>Questions</dt><dd id="questionTotal">320</dd></div>
                         <div><dt>Target</dt><dd>85%</dd></div>
                     </dl>
+                </div>
+            </section>
+
+            <section class="reasoning-guide" aria-labelledby="reasoning-title">
+                <header class="reasoning-intro">
+                    <div>
+                        <p class="reasoning-kicker">The inference map</p>
+                        <h2 id="reasoning-title">Same evidence, different logical moves.</h2>
+                    </div>
+                    <p>Ask what the argument is trying to do: invent a theory, support a theory, or derive what must follow. The direction and strength of the conclusion identify the inference.</p>
+                </header>
+
+                <div class="inference-grid">
+                    <article class="inference-card">
+                        <div class="inference-card-head">
+                            <h3>Abduction</h3>
+                            <span class="certainty-badge">Possible answer</span>
+                        </div>
+                        <div class="inference-route" aria-label="Observation e leads to a new candidate hypothesis H">
+                            <span class="route-node"><strong>e</strong><small>observation</small></span>
+                            <span class="route-arrow" aria-hidden="true">→</span>
+                            <span class="route-node"><strong>H?</strong><small>new candidate</small></span>
+                        </div>
+                        <p class="inference-question"><strong>Asks:</strong> “What theory would best explain this observation?”</p>
+                        <p class="inference-example"><strong>Example:</strong> Semmelweis observed maternal deaths and proposed corpse material as their best explanation; H may still be false or have rivals.</p>
+                    </article>
+
+                    <article class="inference-card">
+                        <div class="inference-card-head">
+                            <h3>Induction</h3>
+                            <span class="certainty-badge">Probably</span>
+                        </div>
+                        <div class="inference-route" aria-label="Observed consequence e supports an existing hypothesis H">
+                            <span class="route-node"><strong>e</strong><small>predicted result</small></span>
+                            <span class="route-arrow" aria-hidden="true">→</span>
+                            <span class="route-node"><strong>H↑</strong><small>more support</small></span>
+                        </div>
+                        <p class="inference-question"><strong>Asks:</strong> “Does this successful result support the theory?”</p>
+                        <p class="inference-example"><strong>Example:</strong> Eddington observed bent starlight as Einstein predicted, so relativity gained support—but was not deductively proved.</p>
+                    </article>
+
+                    <article class="inference-card">
+                        <div class="inference-card-head">
+                            <h3>Deduction</h3>
+                            <span class="certainty-badge">Must follow</span>
+                        </div>
+                        <div class="inference-route" aria-label="Hypothesis H and initial conditions I entail observation e">
+                            <span class="route-node"><strong>H + I</strong><small>theory + conditions</small></span>
+                            <span class="route-arrow" aria-hidden="true">→</span>
+                            <span class="route-node"><strong>e</strong><small>consequence</small></span>
+                        </div>
+                        <p class="inference-question"><strong>Asks:</strong> “If these premises are true, what has to follow?”</p>
+                        <p class="inference-example"><strong>Example:</strong> Newton’s law plus Earth’s mass and radius entails approximately 9.8 m/s²; before observation this predicts, afterward it explains.</p>
+                    </article>
+                </div>
+
+                <div class="refutation-lane">
+                    <div class="refutation-title">
+                        <span class="refutation-icon" aria-hidden="true">¬e</span>
+                        <div><h3>Deductive refutation</h3><p>Modus tollens</p></div>
+                    </div>
+                    <div class="refutation-formula" aria-label="If a hypothesis and auxiliaries entail e, and not e is observed, then the conjunction is false">
+                        <span class="formula-piece">If (H ∧ A), then e</span>
+                        <span class="formula-piece">¬e</span>
+                        <span class="formula-arrow" aria-hidden="true">→</span>
+                        <span class="formula-piece">¬(H ∧ A)</span>
+                    </div>
+                    <p class="refutation-note"><strong>Duhem–Quine warning:</strong> the failed result refutes the theory-plus-auxiliaries package, not H alone—as the Uranus anomaly led scientists to revise an auxiliary by proposing Neptune.</p>
+                </div>
+
+                <div class="task-key" aria-label="Inference rules used by each scientific task">
+                    <div><strong>Formulate H</strong><span>Abduction</span></div>
+                    <div><strong>Confirm H</strong><span>Induction</span></div>
+                    <div><strong>Refute H</strong><span>Deduction</span></div>
+                    <div><strong>Predict / explain e</strong><span>Deduction</span></div>
+                    <div><strong>Reduce sciences</strong><span>Deduction + bridges</span></div>
+                    <div><strong>Explain old theory</strong><span>Deduction + limits</span></div>
                 </div>
             </section>
 
