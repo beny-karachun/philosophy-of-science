@@ -1,0 +1,456 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="The core ideas of History and Philosophy of Science in seven connected sections.">
+    <title>The Course in a Few Sentences — History &amp; Philosophy of Science</title>
+    <style>
+        :root {
+            --ink: #18201e;
+            --muted: #65706d;
+            --paper: #f5f1e8;
+            --card: #fffdf8;
+            --green: #174f43;
+            --green-dark: #0f4137;
+            --green-soft: #dce9e1;
+            --gold: #b47b38;
+            --gold-soft: #efe1ca;
+            --red: #9b4039;
+            --line: rgba(24, 32, 30, 0.12);
+            --shadow: 0 0 0 1px rgba(0, 0, 0, 0.055), 0 2px 5px rgba(38, 50, 46, 0.04), 0 20px 58px rgba(38, 50, 46, 0.09);
+        }
+
+        * { box-sizing: border-box; }
+
+        html {
+            scroll-behavior: smooth;
+            scroll-padding-top: 28px;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+
+        body {
+            margin: 0;
+            color: var(--ink);
+            background:
+                radial-gradient(circle at 8% 4%, rgba(180, 123, 56, 0.13), transparent 31rem),
+                radial-gradient(circle at 92% 13%, rgba(23, 79, 67, 0.10), transparent 34rem),
+                var(--paper);
+            font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+            line-height: 1.65;
+        }
+
+        a { color: inherit; }
+        h1, h2 { text-wrap: balance; }
+        p { text-wrap: pretty; }
+
+        .shell { width: min(1080px, calc(100% - 40px)); margin: 0 auto; }
+
+        .site-header {
+            min-height: 72px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 24px;
+            border-bottom: 1px solid var(--line);
+        }
+
+        .brand {
+            display: inline-flex;
+            align-items: center;
+            gap: 11px;
+            font-size: 0.76rem;
+            font-weight: 800;
+            letter-spacing: 0.13em;
+            text-decoration: none;
+            text-transform: uppercase;
+        }
+
+        .brand-mark {
+            width: 32px;
+            height: 32px;
+            display: grid;
+            place-items: center;
+            color: #fffdf8;
+            background: var(--green);
+            border-radius: 50%;
+            font-family: Georgia, serif;
+            font-size: 1rem;
+            font-weight: 400;
+        }
+
+        .header-nav { display: flex; gap: 7px; }
+
+        .header-nav a {
+            min-height: 42px;
+            display: inline-flex;
+            align-items: center;
+            padding: 0 13px;
+            color: var(--muted);
+            border-radius: 10px;
+            font-size: 0.84rem;
+            font-weight: 700;
+            text-decoration: none;
+            transition-property: color, background-color, scale;
+            transition-duration: 170ms;
+        }
+
+        .header-nav a:hover { color: var(--green); background: rgba(255, 255, 255, 0.58); }
+        .header-nav a:active { scale: 0.96; }
+
+        .hero {
+            display: grid;
+            grid-template-columns: minmax(0, 1.35fr) minmax(280px, 0.65fr);
+            gap: clamp(42px, 8vw, 92px);
+            align-items: end;
+            padding: clamp(68px, 10vw, 112px) 0 62px;
+        }
+
+        .eyebrow {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin: 0 0 18px;
+            color: var(--green);
+            font-size: 0.72rem;
+            font-weight: 850;
+            letter-spacing: 0.16em;
+            text-transform: uppercase;
+        }
+
+        .eyebrow::before { content: ""; width: 32px; height: 2px; background: var(--gold); }
+
+        h1 {
+            max-width: 750px;
+            margin: 0;
+            font-family: Georgia, "Times New Roman", serif;
+            font-size: clamp(3.4rem, 7.2vw, 6.25rem);
+            font-weight: 400;
+            letter-spacing: -0.055em;
+            line-height: 0.92;
+        }
+
+        h1 em { color: var(--green); font-weight: 400; }
+
+        .hero-copy { padding-bottom: 4px; }
+        .hero-copy p { margin: 0 0 20px; color: var(--muted); font-size: 1rem; }
+
+        .read-meta { display: flex; flex-wrap: wrap; gap: 7px; }
+
+        .read-meta span {
+            padding: 6px 9px;
+            color: var(--green);
+            background: rgba(255, 253, 248, 0.68);
+            border-radius: 8px;
+            box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.055);
+            font-size: 0.68rem;
+            font-weight: 800;
+            letter-spacing: 0.06em;
+            text-transform: uppercase;
+        }
+
+        .memory-spine {
+            display: grid;
+            grid-template-columns: repeat(6, minmax(0, 1fr));
+            gap: 7px;
+            margin-bottom: 18px;
+            padding: 13px;
+            color: #fffdf8;
+            background: var(--green);
+            border-radius: 19px;
+            box-shadow: 0 15px 38px rgba(23, 79, 67, 0.17);
+        }
+
+        .memory-spine a {
+            min-height: 54px;
+            display: grid;
+            place-items: center;
+            padding: 8px;
+            color: rgba(255, 255, 255, 0.74);
+            background: rgba(255, 255, 255, 0.075);
+            border-radius: 10px;
+            font-size: 0.65rem;
+            font-weight: 800;
+            line-height: 1.25;
+            text-align: center;
+            text-decoration: none;
+            transition-property: color, background-color, scale;
+            transition-duration: 170ms;
+        }
+
+        .memory-spine a:hover { color: #fff; background: rgba(255, 255, 255, 0.13); }
+        .memory-spine a:active { scale: 0.96; }
+
+        .article {
+            overflow: hidden;
+            background: rgba(255, 253, 248, 0.88);
+            border-radius: 30px;
+            box-shadow: var(--shadow);
+        }
+
+        .chapter {
+            display: grid;
+            grid-template-columns: 108px minmax(0, 1fr);
+            gap: 30px;
+            padding: clamp(30px, 5vw, 54px);
+        }
+
+        .chapter + .chapter { border-top: 1px solid var(--line); }
+
+        .chapter-marker { padding-top: 3px; }
+
+        .chapter-number {
+            display: block;
+            color: var(--gold);
+            font-family: Georgia, serif;
+            font-size: 2rem;
+            font-variant-numeric: tabular-nums;
+            line-height: 1;
+        }
+
+        .chapter-label {
+            display: block;
+            margin-top: 9px;
+            color: var(--muted);
+            font-size: 0.63rem;
+            font-weight: 850;
+            letter-spacing: 0.09em;
+            line-height: 1.35;
+            text-transform: uppercase;
+        }
+
+        .chapter-body h2 {
+            margin: 0 0 16px;
+            font-family: Georgia, serif;
+            font-size: clamp(1.65rem, 3vw, 2.35rem);
+            font-weight: 400;
+            letter-spacing: -0.025em;
+            line-height: 1.05;
+        }
+
+        .chapter-body p {
+            margin: 0;
+            color: #414b48;
+            font-family: Georgia, "Times New Roman", serif;
+            font-size: clamp(1.03rem, 1.65vw, 1.16rem);
+            line-height: 1.85;
+        }
+
+        .chapter-body strong { color: var(--green-dark); font-weight: 700; }
+        .chapter-body em { color: #795321; font-style: normal; }
+
+        .precision-note {
+            display: grid;
+            grid-template-columns: auto minmax(0, 1fr);
+            gap: 12px;
+            align-items: start;
+            margin-top: 18px;
+            padding: 14px 15px;
+            color: #53615d;
+            background: var(--green-soft);
+            border-radius: 13px;
+            font-family: Inter, ui-sans-serif, system-ui, sans-serif;
+            font-size: 0.76rem;
+            line-height: 1.5;
+        }
+
+        .precision-note span:first-child {
+            width: 26px;
+            height: 26px;
+            display: grid;
+            place-items: center;
+            color: #fff;
+            background: var(--green);
+            border-radius: 7px;
+            font-weight: 900;
+        }
+
+        .ending {
+            display: grid;
+            grid-template-columns: minmax(0, 1fr) auto;
+            gap: 30px;
+            align-items: center;
+            margin: 22px 0 78px;
+            padding: 30px;
+            color: #fffdf8;
+            background: var(--green);
+            border-radius: 24px;
+            box-shadow: 0 18px 46px rgba(23, 79, 67, 0.19);
+        }
+
+        .ending h2 { margin: 0 0 6px; font-family: Georgia, serif; font-size: clamp(1.65rem, 3vw, 2.5rem); font-weight: 400; }
+        .ending p { max-width: 660px; margin: 0; color: rgba(255, 255, 255, 0.7); font-size: 0.86rem; }
+
+        .ending-link {
+            min-height: 46px;
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            padding: 0 16px;
+            color: var(--green);
+            background: #fffdf8;
+            border-radius: 12px;
+            font-size: 0.8rem;
+            font-weight: 800;
+            text-decoration: none;
+            white-space: nowrap;
+            transition-property: background-color, scale;
+            transition-duration: 170ms;
+        }
+
+        .ending-link:hover { background: #f2eadc; }
+        .ending-link:active { scale: 0.96; }
+
+        footer {
+            display: flex;
+            justify-content: space-between;
+            gap: 20px;
+            padding: 27px 0 38px;
+            color: var(--muted);
+            border-top: 1px solid var(--line);
+            font-size: 0.78rem;
+        }
+
+        :focus-visible { outline: 3px solid rgba(180, 123, 56, 0.58); outline-offset: 3px; }
+
+        @media (max-width: 760px) {
+            .hero { grid-template-columns: 1fr; align-items: start; gap: 28px; }
+            .hero-copy { max-width: 600px; }
+            .memory-spine { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+            .chapter { grid-template-columns: 72px minmax(0, 1fr); gap: 18px; }
+        }
+
+        @media (max-width: 520px) {
+            .shell { width: min(100% - 26px, 1080px); }
+            .site-header { min-height: 66px; }
+            .header-nav a:first-child { display: none; }
+            .hero { padding: 58px 0 44px; }
+            h1 { font-size: clamp(3.1rem, 15vw, 4.25rem); }
+            .memory-spine { grid-template-columns: repeat(2, minmax(0, 1fr)); padding: 10px; border-radius: 16px; }
+            .article { border-radius: 22px; }
+            .chapter { grid-template-columns: 1fr; gap: 16px; padding: 27px 22px; }
+            .chapter-marker { display: flex; align-items: baseline; gap: 10px; padding: 0; }
+            .chapter-number { font-size: 1.5rem; }
+            .chapter-label { margin: 0; }
+            .chapter-body p { font-size: 1.03rem; line-height: 1.75; }
+            .ending { grid-template-columns: 1fr; padding: 24px; border-radius: 20px; }
+            .ending-link { width: fit-content; }
+            footer { flex-direction: column; gap: 4px; }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            html { scroll-behavior: auto; }
+            *, *::before, *::after { transition-duration: 0.01ms !important; }
+        }
+    </style>
+</head>
+<body>
+    <div class="shell">
+        <header class="site-header">
+            <a class="brand" href="index.html" aria-label="Course home">
+                <span class="brand-mark">φ</span>
+                <span>Course 3240305</span>
+            </a>
+            <nav class="header-nav" aria-label="Page navigation">
+                <a href="summary-exercises.html">Final review</a>
+                <a href="index.html">Course home</a>
+            </nav>
+        </header>
+
+        <main>
+            <section class="hero" aria-labelledby="page-title">
+                <div>
+                    <p class="eyebrow">Three-minute course recap</p>
+                    <h1 id="page-title">The course in a <em>few sentences.</em></h1>
+                </div>
+                <div class="hero-copy">
+                    <p>One connected account of the scientific method, the problems raised against it, and why we continue using it anyway.</p>
+                    <div class="read-meta"><span>7 ideas</span><span>Examples included</span><span>Exam focused</span></div>
+                </div>
+            </section>
+
+            <nav class="memory-spine" aria-label="Summary sections">
+                <a href="#blueprint">The blueprint</a>
+                <a href="#criticism">Testing attacked</a>
+                <a href="#explanation">Explanation &amp; laws</a>
+                <a href="#unity">Unity of science</a>
+                <a href="#kuhn">Kuhn’s challenge</a>
+                <a href="#conclusion">Where we finish</a>
+            </nav>
+
+            <article class="article">
+                <section class="chapter" id="blueprint" aria-labelledby="blueprint-title">
+                    <div class="chapter-marker"><span class="chapter-number">01</span><span class="chapter-label">The positivist blueprint</span></div>
+                    <div class="chapter-body">
+                        <h2 id="blueprint-title">Observation and logic are supposed to run science.</h2>
+                        <p><strong>Logical positivism</strong> says that scientific knowledge should be based only on observation and logic. A deductive argument is <strong>valid</strong> when no possible case has true premises and a false conclusion, and it is <strong>sound</strong> when it is valid and its premises are actually true; a non-deductive argument is <strong>strong</strong> when its premises make the conclusion more likely than not, and <strong>reliable</strong> when it is strong and has true premises. Within this framework, scientists use <strong>abduction</strong> to formulate a theory—as when Semmelweis proposed that doctors carried decaying material because it best explained maternal deaths—<strong>induction</strong> to confirm a theory without proving it—as Eddington’s observation of bent starlight supported Einstein—and <strong>deduction</strong> to predict, explain, or refute by modus tollens.</p>
+                    </div>
+                </section>
+
+                <section class="chapter" id="criticism" aria-labelledby="criticism-title">
+                    <div class="chapter-marker"><span class="chapter-number">02</span><span class="chapter-label">Testing attacked</span></div>
+                    <div class="chapter-body">
+                        <h2 id="criticism-title">Every step from evidence to theory develops a problem.</h2>
+                        <p><strong>Popper</strong> argues that Adler’s ability to explain both saving a drowning child and ignoring the child demonstrates unfalsifiability, not theoretical strength. <strong>Hume</strong> shows that saying “induction worked before, so it will work again” circularly uses induction to justify itself; the <strong>Raven Paradox</strong> lets a white shoe confirm “all ravens are black” because it is a non-black non-raven; and <strong>Goodman</strong> shows that artificial descriptions can make the same present evidence support incompatible future projections—as in exam examples connecting a green sock today with a blue horse after 2050. Finally, <strong>Duhem–Quine</strong> shows that a failed prediction refutes the conjunction of a theory and its background assumptions, not the theory alone: scientists preserved Newton by proposing Neptune when Uranus behaved anomalously, but eventually changed the central theory when relativity explained Mercury.</p>
+                    </div>
+                </section>
+
+                <section class="chapter" id="explanation" aria-labelledby="explanation-title">
+                    <div class="chapter-marker"><span class="chapter-number">03</span><span class="chapter-label">Explanation and laws</span></div>
+                    <div class="chapter-body">
+                        <h2 id="explanation-title">Logical prediction is not automatically genuine explanation.</h2>
+                        <p>The <strong>deductive-nomological model</strong> derives an observation from a law and initial conditions, as Newton’s a = GM/R² explains Galileo’s measured acceleration of approximately 9.8 m/s². As a model of explanation, however, it is <strong>too weak</strong> because it admits false positives: a shadow can be used to calculate a flagpole’s height without explaining that height, a later stellar configuration can reconstruct an earlier one without causing it, and “being hexed” can appear in a valid but irrelevant salt-dissolving argument. It is also <strong>too strong</strong> because it excludes genuine explanations that do not guarantee their outcomes: untreated syphilis can explain paresis without every untreated patient developing it, and knocking over a cup can explain a stain without an explicitly stated universal law. Appealing to causes restores direction, but “cause” may be no clearer than “explanation.”</p>
+                        <div class="precision-note"><span>!</span><span><strong>Keep the labels straight:</strong> too weak means the model includes non-explanations; too strong means it excludes genuine explanations.</span></div>
+                    </div>
+                </section>
+
+                <section class="chapter" id="laws" aria-labelledby="laws-title">
+                    <div class="chapter-marker"><span class="chapter-number">04</span><span class="chapter-label">Natural laws</span></div>
+                    <div class="chapter-body">
+                        <h2 id="laws-title">A true pattern is not necessarily a law.</h2>
+                        <p>Prediction needs genuine laws rather than accidental truths: “whenever Lucy wears green, the team wins” could be true while lacking any real connection between wearing green and winning. The <strong>Armstrong–Dretske–Tully</strong> account therefore describes laws as necessary relations between properties, such as the relevant properties of water producing expansion when water freezes. This distinguishes law-like connection from mere repeated coincidence, although calling the relation “nomological necessity” leaves philosophers asking what that necessity actually is.</p>
+                    </div>
+                </section>
+
+                <section class="chapter" id="unity" aria-labelledby="unity-title">
+                    <div class="chapter-marker"><span class="chapter-number">05</span><span class="chapter-label">Unity of science</span></div>
+                    <div class="chapter-body">
+                        <h2 id="unity-title">The sciences should connect—but the mind resists simple reduction.</h2>
+                        <p>The positivist ideal seeks <strong>synchronous unity</strong> by deriving chemistry from physics, biology from chemistry, and psychology from biology through <strong>bridge laws</strong> that translate between their vocabularies. The project becomes difficult because <strong>multiple realizability</strong> allows one mental type, such as pain, to be realized by different physical systems; <strong>Searle</strong> argues that physical input-output descriptions may omit genuine understanding or consciousness; and <strong>Jackson’s Mary</strong> knows every physical fact about color while living in a black-and-white room yet appears to learn something new when she first experiences red.</p>
+                    </div>
+                </section>
+
+                <section class="chapter" id="kuhn" aria-labelledby="kuhn-title">
+                    <div class="chapter-marker"><span class="chapter-number">06</span><span class="chapter-label">Theory change and Kuhn</span></div>
+                    <div class="chapter-body">
+                        <h2 id="kuhn-title">Scientific change may replace the whole rulebook.</h2>
+                        <p>The cumulative ideal seeks <strong>diachronic progress</strong> through decisive experiments and by deriving old theories as restricted cases of new ones, as Einsteinian velocity yields Newtonian velocity at low speeds. <strong>Kuhn</strong>, however, argues that a <strong>paradigm</strong>—the community’s shared scientific rulebook and worldview—shapes perception, meanings, ontology, and methodology: Newtonian and Einsteinian “mass” may not mean exactly the same thing, scientists in different paradigms may interpret observations differently, and their standards cannot automatically act as neutral judges. A revolution may therefore involve <strong>Kuhn loss</strong>, with some old successes initially abandoned rather than perfectly preserved.</p>
+                    </div>
+                </section>
+
+                <section class="chapter" id="conclusion" aria-labelledby="conclusion-title">
+                    <div class="chapter-marker"><span class="chapter-number">07</span><span class="chapter-label">The final position</span></div>
+                    <div class="chapter-body">
+                        <h2 id="conclusion-title">Use the method, but do not mistake it for an infallible algorithm.</h2>
+                        <p>Despite these criticisms, science remains our best tool for explaining reality, predicting events, and producing technology. We therefore continue using the positivist method while remembering that observations may be theory-laden, confirmation never proves a theory, failed predictions implicate background assumptions, valid deductions need not be explanations, reductions may lose meaning or experience, and comparisons between paradigms may lack neutral standards. The course’s final lesson is not to abandon science, but to practice it with philosophical awareness of what each logical move can—and cannot—establish.</p>
+                    </div>
+                </section>
+            </article>
+
+            <section class="ending" aria-labelledby="ending-title">
+                <div>
+                    <h2 id="ending-title">Now test the story.</h2>
+                    <p>Use the slide-by-slide final review to turn this overview into precise distinctions you can recognize under exam pressure.</p>
+                </div>
+                <a class="ending-link" href="summary-exercises.html">Open 320 questions <span aria-hidden="true">→</span></a>
+            </section>
+        </main>
+
+        <footer>
+            <span>Selected Issues in History &amp; Philosophy of Science</span>
+            <span>Course 3240305 · Spring 2026</span>
+        </footer>
+    </div>
+</body>
+</html>

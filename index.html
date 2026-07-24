@@ -225,6 +225,11 @@
         .logic-feature.review-feature:hover { background: #714e25; box-shadow: 0 22px 46px rgba(87, 57, 24, 0.22); }
         .logic-feature.review-feature .logic-symbol, .logic-feature.review-feature .arrow { color: #825d30; }
 
+        .logic-feature.overview-feature { color: var(--ink); background: #ded0b8; box-shadow: 0 16px 38px rgba(81, 60, 34, 0.11); }
+        .logic-feature.overview-feature:hover { background: #d6c5a8; box-shadow: 0 22px 46px rgba(81, 60, 34, 0.17); }
+        .logic-feature.overview-feature p { color: rgba(24, 32, 30, 0.66); }
+        .logic-feature.overview-feature .logic-symbol, .logic-feature.overview-feature .arrow { color: var(--green); }
+
         .lesson-card {
             counter-increment: lesson;
             min-height: 134px;
@@ -362,7 +367,7 @@
 
         @media (max-width: 540px) {
             .page-shell { width: min(100% - 28px, 1180px); }
-            .header-nav a:first-child { display: none; }
+            .header-nav a:nth-child(-n + 2) { display: none; }
             .site-header { min-height: 66px; }
             .hero { padding: 64px 0 72px; }
             h1 { font-size: clamp(3rem, 15vw, 4.3rem); }
@@ -390,6 +395,7 @@
                 <span>Course 3240305</span>
             </a>
             <nav class="header-nav" aria-label="Page navigation">
+                <a href="course-in-a-few-sentences.html">Course recap</a>
                 <a href="summary-exercises.html">Final review</a>
                 <a href="#lessons">Lessons</a>
                 <a href="#materials">Materials</a>
@@ -416,6 +422,12 @@
                     <h2 id="lessons-title">Course lessons</h2>
                     <p>Move from the ideal scientific method to the philosophical problems that test it. Each lesson includes a summary, study cards, and practice questions.</p>
                 </div>
+
+                <a class="logic-feature overview-feature" href="course-in-a-few-sentences.html">
+                    <span class="logic-symbol" aria-hidden="true">¶</span>
+                    <div><h3>The Course in a Few Sentences</h3><p>Read one connected, example-rich account of the scientific method, its central criticisms, Kuhn’s challenge, and the course’s final position.</p></div>
+                    <span class="arrow" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span>
+                </a>
 
                 <a class="logic-feature review-feature" href="summary-exercises.html">
                     <span class="logic-symbol" aria-hidden="true">✓</span>
